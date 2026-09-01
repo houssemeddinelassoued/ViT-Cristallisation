@@ -469,6 +469,7 @@ flowchart LR
 flowchart TB
   subgraph EXP["experiments/"]
     E1["exp01_zero_training.py<br><i>Expérience 1 : détection du décalage</i>"]
+    E2["exp02_layer_trajectories.py<br><i>Expérience 2 : profondeur N comme variable</i>"]
   end
   subgraph TLSC["tlsc/ — paquet scientifique"]
     subgraph CORE["core/"]
@@ -476,6 +477,7 @@ flowchart TB
     end
     subgraph MODELS["models/"]
       CA["clip_anchors.py<br>FrozenCLIP · PromptSet · PROMPTS"]
+      LP["layer_probe.py<br>sonde par couche (logit lens)"]
     end
     subgraph DATA["data/"]
       MC["medmnistc.py<br>Cohort · corruptions sévérité 0–5"]
@@ -490,16 +492,20 @@ flowchart TB
     T3["test_medmnistc.py"]
     T4["test_metrics.py"]
     T5["test_exp01_validation.py"]
+    T6["test_layer_probe.py<br>couche N ≡ encode_image"]
   end
   OUT[("outputs/&lt;run_id&gt;/<br>metrics.json + figures<br><b>seule source de vérité</b>")]
   E1 --> G & CA & MC & M
+  E2 --> G & CA & LP & MC & M
   CA -->|"T = 2τ"| G
   T1 -.vérifie.-> G
   T2 -.vérifie.-> G & CA
   T3 -.vérifie.-> MC
   T4 -.vérifie.-> M
   T5 -.vérifie.-> E1
+  T6 -.vérifie.-> LP
   E1 ==> OUT
+  E2 ==> OUT
   style OUT fill:#1a2617,stroke:#4ade80,color:#dbe2f0
   </pre>
   <div class="fig-cap">Fig. 2 — Dépendances entre modules. Chaque module scientifique arrive avec son test.</div>
@@ -927,20 +933,36 @@ flowchart TB
   <div class="cards">
     <div class="card"><div class="t">✅ Implémenté &amp; testé</div>
       <div class="d">Noyau Gibbs/CLIP (<code>gibbs.py</code>) · ancres textuelles (<code>FrozenCLIP</code>) ·
-      cohortes P0 corrompues · métriques · expérience 1 zero-shot avec verdict et traçabilité · 5 modules de tests.</div></div>
+      cohortes P0 corrompues · métriques (dont détecteurs bilatéral et bivarié) · expérience 1 zero-shot
+      avec verdict et traçabilité · <strong>sonde par couche et expérience 2</strong> (trajectoires de
+      H, F, χ selon la profondeur N) · 6 modules de tests.</div></div>
     <div class="card"><div class="t">🚧 À implémenter</div>
-      <div class="d">TPT et C-TPT (baselines) · adaptation visuelle V + Vp · sortie anticipée à risque
-      contrôlé · cohortes P1 (BUSI→UDIAT→BUS-UCLM) et P2 (Camelyon17) · calibration conforme.</div></div>
+      <div class="d">Règle d'arrêt par échantillon calibrée sur la source (profondeur adaptative) ·
+      centroïdes de données R2/R3 et D<sub>inter</sub> · TPT et C-TPT (baselines) · adaptation visuelle
+      V + Vp · cohortes P1 (BUSI→UDIAT→BUS-UCLM) et P2 (Camelyon17) · calibration conforme.</div></div>
     <div class="card"><div class="t">🔭 Horizon</div>
       <div class="d">Cohorte Sjögren P3 (subordonnée à l'accès aux données) · contrôle de robustesse
       BiomedCLIP (M2) sur la configuration finale.</div></div>
   </div>
 
+  <div class="explain">
+    <div class="ct">🎓 Expliqué simplement — pourquoi regarder « couche par couche » ?</div>
+    <p>Un ViT lit l'image en 12 étapes successives (les « blocs »). L'idée fondatrice du projet —
+    les croquis de l'encadrant — traite ce nombre d'étapes N comme un <em>réglage à optimiser</em> :
+    peut-être qu'une lecture partielle (s'arrêter à l'étape 3 ou 7) suffit, voire fait mieux.
+    L'expérience 2 mesure exactement cela : à chaque étape, on relève l'hésitation H, l'éloignement F
+    et la justesse — comme des points de contrôle le long d'une chaîne de montage.</p>
+    <p>Verdict mesuré (voir la page Résultats) : le signal de décalage est souvent <em>plus fort au
+    milieu de la chaîne qu'à la fin</em>, mais la meilleure étape change selon le type de dégradation —
+    il n'existe pas de N magique universel. C'est précisément ce qui motive la suite : une règle
+    d'arrêt <em>calibrée</em>, propre à chaque image.</p>
+  </div>
+
   <div class="mermaid-box">
   <pre class="mermaid">
 flowchart LR
-  A["<b>Fait</b><br>Noyau Gibbs ≡ CLIP<br>Exp. 1 zero-training<br>P0 + verdict"] -->
-  B["<b>Étape suivante</b><br>Baselines TPT / C-TPT<br>matrice A0–B2"] -->
+  A["<b>Fait</b><br>Noyau Gibbs ≡ CLIP<br>Exp. 1 zero-training<br>Exp. 2 : profondeur N<br>P0 + verdict"] -->
+  B["<b>Étape suivante</b><br>Arrêt calibré par échantillon<br>centroïdes R2/R3 · D_inter<br>baselines TPT / C-TPT"] -->
   C["<b>Cœur de la méthode</b><br>Adaptation V + Vp<br>ancres fixes<br>arrêt anticipé calibré"] -->
   D["<b>Validation réelle</b><br>P1 : 3 échographes<br>P2 : 5 hôpitaux"] -->
   E["<b>Terrain de thèse</b><br>P3 : cohorte Sjögren<br>calibration conforme"]

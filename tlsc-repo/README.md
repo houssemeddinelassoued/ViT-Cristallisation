@@ -56,5 +56,22 @@ python -m experiments.exp01_analysis outputs     # DeLong + bootstrap → analys
 python -m experiments.exp01_aggregate outputs    # tableau + figures → outputs/aggregate/
 ```
 
+## Expérience 2 — trajectoires par couche (profondeur N comme variable)
+
+```bash
+python -m experiments.exp02_layer_trajectories --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5
+```
+
+Sonde « logit lens » (`tlsc/models/layer_probe.py`) : embedding CLS après chacun des
+12 blocs du ViT visuel, puis H_n, F_n, chi_n et détection par couche. Expérience
+**exploratoire déclarée** (pas de seuil pré-enregistré), issue du croquis fondateur
+`argmin_N H` de l'encadrant.
+
+**État (2026-09-01)** : le signal de décalage est plus fort en profondeur intermédiaire
+qu'en sortie (speckle : couches 3–7 ; brightness_down : couche 1, où l'inversion de
+signe de la couche 12 disparaît), mais la meilleure couche dépend de la corruption ;
+H_n n'est pas monotone sur la source (minimum en couche 4). Détails :
+`docs/rapport-exp02.md`.
+
 Le cadre et les seuils pré-enregistrés sont définis dans `docs/cadre-theorique.md`.
 `docs/STATUT.md` indique quels documents du workspace sont autoritatifs.

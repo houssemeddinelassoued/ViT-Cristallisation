@@ -6,5 +6,6 @@
   ],
   "python.analysis.extraPaths": [
     "${workspaceFolder}/tlsc-repo"
-  ]
+  ],
+  "claudeCodeChat.permissions.yoloMode": false
 }

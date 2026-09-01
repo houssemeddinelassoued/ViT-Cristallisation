@@ -130,3 +130,14 @@ class FrozenCLIP:
     def encode(self, images: Tensor) -> Tensor:
         """Encode un lot d'images prétraitées. Retourne (B, d) L2-normalisé."""
         return F.normalize(self.model.encode_image(images.to(self.device)).float(), dim=-1)
+
+    @torch.no_grad()
+    def encode_layers(self, images: Tensor) -> Tensor:
+        """Embeddings CLS après chaque bloc du ViT visuel (« logit lens »).
+
+        Retourne (N, B, d) L2-normalisé ; la couche N égale ``encode`` à la
+        précision machine. Voir ``tlsc/models/layer_probe.py``.
+        """
+        from tlsc.models.layer_probe import probe_layers
+
+        return probe_layers(self.model.visual, images.to(self.device))
