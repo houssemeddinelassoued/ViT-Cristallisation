@@ -45,9 +45,9 @@ nav.sidebar a:hover{background:var(--panel2); color:var(--text)}
 nav.sidebar a.active{background:var(--panel2); color:var(--accent); font-weight:600}
 nav.sidebar .group{font-size:.68rem; text-transform:uppercase; letter-spacing:.12em; color:var(--group); margin:1.1rem .5rem .3rem}
 .theme-toggle{
-  width:100%; margin:.2rem 0 1rem; padding:.5rem .7rem; border-radius:8px;
-  background:var(--panel2); border:1px solid var(--border); color:var(--text);
-  font-family:var(--font); font-size:.8rem; cursor:pointer; transition:.15s;
+  position:fixed; top:1rem; right:1rem; z-index:5; width:2.25rem; height:2.25rem;
+  padding:0; border:1px solid var(--border); border-radius:50%; background:var(--panel);
+  color:var(--text); font-size:1rem; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.18);
 }
 .theme-toggle:hover{border-color:var(--accent); color:var(--accent)}
 main{padding:2.2rem 3rem 6rem; max-width:1100px}
@@ -60,6 +60,7 @@ p{margin-bottom:.8rem}
 .lead{font-size:1.05rem; color:var(--muted)}
 strong{color:var(--strong)}
 em{color:var(--warn); font-style:normal}
+.project-context{border-left:3px solid var(--accent); color:var(--muted); font-size:.84rem; margin:1rem 0 1.5rem; padding:.15rem 0 .15rem 1rem}
 
 /* ── components ── */
 .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1rem; margin:1.2rem 0}
@@ -151,6 +152,7 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
 </script>
 </head>
 <body>
+<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Activer le thème clair" title="Activer le thème clair">☀</button>
 <div style="background:#0e1620;color:#5eead4;padding:.6rem 1.2rem;font-size:.85rem;text-align:center;font-family:sans-serif;border-bottom:1px solid #1f293d">
     Document de présentation pédagogique — pour les chiffres mesurés, voir la
     <a href="results.html" style="color:#fff;text-decoration:underline">page résultats</a> ou
@@ -161,7 +163,6 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
 <nav class="sidebar" id="sidebar">
   <div class="logo">TLSC</div>
   <div class="sub">Cristallisation de l'espace latent<br>Plateforme explicative</div>
-  <button class="theme-toggle" id="theme-toggle" type="button">☀️ Thème clair</button>
   <div class="group">Comprendre</div>
   <a href="#apercu">1 · Vue d'ensemble</a>
   <a href="#theorie">2 · Cadre théorique</a>
@@ -185,6 +186,11 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
   <p class="lead">Adaptation au moment du test et arrêt anticipé à risque contrôlé, sur un
   <strong>encodeur vision-langage gelé</strong> de type CLIP, en imagerie médicale sous décalage
   d'acquisition. Terrain de thèse : syndrome de Sjögren, échographie.</p>
+  <div class="project-context">
+    <strong>Contexte du projet.</strong> Travaux de recherche de thèse en Machine Learning et Deep Learning appliqués aux maladies auto-immunes. L'étude de la robustesse face aux décalages d'acquisition en imagerie médicale aligne ce projet avec ce sujet de thèse.<br>
+    Travail réalisé par <strong>Houssem Eddine Lassoued</strong>, encadré par <strong>Dr. Anis Ben Aicha</strong> et <strong>Pr. Habib Fathallah</strong>.<br>
+    Faculté des Sciences de Bizerte, Université de Carthage.
+  </div>
 
   <div class="cards">
     <div class="card"><div class="t">L'idée centrale</div>
@@ -470,6 +476,7 @@ flowchart TB
   subgraph EXP["experiments/"]
     E1["exp01_zero_training.py<br><i>Expérience 1 : détection du décalage</i>"]
     E2["exp02_layer_trajectories.py<br><i>Expérience 2 : profondeur N comme variable</i>"]
+    E3["exp03_anchor_regimes.py<br><i>Expérience 3 : régimes d'ancrage R1/R2/R3</i>"]
   end
   subgraph TLSC["tlsc/ — paquet scientifique"]
     subgraph CORE["core/"]
@@ -478,6 +485,7 @@ flowchart TB
     subgraph MODELS["models/"]
       CA["clip_anchors.py<br>FrozenCLIP · PromptSet · PROMPTS"]
       LP["layer_probe.py<br>sonde par couche (logit lens)"]
+      DA["data_anchors.py<br>centroïdes R2/R3 · D_inter"]
     end
     subgraph DATA["data/"]
       MC["medmnistc.py<br>Cohort · corruptions sévérité 0–5"]
@@ -497,6 +505,7 @@ flowchart TB
   OUT[("outputs/&lt;run_id&gt;/<br>metrics.json + figures<br><b>seule source de vérité</b>")]
   E1 --> G & CA & MC & M
   E2 --> G & CA & LP & MC & M
+  E3 --> G & CA & DA & MC & M
   CA -->|"T = 2τ"| G
   T1 -.vérifie.-> G
   T2 -.vérifie.-> G & CA
@@ -506,6 +515,7 @@ flowchart TB
   T6 -.vérifie.-> LP
   E1 ==> OUT
   E2 ==> OUT
+  E3 ==> OUT
   style OUT fill:#1a2617,stroke:#4ade80,color:#dbe2f0
   </pre>
   <div class="fig-cap">Fig. 2 — Dépendances entre modules. Chaque module scientifique arrive avec son test.</div>
@@ -935,10 +945,11 @@ flowchart TB
       <div class="d">Noyau Gibbs/CLIP (<code>gibbs.py</code>) · ancres textuelles (<code>FrozenCLIP</code>) ·
       cohortes P0 corrompues · métriques (dont détecteurs bilatéral et bivarié) · expérience 1 zero-shot
       avec verdict et traçabilité · <strong>sonde par couche et expérience 2</strong> (trajectoires de
-      H, F, χ selon la profondeur N) · 6 modules de tests.</div></div>
+      H, F, χ selon la profondeur N) · <strong>régimes d'ancrage R1/R2/R3 et expérience 3</strong>
+      (centroïdes de données, D<sub>inter</sub>) · 7 modules de tests.</div></div>
     <div class="card"><div class="t">🚧 À implémenter</div>
       <div class="d">Règle d'arrêt par échantillon calibrée sur la source (profondeur adaptative) ·
-      centroïdes de données R2/R3 et D<sub>inter</sub> · TPT et C-TPT (baselines) · adaptation visuelle
+      TPT et C-TPT (baselines) · adaptation visuelle
       V + Vp · cohortes P1 (BUSI→UDIAT→BUS-UCLM) et P2 (Camelyon17) · calibration conforme.</div></div>
     <div class="card"><div class="t">🔭 Horizon</div>
       <div class="d">Cohorte Sjögren P3 (subordonnée à l'accès aux données) · contrôle de robustesse
@@ -961,8 +972,8 @@ flowchart TB
   <div class="mermaid-box">
   <pre class="mermaid">
 flowchart LR
-  A["<b>Fait</b><br>Noyau Gibbs ≡ CLIP<br>Exp. 1 zero-training<br>Exp. 2 : profondeur N<br>P0 + verdict"] -->
-  B["<b>Étape suivante</b><br>Arrêt calibré par échantillon<br>centroïdes R2/R3 · D_inter<br>baselines TPT / C-TPT"] -->
+  A["<b>Fait</b><br>Noyau Gibbs ≡ CLIP<br>Exp. 1 zero-training<br>Exp. 2 : profondeur N<br>Exp. 3 : ancres R1/R2/R3<br>P0 + verdict"] -->
+  B["<b>Étape suivante</b><br>Arrêt calibré par échantillon<br>baselines TPT / C-TPT"] -->
   C["<b>Cœur de la méthode</b><br>Adaptation V + Vp<br>ancres fixes<br>arrêt anticipé calibré"] -->
   D["<b>Validation réelle</b><br>P1 : 3 échographes<br>P2 : 5 hôpitaux"] -->
   E["<b>Terrain de thèse</b><br>P3 : cohorte Sjögren<br>calibration conforme"]
@@ -1047,18 +1058,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ── bascule de thème ── */
   const themeBtn = document.getElementById('theme-toggle');
-  const setThemeLabel = () => {
+  const updateThemeButton = () => {
     const light = document.documentElement.classList.contains('light');
-    themeBtn.textContent = light ? '🌙 Thème sombre' : '☀️ Thème clair';
+    themeBtn.textContent = light ? '☾' : '☀';
+    themeBtn.setAttribute('aria-label', light ? 'Activer le thème sombre' : 'Activer le thème clair');
+    themeBtn.title = themeBtn.getAttribute('aria-label');
   };
   themeBtn.addEventListener('click', () => {
     const light = document.documentElement.classList.toggle('light');
     localStorage.setItem('tlsc-theme', light ? 'light' : 'dark');
-    setThemeLabel();
+    updateThemeButton();
     if (window.__renderMermaid) window.__renderMermaid(light ? 'light' : 'dark');
     if (typeof updateLabB === 'function') updateLabB();
   });
-  setThemeLabel();
+  updateThemeButton();
 
   /* ── sidebar active state ── */
   const links = document.querySelectorAll('nav.sidebar a');
