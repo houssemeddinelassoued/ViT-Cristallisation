@@ -77,6 +77,13 @@ em{color:var(--warn); font-style:normal}
 .callout.danger{border-left-color:var(--danger)}
 .callout .ct{font-weight:700; margin-bottom:.25rem}
 
+.explain{background:var(--panel); border:1px solid var(--accent2); border-left:5px solid var(--accent2);
+  border-radius:10px; padding:1rem 1.2rem; margin:1.2rem 0; font-size:.93rem}
+.explain .ct{font-weight:700; color:var(--accent2); margin-bottom:.35rem}
+.explain p{margin-bottom:.55rem}
+.explain p:last-child{margin-bottom:0}
+.explain em{color:var(--accent2); font-style:italic}
+
 table{width:100%; border-collapse:collapse; margin:1rem 0; font-size:.87rem}
 th,td{padding:.55rem .75rem; text-align:left; border-bottom:1px solid var(--border)}
 th{color:var(--accent); font-weight:600; background:var(--panel)}
@@ -195,6 +202,20 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
       écarts relatifs. C'est une <strong>prédiction falsifiable</strong>, pré-enregistrée avec seuils.</div></div>
   </div>
 
+  <div class="explain">
+    <div class="ct">🎓 Expliqué simplement — l'analogie du radiologue</div>
+    <p>Imaginez un radiologue habitué à un échographe ultra-moderne dans un grand hôpital.
+    On l'envoie dans une petite clinique équipée d'un vieil appareil mal réglé : les images sont
+    plus bruitées, plus sombres, plus floues. Elles ne ressemblent plus à ce dont il a l'habitude —
+    c'est exactement le <em>décalage d'acquisition</em>. Un humain s'en rend compte et redouble de
+    prudence ; une IA, elle, risque de continuer à diagnostiquer <em>en paraissant très sûre d'elle</em>.</p>
+    <p>Ce projet construit un <strong>détecteur de fumée automatique</strong> capable de dire :
+    « attention, cette image est trop différente de nos standards, le modèle risque de se tromper,
+    il faut passer la main à un expert humain ». Et ce détecteur doit fonctionner <strong>sans
+    ré-entraîner l'IA</strong> et <strong>sans qu'un humain étiquette les nouvelles images</strong> —
+    c'est tout l'enjeu du « zero-training ».</p>
+  </div>
+
   <h3>Pourquoi « cristallisation » ?</h3>
   <p>Par analogie physique : un embedding proche d'une ancre unique est <em>cristallisé</em>
   (ordre élevé, entropie basse), un embedding équidistant de toutes les ancres est <em>fondu</em>
@@ -268,6 +289,19 @@ flowchart LR
     c'est vérifié à la précision machine par <code>tests/test_clip_equivalence.py</code>.
   </div>
 
+  <div class="explain">
+    <div class="ct">🎓 Expliqué simplement — la mesure de Gibbs sans les maths</div>
+    <p>Le modèle CLIP transforme chaque image en un point sur une sphère (son « embedding »), et chaque
+    phrase décrivant une classe (« une échographie de tumeur maligne ») en un autre point : une
+    <em>ancre</em>. Imaginez ces ancres comme des <strong>aimants</strong> : plus l'image tombe près d'un
+    aimant, plus elle « appartient » à cette classe. La distance image–ancre, c'est l'<strong>énergie</strong> :
+    basse énergie = très proche = très probable.</p>
+    <p>La <strong>température T</strong> joue le rôle de l'agitation : à très basse température, l'image
+    « choisit » fermement l'aimant le plus proche (probabilités tranchées 99&nbsp;%/1&nbsp;%) ; à haute
+    température, elle hésite entre tous (50&nbsp;%/50&nbsp;%). C'est exactement la physique d'un gaz qui se
+    condense quand on le refroidit — d'où le vocabulaire thermodynamique du projet.</p>
+  </div>
+
   <h3>2.3 Les quatre observables</h3>
   <table>
     <tr><th>Observable</th><th>Définition</th><th>Intuition physique</th><th>Rôle diagnostique</th></tr>
@@ -286,6 +320,21 @@ flowchart LR
     $$F = \langle E\rangle - T\,H$$
   </div>
 
+  <div class="explain">
+    <div class="ct">🎓 Expliqué simplement — H et F en deux phrases</div>
+    <p><strong>L'entropie H, c'est l'hésitation du modèle.</strong> H basse = « je suis sûr de moi »
+    (99&nbsp;% / 1&nbsp;%), H haute = « je ne sais pas » (50&nbsp;% / 50&nbsp;%). Le piège : un modèle peut
+    être sûr de lui… et se tromper complètement.</p>
+    <p><strong>L'énergie libre F, c'est l'éloignement global.</strong> Elle mesure à quelle distance
+    l'image se trouve de <em>l'ensemble</em> des concepts connus, tous à la fois. Une image d'un appareil
+    inhabituel s'éloigne de tout ce que le modèle connaît : F monte, même si le modèle reste « sûr de
+    lui » au sens de H. C'est pour ça que F peut servir de détecteur là où H reste muette.</p>
+    <p>Les deux autres grandeurs complètent le tableau : ⟨E⟩ est la distance moyenne pondérée,
+    et χ (« cristallinité ») reformule H sur une échelle de 0 (hésitation totale) à 1 (certitude
+    parfaite). L'équation F = ⟨E⟩ − T·H les relie exactement — le logiciel vérifie cette égalité
+    en permanence, comme un comptable vérifie que ses colonnes s'équilibrent.</p>
+  </div>
+
   <h3>2.4 Proposition 2 — le cœur de la prédiction falsifiable</h3>
   <p>Soit une translation uniforme des énergies $E_k \mapsto E_k + c$ (toutes les classes s'éloignent
   d'autant). Alors :</p>
@@ -294,6 +343,19 @@ flowchart LR
   <strong>toutes</strong> les ancres sans bouleverser les écarts relatifs entre classes. Le modèle reste
   donc <em>confiant</em> (H basse) tout en étant <em>hors de son domaine</em> (F élevée). C'est le
   scénario le plus dangereux en clinique : l'erreur silencieuse et assurée.</p>
+
+  <div class="explain">
+    <div class="ct">🎓 Expliqué simplement — l'erreur silencieuse</div>
+    <p>Reprenons l'image des aimants. Si un nouvel échographe dégrade l'image, son point sur la sphère
+    <em>recule de la même distance</em> par rapport aux deux aimants « malin » et « bénin ». Le rapport
+    de forces entre les deux aimants ne change pas : le modèle donne <strong>les mêmes probabilités
+    qu'avant</strong>, avec la même assurance — son hésitation H ne bouge pas d'un millimètre.</p>
+    <p>Mais la <em>distance totale</em> à tout ce que le modèle connaît, elle, a augmenté : F l'enregistre.
+    C'est comme un employé qui répond avec le même aplomb à des questions de plus en plus éloignées de
+    son métier : son ton (H) ne trahit rien, mais la distance entre la question et ses compétences (F)
+    est objectivement mesurable. La prédiction pré-enregistrée ci-dessous parie que F sonnera l'alarme
+    et que H restera muette — et l'expérience tranchera.</p>
+  </div>
 
   <div class="callout warn">
     <div class="ct">🎯 Critère pré-enregistré (expérience 1, sévérité maximale)</div>
@@ -316,6 +378,19 @@ flowchart LR
   <h2>3 · Laboratoire interactif — touchez la thermodynamique</h2>
   <p class="lead">Simulation exacte des formules de <code>tlsc/core/gibbs.py</code>, exécutée dans votre
   navigateur. Deux classes (bénin / malin), comme BreastMNIST.</p>
+
+  <div class="explain">
+    <div class="ct">🎓 Mode d'emploi si vous débutez</div>
+    <p>Pas besoin de comprendre les formules pour <em>voir</em> le phénomène. Dans le panneau A :
+    bougez le curseur <strong>« décalage d'acquisition c »</strong> et observez les cadrans —
+    <strong>H ne bouge pas</strong> (le modèle garde la même assurance) alors que
+    <strong>F monte</strong> (l'alarme se déclenche). C'est toute la thèse du projet en un geste.</p>
+    <p>Essayez ensuite la <strong>température T</strong> : basse, les probabilités se tranchent
+    (cristallisation) ; haute, tout devient 50/50 (fusion). Dans le panneau B, le curseur
+    « translation ← → distorsion » montre le cas où la prédiction se fragilise : quand la corruption
+    déforme les écarts entre classes au lieu de tout éloigner uniformément, H se met aussi à voir
+    le décalage.</p>
+  </div>
 
   <div class="lab">
     <h3 style="margin-top:0">A — La mesure de Gibbs en direct</h3>
@@ -553,6 +628,22 @@ pytest</code></pre>
 <section id="donnees">
   <h2>6 · Données &amp; corruptions — les quatre paliers de cohortes</h2>
 
+  <div class="explain">
+    <div class="ct">🎓 Ce projet utilise-t-il des images ? Oui — voici lesquelles et comment</div>
+    <p><strong>Des images médicales publiques, téléchargées automatiquement.</strong> Le code récupère
+    lui-même les jeux de données (bibliothèque <code>medmnist</code>) dans <code>tlsc-repo/data/raw/</code> :
+    <em>BreastMNIST</em> (échographies mammaires, bénin/malin) et <em>PneumoniaMNIST</em> (radiographies
+    pulmonaires, sain/pneumonie). Aucune collecte manuelle n'est nécessaire pour reproduire l'expérience 1.</p>
+    <p><strong>Les « corruptions » sont des pannes d'appareil simulées.</strong> Comme on ne possède pas
+    dix échographes différents, on imite leurs défauts par logiciel (paquet <code>medmnistc</code>) : bruit
+    de sonde, flou de mouvement, image trop claire ou trop sombre, compression… chacun gradué de la
+    sévérité 1 (léger) à 5 (sévère). On peut ainsi vérifier si l'alarme F se déclenche de plus en plus
+    fort quand l'image se dégrade de plus en plus.</p>
+    <p><strong>Et ensuite, du réel.</strong> Les paliers P1 à P3 ci-dessous remplacent progressivement la
+    simulation par de vrais changements d'appareils et d'hôpitaux (BUSI → UDIAT → BUS-UCLM), jusqu'au
+    terrain de thèse : l'échographie des glandes salivaires dans le syndrome de Sjögren.</p>
+  </div>
+
   <div class="mermaid-box">
   <pre class="mermaid">
 flowchart LR
@@ -611,6 +702,18 @@ flowchart LR
 <!-- ══════════════════ 7. PROTOCOLE ══════════════════ -->
 <section id="protocole">
   <h2>7 · Protocole v3 &amp; matrice d'ablation</h2>
+
+  <div class="explain">
+    <div class="ct">🎓 Expliqué simplement — à quoi sert une « matrice d'ablation » ?</div>
+    <p>C'est l'équivalent scientifique d'un essai de médicament. Quand un traitement combine plusieurs
+    ingrédients, on teste chaque ingrédient séparément, le placebo, et la combinaison complète — sinon
+    impossible de savoir ce qui agit vraiment. Ici, chaque ligne (A0, A1, B2… D5) est une variante de la
+    méthode où l'on retire ou ajoute un seul élément à la fois.</p>
+    <p>La ligne la plus importante est <strong>D1</strong> : elle combine naïvement deux méthodes déjà
+    publiées. Si notre méthode complète (D5) ne fait pas <em>significativement</em> mieux que D1, alors le
+    projet n'apporte rien de neuf — et le protocole impose de tester cela tôt, pas à la fin. C'est une
+    protection contre l'auto-illusion.</p>
+  </div>
 
   <h3>7.1 Ce qui a changé entre v2 et v3 — le recadrage CLIP</h3>
   <table>
@@ -764,6 +867,18 @@ env = {
 <!-- ══════════════════ 9. INTÉGRITÉ ══════════════════ -->
 <section id="integrite">
   <h2>9 · Intégrité scientifique — l'architecture anti-fuite</h2>
+
+  <div class="explain">
+    <div class="ct">🎓 Expliqué simplement — qu'est-ce qu'une « fuite » ?</div>
+    <p>Une fuite, c'est <em>tricher sans forcément le vouloir</em> : utiliser une information du jeu de
+    test pour prendre une décision qui aurait dû être prise avant. C'est comme réviser un examen… avec
+    la feuille des réponses : la note obtenue ne prouve plus rien.</p>
+    <p>Exemple concret ici : les phrases qui définissent les ancres (« a breast ultrasound image of… »)
+    influencent tous les résultats. Si on les reformulait <em>après</em> avoir vu que telle formulation
+    donne de meilleurs scores sur les images cibles, la démonstration serait invalidée. D'où les règles
+    du schéma ci-dessous : tout se décide côté source (zone verte), la cible (zone rouge) ne sert qu'à
+    mesurer, et les seuils de réussite sont gravés <em>avant</em> l'expérience.</p>
+  </div>
   <div class="mermaid-box">
   <pre class="mermaid">
 flowchart TB
