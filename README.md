@@ -17,9 +17,8 @@ vision-langage gelés (CLIP), appliquée à l'imagerie médicale.
 ## Règle de citation des résultats
 
 Seule une valeur présente dans un `tlsc-repo/outputs/<run_id>/metrics.json` versionné
-est un résultat mesuré. Les pages `docs/plateforme-explicative.html` et
-`docs/thermodynamic-vit-infographic.html` sont des supports pédagogiques ; leurs
-chiffres ne doivent jamais être cités comme mesures.
+est un résultat mesuré. La page `docs/plateforme-explicative.html` est un support
+pédagogique ; ses chiffres ne doivent jamais être cités comme mesures.
 
 ## Convention de branches et de push
 

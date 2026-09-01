@@ -15,8 +15,9 @@
   prévaut.
 - `Cristallisation Latente.html` et `Cristallisation Latente_files/` sont un export de
   navigateur d'un artefact Claude, pas une source scientifique maintenable.
-- `thermodynamic_vit_infographic.html` est une maquette illustrative. Ses nombres
-  codés en dur ne sont pas des résultats expérimentaux et ne doivent pas être cités.
+- `thermodynamic_vit_infographic.html` a été retiré du projet (2026-09-01) : sa maquette
+  décrivait une architecture différente (adaptation au moment du test, sortie anticipée)
+  contredisant le cadre théorique canonique, avec des chiffres entièrement fabriqués.
 
 ## État d'implémentation
 
