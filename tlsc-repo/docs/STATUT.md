@@ -2,19 +2,22 @@
 
 ## Sources autoritatives
 
-1. `../02protocoleexperimentalv3.md` dans le workspace: protocole expérimental v3.
+1. `../../02protocoleexperimentalv3.md` (racine du dépôt): protocole expérimental v3.
 2. `docs/cadre-theorique.md`: notations et prédiction falsifiable implémentées.
 3. `CLAUDE.md`: contraintes de développement et de reproductibilité.
 4. `outputs/<run_id>/metrics.json`: seule source admissible pour une valeur mesurée.
 
 ## Documents antérieurs ou de présentation
 
-- `01  Feuille de Route Cristallisation.html`, `02  Chantier Cristallisation.html` et
-  `03  Cristallisation Latente.html` décrivent une version antérieure du protocole.
-  En cas de divergence sur les cohortes, baselines ou identifiants d'ablation, la v3
-  prévaut.
-- `Cristallisation Latente.html` et `Cristallisation Latente_files/` sont un export de
-  navigateur d'un artefact Claude, pas une source scientifique maintenable.
+- Les documents de cadrage historiques sont regroupés dans `../archive/`
+  (2026-09-01) : `01  Feuille de Route Cristallisation.html`,
+  `02  Chantier Cristallisation.html`, `03  Cristallisation Latente.html`,
+  plans, guides et notes aux encadrants. Ils décrivent des versions antérieures
+  du protocole ; en cas de divergence sur les cohortes, baselines ou
+  identifiants d'ablation, la v3 prévaut.
+- `plateforme-explicative.html` n'existe plus qu'en **une seule copie**,
+  `../docs/plateforme-explicative.html` (site public) ; la copie racine a été
+  retirée (2026-09-01). C'est un support pédagogique, pas une source de mesures.
 - `thermodynamic_vit_infographic.html` a été retiré du projet (2026-09-01) : sa maquette
   décrivait une architecture différente (adaptation au moment du test, sortie anticipée)
   contredisant le cadre théorique canonique, avec des chiffres entièrement fabriqués.

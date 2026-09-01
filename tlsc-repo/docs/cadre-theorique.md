@@ -1,7 +1,7 @@
 # Cadre théorique canonique
 
 Ce document fixe les notations implémentées par `tlsc/core/gibbs.py`. Le protocole
-expérimental autoritatif est `../02protocoleexperimentalv3.md` à la racine du workspace.
+expérimental autoritatif est `../../02protocoleexperimentalv3.md` à la racine du dépôt.
 
 ## Représentation et ancres
 
