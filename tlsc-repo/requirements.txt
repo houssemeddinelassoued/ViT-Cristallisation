@@ -1,0 +1,14 @@
+# Noyau — installer torch séparément avec l'index CUDA adapté à la machine :
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+open_clip_torch>=2.24
+numpy>=1.26,<2
+scipy>=1.11
+scikit-learn>=1.4
+pandas>=2.1
+matplotlib>=3.8
+tqdm>=4.66
+medmnist==3.0.1
+opencv-python==4.10.0.84
+medmnistc @ git+https://github.com/francescodisalvo05/medmnistc-api.git@8acfd2710c6e0e8b2745be8b1fa1c17b94b8f8a7
+pytest>=8.0
+ruff>=0.5

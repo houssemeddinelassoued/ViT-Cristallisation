@@ -1,0 +1,11 @@
+.venv/
+.tools/
+__pycache__/
+*.pyc
+data/raw/
+outputs/*/
+!outputs/.gitkeep
+*.pt
+*.pth
+.pytest_cache/
+.ruff_cache/
