@@ -198,7 +198,7 @@ def main() -> None:
     p.add_argument("path", nargs="?", default="outputs")
     args = p.parse_args()
 
-    root = Path(args.path)
+    root = Path(os.path.join(os.getcwd(), args.path))
     runs = [r for d in sorted(root.iterdir()) if d.is_dir() and d.name != "aggregate"
             for r in [collect_run(d)] if r is not None]
     if not runs:
