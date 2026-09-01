@@ -73,5 +73,21 @@ signe de la couche 12 disparaît), mais la meilleure couche dépend de la corrup
 H_n n'est pas monotone sur la source (minimum en couche 4). Détails :
 `docs/rapport-exp02.md`.
 
+## Expérience 3 — régimes d'ancrage (invites vs centroïdes de données)
+
+```bash
+python -m experiments.exp03_anchor_regimes --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5 --k-shot 16
+```
+
+Compare R1 (invites textuelles), R2 (centroïdes few-shot) et R3 (centroïdes sur le
+train source complet) : D_inter, classification et détection F/H par sévérité
+(`tlsc/models/data_anchors.py`). Anti-fuite : centroïdes calculés sur le split train
+SOURCE à sévérité 0 uniquement. Exploratoire déclarée.
+
+**État (2026-09-01)** : l'inversion photométrique de F était une propriété des ancres
+textuelles — elle disparaît dès k = 16 (brightness_down : AUROC(F) 0,359 → 0,845) ;
+la balanced accuracy source passe de 0,517 (R1) à 0,692 (R3). Détails :
+`docs/rapport-exp03.md`.
+
 Le cadre et les seuils pré-enregistrés sont définis dans `docs/cadre-theorique.md`.
 `docs/STATUT.md` indique quels documents du workspace sont autoritatifs.

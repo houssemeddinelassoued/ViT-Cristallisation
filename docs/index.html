@@ -12,6 +12,7 @@
   a{color:var(--accent);text-decoration:none}
   a:hover{text-decoration:underline}
   h1{font-size:2rem;margin-bottom:.3rem}
+  .byline{color:var(--muted);font-size:.86rem;margin-bottom:1rem}
   .lead{color:var(--muted);margin-bottom:2.2rem}
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.5rem 0}
   .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.3rem}
@@ -32,29 +33,29 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
 <body>
   <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Activer le thème clair" title="Activer le thème clair">☀</button>
   <h1>Cristallisation de l'espace latent</h1>
+  <p class="byline">Travaux de recherche réalisés par <strong>Houssem Eddine Lassoued</strong>, encadré par <strong>Dr. Anis Ben Aicha</strong> et <strong>Pr. Habib Fathallah</strong>.</p>
   <p class="lead">Détection de décalage de domaine par thermodynamique statistique appliquée
   aux embeddings CLIP, sans aucun entraînement (zero-training).</p>
   <div class="project-context">
     <strong>Contexte du projet.</strong> Travaux de recherche de thèse en Machine Learning et Deep Learning appliqués aux maladies auto-immunes. Le projet est aligné avec ce sujet par l'étude de la robustesse des modèles d'imagerie médicale face aux décalages d'acquisition.<br>
-    Travail réalisé par <strong>Houssem Eddine Lassoued</strong>, encadré par <strong>Dr. Anis Ben Aicha</strong> et <strong>Pr. Habib Fathallah</strong>.<br>
     Faculté des Sciences de Bizerte, Université de Carthage.
   </div>
 
   <div class="cards">
-    <div class="card">
-      <span class="badge">résultats mesurés</span>
-      <h2>Résultats des expériences</h2>
-      <p>Exp. 1 : verdict pré-enregistré, 11 configurations, dichotomie
-      structurel/photométrique, détecteur bivarié. Exp. 2 : trajectoires par couche —
-      la profondeur N comme variable.</p>
-      <a href="results.html">Voir les résultats →</a>
-    </div>
     <div class="card">
       <span class="badge">présentation</span>
       <h2>Plateforme explicative</h2>
       <p>Cadre théorique, pipeline expérimental et laboratoire interactif présentant
       la mécanique du protocole.</p>
       <a href="plateforme-explicative.html">Explorer →</a>
+    </div>
+    <div class="card">
+      <span class="badge">résultats mesurés</span>
+      <h2>Résultats des expériences</h2>
+      <p>Exp. 1 : verdict pré-enregistré, 11 configurations, dichotomie
+      structurel/photométrique, détecteur bivarié. Exp. 2 : trajectoires par couche —
+      la profondeur N comme variable. Exp. 3 : régimes d'ancrage — invites vs centroïdes.</p>
+      <a href="results.html">Voir les résultats →</a>
     </div>
     <div class="card">
       <span class="badge">code</span>

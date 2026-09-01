@@ -156,6 +156,43 @@ l'espace des ancres, sans aucun entraînement. Expérience <strong>exploratoire 
   aux premières couches (0,997 en couche 1). Run 20260901T170957Z_breastmnist_1dfe8046.</figcaption>
 </figure>
 
+<h2>Expérience 3 — régimes d'ancrage : invites textuelles vs centroïdes de données</h2>
+<p>Trois façons de définir les ancres μ<sub>k</sub> (protocole §2.3), centroïdes calculés sur le
+split <em>train source</em> uniquement (anti-fuite) : R1 = invites textuelles (zero-shot),
+R2 = centroïdes few-shot (k = 16 par classe), R3 = centroïdes sur le train complet (n = 546).
+Expérience <strong>exploratoire déclarée</strong>. BreastMNIST, sévérités 0–5, seed 0.</p>
+<table>
+<tr><th>Régime</th><th>D<sub>inter</sub></th><th>Bal. acc. (sév. 0)</th><th>AUROC(F) sév. 5<br>speckle</th><th>AUROC(F) sév. 5<br>brightness_down</th></tr>
+<tr><td>R1 — invites textuelles</td><td>0,1032</td><td>0,517</td><td>0,814</td><td>0,359</td></tr>
+<tr><td>R2 — few-shot (k=16)</td><td>0,0208</td><td>0,597</td><td>0,977</td><td>0,845</td></tr>
+<tr><td>R3 — centroïdes complets</td><td>0,0073</td><td>0,692</td><td>0,977</td><td>0,844</td></tr>
+</table>
+<p style="font-size:.85rem;color:var(--muted)">Runs : 20260901T173740Z_breastmnist_fe6d6b35 (speckle_noise),
+20260901T174749Z_breastmnist_bccf7433 (brightness_down).</p>
+<p>Trois lectures :</p>
+<ul>
+  <li><strong>L'inversion photométrique était une propriété des ancres textuelles, pas de F</strong> :
+  avec des centroïdes de données, brightness_down passe de 0,359 (sous le hasard) à 0,844–0,845 —
+  dès k = 16 exemples par classe.</li>
+  <li><strong>La faiblesse zero-shot venait des ancres</strong> : balanced accuracy 0,517 → 0,692
+  (R3) sur données propres. Mais D<sub>inter</sub> diminue de R1 à R3 (0,103 → 0,007) alors que la
+  classification s'améliore : la distance brute entre ancres n'est pas, seule, le bon indicateur de
+  qualité — c'est la position des ancres <em>dans le nuage des images</em> qui compte.</li>
+  <li><strong>H devient un mauvais détecteur sous R2/R3</strong> (AUROC 0,25–0,54) : avec des ancres
+  proches du nuage, la corruption déplace les images sans augmenter l'hésitation — la dominance
+  de F comme détecteur s'accentue.</li>
+</ul>
+<figure>
+  <img src="assets/figures/fig_exp03_regimes_speckle.png" alt="Régimes d'ancrage — speckle_noise">
+  <figcaption>speckle_noise — détection AUROC(F), AUROC(H) et exactitude équilibrée par sévérité, trois régimes.
+  Run 20260901T173740Z_breastmnist_fe6d6b35.</figcaption>
+</figure>
+<figure>
+  <img src="assets/figures/fig_exp03_regimes_brightness_down.png" alt="Régimes d'ancrage — brightness_down">
+  <figcaption>brightness_down — l'inversion de F sous R1 (courbe sous 0,5) disparaît sous R2/R3.
+  Run 20260901T174749Z_breastmnist_bccf7433.</figcaption>
+</figure>
+
 <h2>Limites et prochaines étapes</h2>
 <ul>
   <li>Les ancres textuelles CLIP <code>openai</code> sont quasi aveugles sur BreastMNIST

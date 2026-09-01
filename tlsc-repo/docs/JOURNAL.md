@@ -109,3 +109,28 @@ pré-enregistré ; attente qualitative a priori « H_n décroît avec n sur la s
   source (H-stop vs F-stop vs N fixe), en simulation depuis les
   `scores_layers.npz` — aucun nouveau calcul d'encodage requis.
 - Détail : `docs/rapport-exp02.md`.
+
+## 2026-09-01 · exp03 — régimes d'ancrage R1/R2/R3 (centroïdes du croquis fondateur)
+
+Chantier d'alignement 2 : ancres = centroïdes de classe calculés depuis les
+données source (`tlsc/models/data_anchors.py`, 5 tests) + D_inter. Anti-fuite :
+centroïdes sur le split train SOURCE à sévérité 0 uniquement. **Exploratoire
+déclaré.** Runs (git 00f9f37 propre) : fe6d6b35 (speckle_noise), bccf7433
+(brightness_down).
+
+| Régime | D_inter | Bal.acc (sév.0) | speckle F sév.5 | bright_down F sév.5 |
+|---|---|---|---|---|
+| R1 texte | 0,1032 | 0,517 | 0,814 | 0,359 |
+| R2 few-shot k=16 | 0,0208 | 0,597 | 0,977 | 0,845 |
+| R3 centroïdes | 0,0073 | 0,692 | 0,977 | 0,844 |
+
+- **Observé** : l'inversion photométrique de F était une propriété des ancres
+  *textuelles* — elle disparaît dès k = 16 (0,359 → 0,845). La faiblesse
+  zero-shot venait des ancres (bal.acc 0,517 → 0,692 sous R3). D_inter seule
+  est trompeuse : maximale pour les ancres les moins utiles (gap de modalité).
+  H se dégrade en détecteur sous R2/R3 (0,25–0,54) — la dominance de F
+  s'accentue.
+- Décision : R2 (32 étiquettes source) = meilleur compromis observé ; croiser
+  ensuite meilleure couche (exp02) × ancres R2 ; formaliser un critère de
+  qualité d'ancrage combinant D_inter et distance ancres–nuage.
+- Détail : `docs/rapport-exp03.md`.
