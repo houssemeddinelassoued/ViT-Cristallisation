@@ -87,9 +87,9 @@ def calibrate_epsilon(scores: np.ndarray, correct: np.ndarray,
     best: dict[str, float] | None = None
     for eps in np.unique(grid):
         out = simulate_early_exit(scores, correct, float(eps))
-        if out["accuracy"] >= acc_full - tolerance:
-            if best is None or out["mean_depth"] < best["mean_depth"]:
-                best = out
+        if out["accuracy"] >= acc_full - tolerance and (
+                best is None or out["mean_depth"] < best["mean_depth"]):
+            best = out
     if best is None:
         best = simulate_early_exit(scores, correct, float(scores.min()) - 1.0)
     best["accuracy_full"] = acc_full
