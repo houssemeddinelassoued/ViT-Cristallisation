@@ -1,0 +1,21 @@
+[project]
+name = "tlsc"
+version = "0.1.0"
+description = "Cristallisation de l'espace latent — adaptation au moment du test pour encodeur vision-langage gelé"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM"]
+# La notation mathematique du projet (H, F, T, E, K, d2) est imposee par
+# docs/cadre-theorique.md et prime sur la convention de nommage minuscule.
+ignore = ["N802", "N803", "N806", "N812"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.setuptools.packages.find]
+include = ["tlsc*"]
