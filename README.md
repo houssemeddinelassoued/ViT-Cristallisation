@@ -43,5 +43,18 @@ source du domaine corrompu (AUROC élevée) tandis que l'entropie H échoue (AUR
 0,5). C'est le corollaire de la Proposition 2. Si la prédiction ne tient pas, le résultat
 se consigne tel quel — c'est une réfutation, pas un bug.
 
+**État (2026-09-01)** : prédiction forte **réfutée** sur les 11 configurations
+canoniques (H jamais au hasard). Résultat exploitable : F est un détecteur **signé**
+— dominant sur les corruptions structurelles, sous le hasard sur les photométriques —
+et la variante bilatérale `two_sided_shift_score` récupère 5 inversions sur 6.
+Détails : `docs/rapport-exp01.md`, `docs/JOURNAL.md`, papier dans `paper/`.
+
+Analyse statistique appariée et agrégation multi-runs :
+
+```bash
+python -m experiments.exp01_analysis outputs     # DeLong + bootstrap → analysis.json
+python -m experiments.exp01_aggregate outputs    # tableau + figures → outputs/aggregate/
+```
+
 Le cadre et les seuils pré-enregistrés sont définis dans `docs/cadre-theorique.md`.
 `docs/STATUT.md` indique quels documents du workspace sont autoritatifs.

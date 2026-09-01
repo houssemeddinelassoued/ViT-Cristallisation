@@ -20,6 +20,16 @@
 
 ## État d'implémentation
 
-Le dépôt implémente le noyau Gibbs/CLIP et l'expérience P0 zero-shot. TPT, C-TPT,
-l'adaptation visuelle, la sortie anticipée, les cohortes P1/P2 et la calibration
-conforme restent à implémenter et à valider avant toute revendication correspondante.
+Le dépôt implémente le noyau Gibbs/CLIP, l'expérience P0 zero-shot
+(`experiments/exp01_zero_training.py`), l'analyse statistique appariée
+(`experiments/exp01_analysis.py` : DeLong + bootstrap stratifié) et
+l'agrégation multi-runs (`experiments/exp01_aggregate.py`), y compris le
+détecteur bilatéral `two_sided_shift_score` de `tlsc/eval/metrics.py`
+(médiane calibrée sur la source seule). Les cohortes P0 couvertes sont
+BreastMNIST-C (7 corruptions officielles) et PneumoniaMNIST-C (4 corruptions).
+TPT, C-TPT, l'adaptation visuelle, la sortie anticipée, les cohortes P1/P2 et
+la calibration conforme restent à implémenter et à valider avant toute
+revendication correspondante.
+
+Le papier issu de l'expérience 1 se trouve dans `paper/` (main.tex + refs.bib) ;
+chaque valeur y est rattachée à un run de `outputs/`.

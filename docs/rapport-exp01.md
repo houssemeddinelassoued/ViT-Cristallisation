@@ -159,3 +159,56 @@ Deux observations importantes :
 *Runs sources : c2a0cdaf, 7d2ca324, 0a27403c, 5458df41 (speckle_noise, seeds 0/2/3/4),
 4a406385 (motion_blur, seed 0). Environnement : Python 3.11.14, torch 2.4.1+cpu,
 Windows, CPU. Commit 101ab28.*
+
+---
+
+## 7. Balayage systématique — 2026-09-01, commit a82b42d (arbre propre)
+
+Exécution des étapes 1, 2 et 4 du §6, plus une seconde modalité (PneumoniaMNIST,
+radiographie, n = 624) et la sensibilité aux invites. Runs canoniques : ensemble
+d'invites, seed 0, sévérités 0–5 complètes. Analyse appariée par
+`experiments/exp01_analysis.py` (DeLong + bootstrap stratifié 10 000),
+agrégation par `experiments/exp01_aggregate.py` (`outputs/aggregate/`).
+
+### 7.1 Détection à sévérité 5 — les 11 runs canoniques
+
+| Dataset | Corruption | AUROC(F) | AUROC(H) | ΔAUROC [IC 95 %] | p (DeLong) | \|F−méd_src\| | run id |
+|---|---|---|---|---|---|---|---|
+| breast | pixelate | 1,000 | 0,888 | +0,112 [+0,078, +0,150] | 1,9e−9 | 1,000 | 3e02269f |
+| breast | jpeg_compression | 0,920 | 0,711 | +0,208 [+0,143, +0,274] | 7,7e−10 | 0,899 | 98d42003 |
+| breast | motion_blur | 0,885 | 0,760 | +0,125 [+0,060, +0,190] | 1,7e−4 | 0,845 | 2308a744 |
+| breast | speckle_noise | 0,814 | 0,734 | +0,080 [+0,006, +0,154] | 0,032 | 0,742 | de6dba0c |
+| pneumonia | gaussian_blur | 0,970 | 0,798 | +0,172 [+0,148, +0,198] | 3,9e−41 | 0,962 | 2bc1d5f9 |
+| breast | brightness_up | 0,594 | 0,677 | −0,083 [−0,176, +0,012] | 0,083 | 0,447 | 41fa7739 |
+| breast | brightness_down | 0,359 | 0,563 | −0,204 [−0,297, −0,112] | 1,3e−5 | 0,606 | c1697982 |
+| breast | contrast_down | 0,299 | 0,498 | −0,199 [−0,287, −0,112] | 7,4e−6 | 0,630 | 4ae2e534 |
+| pneumonia | gaussian_noise | 0,127 | 0,462 | −0,335 [−0,368, −0,300] | 1,7e−86 | 0,803 | a0dfe1a7 |
+| pneumonia | brightness_down | 0,200 | 0,644 | −0,444 [−0,481, −0,405] | 1,6e−117 | 0,593 | 2de86cbd |
+| pneumonia | contrast_down | 0,209 | 0,698 | −0,489 [−0,526, −0,452] | 2,9e−148 | 0,584 | 2764835a |
+
+### 7.2 Lecture
+
+1. **Dichotomie structurel / photométrique.** F ≫ H sur les corruptions qui
+   détruisent la structure spatiale (pixelate, jpeg, motion_blur, speckle,
+   gaussian_blur) ; F passe **sous le hasard** sur les corruptions photométriques
+   (brightness, contrast, bruit gaussien radiographique) : les images corrompues
+   se *rapprochent* des ancres textuelles. **F est un détecteur signé.**
+2. **Variante bilatérale.** |F − médiane_source(F)| (calibrée sur la source
+   seule, `two_sided_shift_score`) récupère 5 des 6 inversions
+   (gaussian_noise 0,127 → 0,803) sans dégrader le bloc structurel. Échec
+   résiduel : brightness_up (trajectoire de F non monotone).
+3. **Sensibilité aux invites** (runs 1230876b, 417916a6, 6fdae919 — speckle ;
+   6353723a, 7ee23e9b, fb676849 — brightness_down) : dispersion inter-gabarits
+   de l'AUROC(F) ≈ 0,03–0,05 contre ≈ 0,06–0,08 pour H. L'inversion de signe
+   persiste sous chaque gabarit isolé — ce n'est pas un artefact d'invite.
+4. **Graines** (0f58bbbd, f7608199) : AUROC(F) speckle sév. 5 = 0,814/0,819/0,827 —
+   le bruit d'échantillonnage des corruptions est négligeable devant les effets.
+5. **Verdict pré-enregistré** : C2 (H ≤ 0,60) échoue sur les 11 configurations →
+   `prediction_confirmee: false` partout. Réfutation consignée telle quelle ;
+   la dichotomie signée est le résultat exploitable.
+
+### 7.3 Artefacts
+
+- Agrégat : `outputs/aggregate/{summary.json, summary.csv, fig_*.png}`.
+- Papier : `paper/main.tex` (compilé, 10 pages) — chaque valeur y est tracée
+  vers un run id de ce tableau.

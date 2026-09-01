@@ -25,7 +25,11 @@ def analyse_run(run_dir: Path, n_boot: int, alpha: float, seed: int) -> dict | N
     metrics_path, scores_path = run_dir / "metrics.json", run_dir / "scores.npz"
     if not metrics_path.is_file() or not scores_path.is_file():
         return None
-    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    try:
+        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    except UnicodeDecodeError:
+        # runs antérieurs au passage systématique en UTF-8 (Windows, cp1252)
+        metrics = json.loads(metrics_path.read_text(encoding="cp1252"))
     if metrics.get("config", {}).get("dry_run"):
         return None
 

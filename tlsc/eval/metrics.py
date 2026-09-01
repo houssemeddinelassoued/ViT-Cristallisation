@@ -12,7 +12,7 @@ from sklearn.metrics import balanced_accuracy_score, f1_score, roc_auc_score, ro
 __all__ = [
     "bootstrap_auroc_delta", "brier_score", "delong_test", "diagnostic_metrics",
     "expected_calibration_error", "paired_bootstrap_ci", "sensitivity_at_specificity",
-    "shift_detection_auroc",
+    "shift_detection_auroc", "two_sided_shift_score",
 ]
 
 
@@ -87,6 +87,29 @@ def shift_detection_auroc(score_source: np.ndarray, score_target: np.ndarray) ->
     y = np.concatenate([np.zeros(len(score_source)), np.ones(len(score_target))])
     s = np.concatenate([score_source, score_target])
     return float(roc_auc_score(y, s))
+
+
+def two_sided_shift_score(score_source: np.ndarray,
+                          score_target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Score de décalage bilatéral : écart absolu à la médiane SOURCE.
+
+    Motivation empirique : certains décalages photométriques rapprochent les
+    images de toutes les ancres et font *baisser* F, ce qui inverse l'AUROC du
+    détecteur unilatéral. La statistique ``|s - médiane(source)|`` détecte les
+    départs dans les deux directions. La médiane est calculée sur la source
+    seule : aucune information cible n'entre dans la calibration.
+
+    Returns
+    -------
+    (scores_source, scores_target) transformés, prêts pour
+    :func:`shift_detection_auroc`.
+    """
+    src = np.asarray(score_source, dtype=np.float64)
+    tgt = np.asarray(score_target, dtype=np.float64)
+    if src.ndim != 1 or tgt.ndim != 1 or len(src) == 0 or len(tgt) == 0:
+        raise ValueError("score_source et score_target doivent être des vecteurs non vides")
+    center = float(np.median(src))
+    return np.abs(src - center), np.abs(tgt - center)
 
 
 def paired_bootstrap_ci(a: np.ndarray, b: np.ndarray, n: int = 10_000,

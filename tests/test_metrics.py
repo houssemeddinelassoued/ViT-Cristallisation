@@ -11,6 +11,8 @@ from tlsc.eval.metrics import (
     diagnostic_metrics,
     paired_bootstrap_ci,
     sensitivity_at_specificity,
+    shift_detection_auroc,
+    two_sided_shift_score,
 )
 
 
@@ -78,3 +80,19 @@ def test_bootstrap_delta_auroc_reproductible_et_coherent() -> None:
     observed, lo, hi = first
     assert lo <= observed <= hi
     assert lo > 0.0  # le détecteur fort domine avec un IC excluant zéro
+
+
+def test_two_sided_rattrape_un_decalage_descendant() -> None:
+    # cible décalée VERS LE BAS : le détecteur unilatéral tombe sous 0,5,
+    # le bilatéral doit rester nettement au-dessus.
+    rng = np.random.default_rng(6)
+    src = rng.normal(0.0, 1.0, size=300)
+    tgt = rng.normal(-3.0, 1.0, size=300)
+    assert shift_detection_auroc(src, tgt) < 0.2
+    s2, t2 = two_sided_shift_score(src, tgt)
+    assert shift_detection_auroc(s2, t2) > 0.9
+
+
+def test_two_sided_valide_les_entrees() -> None:
+    with pytest.raises(ValueError):
+        two_sided_shift_score(np.empty(0), np.arange(3.0))

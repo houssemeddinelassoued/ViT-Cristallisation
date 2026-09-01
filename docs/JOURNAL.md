@@ -32,3 +32,28 @@ Format : date · run_id · ce qui était testé · ce qui a été observé · d�
 
 - Le run `20260901T000843Z_breastmnist_4aecb603` (figures sans `metrics.json`) est
   incomplet et ne doit pas être cité.
+
+## 2026-09-01 · balayage systématique P0 (commit a82b42d, arbre propre)
+
+19 runs canoniques et de contrôle, tous complets, sévérités 0–5, ensemble
+d'invites sauf mention. Détail chiffré : `docs/rapport-exp01.md` §7 et
+`outputs/aggregate/summary.csv`.
+
+| Lot | Runs | Ce qui était testé | Observé |
+|---|---|---|---|
+| 7 corruptions breastmnist | de6dba0c, 2308a744, 41fa7739, c1697982, 4ae2e534, 98d42003, 3e02269f | prédiction pré-enregistrée corruption par corruption | F ≫ H sur structurel (pixelate 1,000 ; jpeg 0,920) ; **F sous le hasard sur photométrique** (brightness_down 0,359 ; contrast_down 0,299) |
+| Sensibilité invites | 1230876b, 417916a6, 6fdae919, 6353723a, 7ee23e9b, fb676849 | chaque gabarit isolé, speckle + brightness_down | dispersion AUROC(F) ≈ 0,03–0,05 < dispersion AUROC(H) ≈ 0,06–0,08 ; l'inversion de signe persiste sous chaque gabarit |
+| Graines 1–2, speckle | 0f58bbbd, f7608199 | bruit d'échantillonnage des corruptions | AUROC(F) sév. 5 : 0,814/0,819/0,827 — négligeable |
+| PneumoniaMNIST ×4 | a0dfe1a7, 2bc1d5f9, 2de86cbd, 2764835a | réplication seconde modalité (n = 624) | dichotomie répliquée : gaussian_blur F = 0,970 ≫ H ; photométrique inversé (F = 0,127–0,209, p ≤ 1e−86) |
+
+- **Verdict pré-enregistré : réfuté sur les 11 configurations canoniques**
+  (C2 échoue partout ; `prediction_confirmee: false`). Consigné tel quel.
+- **Résultat exploitable non pré-enregistré** : F est un détecteur *signé* ;
+  la variante bilatérale |F − médiane_source| (ajoutée à `tlsc/eval/metrics.py`,
+  testée) récupère 5 inversions sur 6, recalculée dans `outputs/aggregate/`.
+- Analyse appariée (DeLong + bootstrap 10 000) écrite dans chaque
+  `outputs/<run_id>/analysis.json` ; run fumigène 6243078d lu en cp1252 (antérieur
+  au passage UTF-8), gestion de repli ajoutée aux scripts d'analyse.
+- Papier rédigé et compilé : `paper/main.tex` (10 pages, pdflatex/MiKTeX propre).
+- Décision : prochaine étape scientifique = score bivarié (F, H) et cohorte P1
+  (BUSI → UDIAT → BUS-UCLM) ; contrôle BiomedCLIP sur la configuration finale.
