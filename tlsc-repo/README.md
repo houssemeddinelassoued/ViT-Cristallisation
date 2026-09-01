@@ -47,7 +47,7 @@ se consigne tel quel — c'est une réfutation, pas un bug.
 canoniques (H jamais au hasard). Résultat exploitable : F est un détecteur **signé**
 — dominant sur les corruptions structurelles, sous le hasard sur les photométriques —
 et la variante bilatérale `two_sided_shift_score` récupère 5 inversions sur 6.
-Détails : `docs/rapport-exp01.md`, `docs/JOURNAL.md`, papier dans `paper/`.
+Détails : `docs/rapport-exp01.md`, `docs/JOURNAL.md`, papier dans `../papers/contribution/`.
 
 Analyse statistique appariée et agrégation multi-runs :
 

@@ -210,5 +210,5 @@ agrégation par `experiments/exp01_aggregate.py` (`outputs/aggregate/`).
 ### 7.3 Artefacts
 
 - Agrégat : `outputs/aggregate/{summary.json, summary.csv, fig_*.png}`.
-- Papier : `paper/main.tex` (compilé, 10 pages) — chaque valeur y est tracée
+- Papier : `papers/contribution/main.tex` (compilé, 10 pages) — chaque valeur y est tracée
   vers un run id de ce tableau.

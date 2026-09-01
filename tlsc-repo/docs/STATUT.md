@@ -35,5 +35,5 @@ TPT, C-TPT, l'adaptation visuelle, la sortie anticipée, les cohortes P1/P2 et
 la calibration conforme restent à implémenter et à valider avant toute
 revendication correspondante.
 
-Le papier issu de l'expérience 1 se trouve dans `paper/` (main.tex + refs.bib) ;
+Le papier issu de l'expérience 1 se trouve dans `../../papers/contribution/` (main.tex + refs.bib) ;
 chaque valeur y est rattachée à un run de `outputs/`.

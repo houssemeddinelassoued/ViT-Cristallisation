@@ -54,7 +54,7 @@ d'invites sauf mention. Détail chiffré : `docs/rapport-exp01.md` §7 et
 - Analyse appariée (DeLong + bootstrap 10 000) écrite dans chaque
   `outputs/<run_id>/analysis.json` ; run fumigène 6243078d lu en cp1252 (antérieur
   au passage UTF-8), gestion de repli ajoutée aux scripts d'analyse.
-- Papier rédigé et compilé : `paper/main.tex` (10 pages, pdflatex/MiKTeX propre).
+- Papier rédigé et compilé : `papers/contribution/main.tex` (10 pages, pdflatex/MiKTeX propre).
 - Décision : prochaine étape scientifique = score bivarié (F, H) et cohorte P1
   (BUSI → UDIAT → BUS-UCLM) ; contrôle BiomedCLIP sur la configuration finale.
 

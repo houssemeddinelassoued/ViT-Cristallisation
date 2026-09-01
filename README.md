@@ -9,9 +9,9 @@ vision-langage gelés (CLIP), appliquée à l'imagerie médicale.
 
 | Chemin | Contenu |
 |---|---|
-| [`tlsc-repo/`](tlsc-repo/) | Code, tests, expériences, résultats mesurés (`outputs/<run_id>/metrics.json`), papier LaTeX. Voir [`tlsc-repo/README.md`](tlsc-repo/README.md) pour l'installation et l'exécution. |
+| [`tlsc-repo/`](tlsc-repo/) | Code, tests, expériences, résultats mesurés (`outputs/<run_id>/metrics.json`). Voir [`tlsc-repo/README.md`](tlsc-repo/README.md) pour l'installation et l'exécution. |
 | [`docs/`](docs/) | Site public GitHub Pages : accueil, page de résultats, plateforme explicative (copie unique), figures. Ne pas confondre avec `tlsc-repo/docs/` (notes internes : journal de bord, cadre théorique, statut des sources). |
-| [`review-paper/`](review-paper/) | Revue de littérature complémentaire (LaTeX). |
+| [`papers/`](papers/) | Documents LaTeX : [`papers/contribution/`](papers/contribution/) (papier de l'expérience 1) et [`papers/review/`](papers/review/) (revue de littérature complémentaire), indépendants l'un de l'autre. |
 | [`archive/`](archive/) | Documents de cadrage historiques (feuilles de route, plans, guides, notes aux encadrants). Conservés pour trace ; en cas de divergence, `02protocoleexperimentalv3.md` et `tlsc-repo/docs/` prévalent — voir [`tlsc-repo/docs/STATUT.md`](tlsc-repo/docs/STATUT.md). |
 | Racine | `README.md` (ce fichier) et [`02protocoleexperimentalv3.md`](02protocoleexperimentalv3.md), le protocole expérimental autoritatif (référencé par `tlsc-repo/docs/`). |
 
