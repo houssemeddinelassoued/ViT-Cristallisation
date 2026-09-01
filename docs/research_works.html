@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TLSC — Plateforme explicative · Cristallisation de l'espace latent</title>
+<title>TLSC — Travaux de recherche · Cristallisation de l'espace latent</title>
 
 <!-- KaTeX -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
@@ -44,6 +44,8 @@ nav.sidebar a{
 nav.sidebar a:hover{background:var(--panel2); color:var(--text)}
 nav.sidebar a.active{background:var(--panel2); color:var(--accent); font-weight:600}
 nav.sidebar .group{font-size:.68rem; text-transform:uppercase; letter-spacing:.12em; color:var(--group); margin:1.1rem .5rem .3rem}
+.back-link{display:inline-block; margin-bottom:1rem; color:var(--accent); font-size:.85rem; text-decoration:none}
+.back-link:hover{text-decoration:underline}
 .theme-toggle{
   position:fixed; top:1rem; right:1rem; z-index:5; width:2.25rem; height:2.25rem;
   padding:0; border:1px solid var(--border); border-radius:50%; background:var(--panel);
@@ -58,6 +60,7 @@ h2{font-size:1.5rem; color:var(--accent); margin-bottom:1rem; padding-bottom:.4r
 h3{font-size:1.08rem; color:var(--accent2); margin:1.6rem 0 .6rem}
 p{margin-bottom:.8rem}
 .lead{font-size:1.05rem; color:var(--muted)}
+.byline{color:var(--muted); font-size:.84rem; margin-bottom:1rem}
 strong{color:var(--strong)}
 em{color:var(--warn); font-style:normal}
 .project-context{border-left:3px solid var(--accent); color:var(--muted); font-size:.84rem; margin:1rem 0 1.5rem; padding:.15rem 0 .15rem 1rem}
@@ -154,7 +157,7 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
 <body>
 <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Activer le thème clair" title="Activer le thème clair">☀</button>
 <div style="background:#0e1620;color:#5eead4;padding:.6rem 1.2rem;font-size:.85rem;text-align:center;font-family:sans-serif;border-bottom:1px solid #1f293d">
-    Document de présentation pédagogique — pour les chiffres mesurés, voir la
+  Travaux de recherche — pour les chiffres mesurés, voir la
     <a href="results.html" style="color:#fff;text-decoration:underline">page résultats</a> ou
     <a href="index.html" style="color:#fff;text-decoration:underline">l'accueil</a>.
 </div>
@@ -162,7 +165,7 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
 <div class="layout">
 <nav class="sidebar" id="sidebar">
   <div class="logo">TLSC</div>
-  <div class="sub">Cristallisation de l'espace latent<br>Plateforme explicative</div>
+  <div class="sub">Cristallisation de l'espace latent<br>Travaux de recherche</div>
   <div class="group">Comprendre</div>
   <a href="#apercu">1 · Vue d'ensemble</a>
   <a href="#theorie">2 · Cadre théorique</a>
@@ -182,13 +185,14 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
 
 <!-- ══════════════════ 1. VUE D'ENSEMBLE ══════════════════ -->
 <section id="apercu">
+  <a class="back-link" href="index.html">← Retour à l'accueil</a>
   <h1>Cristallisation de l'espace latent</h1>
+  <p class="byline">Travaux de recherche réalisés par <strong>Houssem Eddine Lassoued</strong>, encadré par <strong>Dr. Anis Ben Aicha</strong> et <strong>Pr. Habib Fathallah</strong>.</p>
   <p class="lead">Adaptation au moment du test et arrêt anticipé à risque contrôlé, sur un
   <strong>encodeur vision-langage gelé</strong> de type CLIP, en imagerie médicale sous décalage
   d'acquisition. Terrain de thèse : syndrome de Sjögren, échographie.</p>
   <div class="project-context">
     <strong>Contexte du projet.</strong> Travaux de recherche de thèse en Machine Learning et Deep Learning appliqués aux maladies auto-immunes. L'étude de la robustesse face aux décalages d'acquisition en imagerie médicale aligne ce projet avec ce sujet de thèse.<br>
-    Travail réalisé par <strong>Houssem Eddine Lassoued</strong>, encadré par <strong>Dr. Anis Ben Aicha</strong> et <strong>Pr. Habib Fathallah</strong>.<br>
     Faculté des Sciences de Bizerte, Université de Carthage.
   </div>
 
@@ -995,7 +999,7 @@ flowchart LR
   </table>
 
   <footer>
-    Plateforme explicative générée pour le projet TLSC — Cristallisation de l'espace latent ·
+    Travaux de recherche générés pour le projet TLSC — Cristallisation de l'espace latent ·
     Auteur du projet : Houssem Eddine Lassoued · Les valeurs affichées dans le laboratoire interactif
     sont des simulations pédagogiques et ne constituent en aucun cas des résultats expérimentaux.
   </footer>

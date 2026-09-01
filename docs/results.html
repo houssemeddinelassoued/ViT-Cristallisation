@@ -15,6 +15,8 @@
   header{padding:1.5rem 0}
   nav a{margin-right:1rem;font-size:.85rem;color:var(--muted);text-decoration:none}
   nav a:hover{color:var(--accent)}
+  .back-link{display:inline-block;margin-bottom:1rem;font-size:.85rem;text-decoration:none}
+  .byline{color:var(--muted);font-size:.84rem;margin-bottom:1rem}
   h1{font-size:1.9rem;margin-bottom:.3rem}
   h2{font-size:1.35rem;color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:.4rem;margin-top:2.6rem}
   .lead{color:var(--muted)}
@@ -44,15 +46,16 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
 <body>
 <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Activer le thème clair" title="Activer le thème clair">☀</button>
 <header>
-  <nav><a href="index.html">Accueil</a><a href="plateforme-explicative.html">Plateforme explicative</a><a href="https://github.com/houssemeddinelassoued/ViT-Cristallisation">Dépôt GitHub</a></nav>
+  <nav><a href="research_works.html">Travaux de recherche</a><a href="https://github.com/houssemeddinelassoued/ViT-Cristallisation">Dépôt GitHub</a></nav>
+  <a class="back-link" href="index.html">← Retour à l'accueil</a>
   <h1>Résultats — expériences zero-training</h1>
+  <p class="byline">Travaux de recherche réalisés par <strong>Houssem Eddine Lassoued</strong>, encadré par <strong>Dr. Anis Ben Aicha</strong> et <strong>Pr. Habib Fathallah</strong>.</p>
   <p class="lead">Détection de décalage d'acquisition par énergie libre F vs entropie H, sans aucun entraînement,
   puis trajectoires des observables en fonction de la profondeur du ViT.
   Modèle ViT-B-16-quickgelu (poids <code>openai</code>), T = 2τ ≈ 0,0200. Chaque chiffre provient d'un
   <code>outputs/&lt;run_id&gt;/metrics.json</code> versionné dans le dépôt.</p>
   <div class="project-context">
     <strong>Contexte du projet.</strong> Travaux de recherche de thèse en Machine Learning et Deep Learning appliqués aux maladies auto-immunes. L'étude de la robustesse face aux décalages d'acquisition en imagerie médicale aligne ce projet avec ce sujet de thèse.<br>
-    Travail réalisé par <strong>Houssem Eddine Lassoued</strong>, encadré par <strong>Dr. Anis Ben Aicha</strong> et <strong>Pr. Habib Fathallah</strong>.<br>
     Faculté des Sciences de Bizerte, Université de Carthage.
   </div>
 </header>

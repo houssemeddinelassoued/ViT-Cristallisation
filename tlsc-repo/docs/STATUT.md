@@ -15,8 +15,8 @@
   plans, guides et notes aux encadrants. Ils décrivent des versions antérieures
   du protocole ; en cas de divergence sur les cohortes, baselines ou
   identifiants d'ablation, la v3 prévaut.
-- `plateforme-explicative.html` n'existe plus qu'en **une seule copie**,
-  `../docs/plateforme-explicative.html` (site public) ; la copie racine a été
+- `research_works.html` n'existe plus qu'en **une seule copie**,
+  `../docs/research_works.html` (site public) ; la copie racine a été
   retirée (2026-09-01). C'est un support pédagogique, pas une source de mesures.
 - `thermodynamic_vit_infographic.html` a été retiré du projet (2026-09-01) : sa maquette
   décrivait une architecture différente (adaptation au moment du test, sortie anticipée)
