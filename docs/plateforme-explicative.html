@@ -151,7 +151,7 @@ footer{color:var(--muted); font-size:.78rem; border-top:1px solid var(--border);
 </style>
 <script>
 // Applique le thème sauvegardé avant le premier rendu (évite le flash)
-if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.classList.add('light');
+if (localStorage.getItem('tlsc-theme') !== 'dark') document.documentElement.classList.add('light');
 </script>
 </head>
 <body>
