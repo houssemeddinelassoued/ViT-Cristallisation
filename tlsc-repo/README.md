@@ -89,5 +89,21 @@ textuelles — elle disparaît dès k = 16 (brightness_down : AUROC(F) 0,359 →
 la balanced accuracy source passe de 0,517 (R1) à 0,692 (R3). Détails :
 `docs/rapport-exp03.md`.
 
+## Expérience 4 — arrêt anticipé calibré (« sortir quand H < ε »)
+
+```bash
+python -m experiments.exp04_early_exit --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5
+```
+
+Règle d'arrêt par échantillon du croquis fondateur (`tlsc/eval/early_exit.py`) :
+seuils H/F et couche fixe calibrés sur une moitié stratifiée du split test source,
+évaluation sur l'autre moitié, sévérités 0–5. Exploratoire déclarée.
+
+**État (2026-09-01)** : sortie en couche ≈ 1 à exactitude préservée (≈ 92 % de calcul
+économisé) — mais trivialement, les ancres R1 étant quasi aveugles ; à refaire sous
+ancres R2/R3. Résultat exploitable : la profondeur de sortie N* croît avec la
+sévérité (1,00 → 2,79 sur brightness_down) — signal de dérive gratuit. Détails :
+`docs/rapport-exp04.md`.
+
 Le cadre et les seuils pré-enregistrés sont définis dans `docs/cadre-theorique.md`.
 `docs/STATUT.md` indique quels documents du workspace sont autoritatifs.

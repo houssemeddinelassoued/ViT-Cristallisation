@@ -30,13 +30,15 @@ Le dépôt implémente le noyau Gibbs/CLIP, l'expérience P0 zero-shot
 l'agrégation multi-runs (`experiments/exp01_aggregate.py`), les détecteurs
 bilatéral et bivarié de `tlsc/eval/metrics.py`, la sonde par couche
 (`tlsc/models/layer_probe.py` + `experiments/exp02_layer_trajectories.py`,
-exploratoire déclarée — profondeur N comme variable) et les régimes
+exploratoire déclarée — profondeur N comme variable), les régimes
 d'ancrage R1/R2/R3 (`tlsc/models/data_anchors.py` +
 `experiments/exp03_anchor_regimes.py`, centroïdes source et D_inter,
-exploratoire déclarée). Les cohortes P0
+exploratoire déclarée) et l'arrêt anticipé calibré (`tlsc/eval/early_exit.py`
++ `experiments/exp04_early_exit.py`, règle H < epsilon du croquis fondateur,
+split calibration/évaluation stratifié, exploratoire déclarée). Les cohortes P0
 couvertes sont BreastMNIST-C (7 corruptions officielles) et PneumoniaMNIST-C
-(4 corruptions). La règle d'arrêt par échantillon, TPT,
-C-TPT, l'adaptation visuelle, les cohortes P1/P2 et la calibration conforme
+(4 corruptions). Le croisement ancres R2 × arrêt calibré, N* comme détecteur,
+TPT, C-TPT, l'adaptation visuelle, les cohortes P1/P2 et la calibration conforme
 restent à implémenter et à valider avant toute revendication correspondante.
 
 Le papier issu de l'expérience 1 se trouve dans `../../papers/contribution/` (main.tex + refs.bib) ;

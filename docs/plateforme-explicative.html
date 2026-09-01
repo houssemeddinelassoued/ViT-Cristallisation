@@ -157,12 +157,9 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
 <body>
 <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Activer le thème clair" title="Activer le thème clair">☀</button>
 <div style="background:#0e1620;color:#5eead4;padding:.6rem 1.2rem;font-size:.85rem;text-align:center;font-family:sans-serif;border-bottom:1px solid #1f293d">
-  Travaux de recherche réalisés par <strong style="color:#fff">Houssem Eddine Lassoued</strong>, encadré par <strong style="color:#fff">Dr. Anis Ben Aicha</strong> et <strong style="color:#fff">Pr. Habib Fathallah</strong>
-  </br>
-  Pour les chiffres mesurés, voir la
+  Travaux de recherche — pour les chiffres mesurés, voir la
     <a href="results.html" style="color:#fff;text-decoration:underline">page résultats</a> ou
     <a href="index.html" style="color:#fff;text-decoration:underline">l'accueil</a>.
-    Travaux de recherche
 </div>
 
 <div class="layout">
@@ -190,10 +187,14 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
 <section id="apercu">
   <a class="back-link" href="index.html">← Retour à l'accueil</a>
   <h1>Cristallisation de l'espace latent</h1>
-  
+  <p class="byline">Travaux de recherche réalisés par <strong>Houssem Eddine Lassoued</strong>, encadré par <strong>Dr. Anis Ben Aicha</strong> et <strong>Pr. Habib Fathallah</strong>.</p>
   <p class="lead">Adaptation au moment du test et arrêt anticipé à risque contrôlé, sur un
   <strong>encodeur vision-langage gelé</strong> de type CLIP, en imagerie médicale sous décalage
   d'acquisition. Terrain de thèse : syndrome de Sjögren, échographie.</p>
+  <div class="project-context">
+    <strong>Contexte du projet.</strong> Travaux de recherche de thèse en Machine Learning et Deep Learning appliqués aux maladies auto-immunes. L'étude de la robustesse face aux décalages d'acquisition en imagerie médicale aligne ce projet avec ce sujet de thèse.<br>
+    Faculté des Sciences de Bizerte, Université de Carthage.
+  </div>
 
   <div class="cards">
     <div class="card"><div class="t">L'idée centrale</div>
@@ -212,8 +213,8 @@ if (localStorage.getItem('tlsc-theme') === 'light') document.documentElement.cla
   </div>
 
   <div class="explain">
-    <div class="ct">🎓 L'analogie du radiologue</div>
-    <p>Un radiologue habitué à un échographe ultra-moderne dans un grand hôpital.
+    <div class="ct">🎓 Expliqué simplement — l'analogie du radiologue</div>
+    <p>Imaginez un radiologue habitué à un échographe ultra-moderne dans un grand hôpital.
     On l'envoie dans une petite clinique équipée d'un vieil appareil mal réglé : les images sont
     plus bruitées, plus sombres, plus floues. Elles ne ressemblent plus à ce dont il a l'habitude —
     c'est exactement le <em>décalage d'acquisition</em>. Un humain s'en rend compte et redouble de
@@ -299,7 +300,7 @@ flowchart LR
   </div>
 
   <div class="explain">
-    <div class="ct">🎓 La mesure de Gibbs sans les maths</div>
+    <div class="ct">🎓 Expliqué simplement — la mesure de Gibbs sans les maths</div>
     <p>Le modèle CLIP transforme chaque image en un point sur une sphère (son « embedding »), et chaque
     phrase décrivant une classe (« une échographie de tumeur maligne ») en un autre point : une
     <em>ancre</em>. Imaginez ces ancres comme des <strong>aimants</strong> : plus l'image tombe près d'un
@@ -330,7 +331,7 @@ flowchart LR
   </div>
 
   <div class="explain">
-    <div class="ct">🎓 H et F en deux phrases</div>
+    <div class="ct">🎓 Expliqué simplement — H et F en deux phrases</div>
     <p><strong>L'entropie H, c'est l'hésitation du modèle.</strong> H basse = « je suis sûr de moi »
     (99&nbsp;% / 1&nbsp;%), H haute = « je ne sais pas » (50&nbsp;% / 50&nbsp;%). Le piège : un modèle peut
     être sûr de lui… et se tromper complètement.</p>
@@ -354,7 +355,7 @@ flowchart LR
   scénario le plus dangereux en clinique : l'erreur silencieuse et assurée.</p>
 
   <div class="explain">
-    <div class="ct">🎓 L'erreur silencieuse</div>
+    <div class="ct">🎓 Expliqué simplement — l'erreur silencieuse</div>
     <p>Reprenons l'image des aimants. Si un nouvel échographe dégrade l'image, son point sur la sphère
     <em>recule de la même distance</em> par rapport aux deux aimants « malin » et « bénin ». Le rapport
     de forces entre les deux aimants ne change pas : le modèle donne <strong>les mêmes probabilités
@@ -480,6 +481,7 @@ flowchart TB
     E1["exp01_zero_training.py<br><i>Expérience 1 : détection du décalage</i>"]
     E2["exp02_layer_trajectories.py<br><i>Expérience 2 : profondeur N comme variable</i>"]
     E3["exp03_anchor_regimes.py<br><i>Expérience 3 : régimes d'ancrage R1/R2/R3</i>"]
+    E4["exp04_early_exit.py<br><i>Expérience 4 : arrêt anticipé calibré</i>"]
   end
   subgraph TLSC["tlsc/ — paquet scientifique"]
     subgraph CORE["core/"]
@@ -495,6 +497,7 @@ flowchart TB
     end
     subgraph EVAL["eval/"]
       M["metrics.py<br>AUROC · ECE · Brier · bootstrap"]
+      EE["early_exit.py<br>règle H &lt; ε · calibration ε"]
     end
   end
   subgraph TESTS["tests/ — un test par module scientifique"]
@@ -509,6 +512,7 @@ flowchart TB
   E1 --> G & CA & MC & M
   E2 --> G & CA & LP & MC & M
   E3 --> G & CA & DA & MC & M
+  E4 --> G & CA & LP & MC & EE
   CA -->|"T = 2τ"| G
   T1 -.vérifie.-> G
   T2 -.vérifie.-> G & CA
@@ -519,6 +523,7 @@ flowchart TB
   E1 ==> OUT
   E2 ==> OUT
   E3 ==> OUT
+  E4 ==> OUT
   style OUT fill:#1a2617,stroke:#4ade80,color:#dbe2f0
   </pre>
   <div class="fig-cap">Fig. 2 — Dépendances entre modules. Chaque module scientifique arrive avec son test.</div>
@@ -723,7 +728,7 @@ flowchart LR
   <h2>7 · Protocole v3 &amp; matrice d'ablation</h2>
 
   <div class="explain">
-    <div class="ct">🎓 à quoi sert une « matrice d'ablation » ?</div>
+    <div class="ct">🎓 Expliqué simplement — à quoi sert une « matrice d'ablation » ?</div>
     <p>C'est l'équivalent scientifique d'un essai de médicament. Quand un traitement combine plusieurs
     ingrédients, on teste chaque ingrédient séparément, le placebo, et la combinaison complète — sinon
     impossible de savoir ce qui agit vraiment. Ici, chaque ligne (A0, A1, B2… D5) est une variante de la
@@ -888,7 +893,7 @@ env = {
   <h2>9 · Intégrité scientifique — l'architecture anti-fuite</h2>
 
   <div class="explain">
-    <div class="ct">🎓 Qu'est-ce qu'une « fuite » ?</div>
+    <div class="ct">🎓 Expliqué simplement — qu'est-ce qu'une « fuite » ?</div>
     <p>Une fuite, c'est <em>tricher sans forcément le vouloir</em> : utiliser une information du jeu de
     test pour prendre une décision qui aurait dû être prise avant. C'est comme réviser un examen… avec
     la feuille des réponses : la note obtenue ne prouve plus rien.</p>
@@ -949,10 +954,11 @@ flowchart TB
       cohortes P0 corrompues · métriques (dont détecteurs bilatéral et bivarié) · expérience 1 zero-shot
       avec verdict et traçabilité · <strong>sonde par couche et expérience 2</strong> (trajectoires de
       H, F, χ selon la profondeur N) · <strong>régimes d'ancrage R1/R2/R3 et expérience 3</strong>
-      (centroïdes de données, D<sub>inter</sub>) · 7 modules de tests.</div></div>
+      (centroïdes de données, D<sub>inter</sub>) · <strong>arrêt anticipé calibré et expérience 4</strong>
+      (règle H &lt; ε, split calibration/évaluation) · 8 modules de tests.</div></div>
     <div class="card"><div class="t">🚧 À implémenter</div>
-      <div class="d">Règle d'arrêt par échantillon calibrée sur la source (profondeur adaptative) ·
-      TPT et C-TPT (baselines) · adaptation visuelle
+      <div class="d">Croisement ancres R2 × arrêt calibré (test non trivial de la règle) ·
+      N̄* comme détecteur de décalage · TPT et C-TPT (baselines) · adaptation visuelle
       V + Vp · cohortes P1 (BUSI→UDIAT→BUS-UCLM) et P2 (Camelyon17) · calibration conforme.</div></div>
     <div class="card"><div class="t">🔭 Horizon</div>
       <div class="d">Cohorte Sjögren P3 (subordonnée à l'accès aux données) · contrôle de robustesse
@@ -960,7 +966,7 @@ flowchart TB
   </div>
 
   <div class="explain">
-    <div class="ct">🎓 Pourquoi regarder « couche par couche » ?</div>
+    <div class="ct">🎓 Expliqué simplement — pourquoi regarder « couche par couche » ?</div>
     <p>Un ViT lit l'image en 12 étapes successives (les « blocs »). L'idée fondatrice du projet —
     les croquis de l'encadrant — traite ce nombre d'étapes N comme un <em>réglage à optimiser</em> :
     peut-être qu'une lecture partielle (s'arrêter à l'étape 3 ou 7) suffit, voire fait mieux.
@@ -975,8 +981,8 @@ flowchart TB
   <div class="mermaid-box">
   <pre class="mermaid">
 flowchart LR
-  A["<b>Fait</b><br>Noyau Gibbs ≡ CLIP<br>Exp. 1 zero-training<br>Exp. 2 : profondeur N<br>Exp. 3 : ancres R1/R2/R3<br>P0 + verdict"] -->
-  B["<b>Étape suivante</b><br>Arrêt calibré par échantillon<br>baselines TPT / C-TPT"] -->
+  A["<b>Fait</b><br>Noyau Gibbs ≡ CLIP<br>Exp. 1 zero-training<br>Exp. 2 : profondeur N<br>Exp. 3 : ancres R1/R2/R3<br>Exp. 4 : arrêt calibré<br>P0 + verdict"] -->
+  B["<b>Étape suivante</b><br>Croisement R2 × arrêt calibré<br>N* comme détecteur<br>baselines TPT / C-TPT"] -->
   C["<b>Cœur de la méthode</b><br>Adaptation V + Vp<br>ancres fixes<br>arrêt anticipé calibré"] -->
   D["<b>Validation réelle</b><br>P1 : 3 échographes<br>P2 : 5 hôpitaux"] -->
   E["<b>Terrain de thèse</b><br>P3 : cohorte Sjögren<br>calibration conforme"]

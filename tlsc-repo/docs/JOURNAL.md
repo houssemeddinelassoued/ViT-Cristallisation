@@ -134,3 +134,24 @@ déclaré.** Runs (git 00f9f37 propre) : fe6d6b35 (speckle_noise), bccf7433
   ensuite meilleure couche (exp02) × ancres R2 ; formaliser un critère de
   qualité d'ancrage combinant D_inter et distance ancres–nuage.
 - Détail : `docs/rapport-exp03.md`.
+
+## 2026-09-01 · exp04 — arrêt anticipé calibré (« sortir quand H < ε »)
+
+Chantier d'alignement 3 : règle d'arrêt par échantillon du croquis fondateur
+(`tlsc/eval/early_exit.py`, 5 tests). Seuils ε (H et F) et couche fixe calibrés
+sur une moitié stratifiée du split test source (77 images) ; évaluation sur
+l'autre moitié (79), sévérités 0–5. **Exploratoire déclaré.** Runs
+(git 3ef3ebe propre) : a8b68f84 (speckle), a1a557b5 (motion_blur),
+898385f7 (brightness_down). Ancres R1.
+
+- **Observé (1)** : la règle calibrée sort en couche ≈ 1 avec exactitude
+  préservée (0,731 contre 0,705 pleine profondeur) — ~92 % de calcul économisé,
+  mais *trivialement* : sous ancres R1 quasi aveugles, la profondeur n'apporte
+  aucun gain diagnostique. Sur ce couple substrat/tâche, argmin_N H est
+  dégénéré (N* = 1). Consigné tel quel.
+- **Observé (2), exploitable** : la profondeur de sortie N̄* croît avec la
+  sévérité (F-stop brightness_down 1,00 → 2,79 ; H-stop speckle 1,00 → 2,08) —
+  l'arrêt anticipé est lui-même un moniteur de dérive, gratuit en production.
+- Décision : test non trivial de la règle = croisement ancres R2 (exp03) ×
+  arrêt calibré (exp04) ; quantifier N̄* en AUROC comme détecteur.
+- Détail : `docs/rapport-exp04.md`.

@@ -196,6 +196,35 @@ Expérience <strong>exploratoire déclarée</strong>. BreastMNIST, sévérités 
   Run 20260901T174749Z_breastmnist_bccf7433.</figcaption>
 </figure>
 
+<h2>Expérience 4 — arrêt anticipé calibré (« sortir quand H &lt; ε »)</h2>
+<p>Règle d'arrêt par échantillon : sortie à la première couche où l'observable (H ou F) passe
+sous un seuil ε. Seuils et couche fixe de référence calibrés sur une moitié stratifiée du split
+test source (77 images) ; évaluation sur l'autre moitié (79). Ancres textuelles R1.
+Expérience <strong>exploratoire déclarée</strong>.
+Runs : 20260901T182032Z_breastmnist_a8b68f84 (speckle), 20260901T182436Z_breastmnist_a1a557b5
+(motion_blur), 20260901T183051Z_breastmnist_898385f7 (brightness_down).</p>
+<ul>
+  <li><strong>Économie réelle mais triviale sur ce substrat</strong> : la règle calibrée sort en
+  couche ≈ 1 avec exactitude préservée (0,731 contre 0,705 en pleine profondeur) — ~92 % des blocs
+  économisés — mais uniquement parce que les ancres textuelles R1 sont quasi aveugles : la
+  profondeur n'apporte aucun gain diagnostique à préserver. Sur ce couple substrat/tâche,
+  « argmin_N H » est dégénéré (N* = 1). À refaire sous ancres R2/R3, où la classification
+  porte un signal réel.</li>
+  <li><strong>La profondeur de sortie N̄* est elle-même un signal de décalage</strong> : elle croît
+  avec la sévérité (F-stop, brightness_down : 1,00 → 2,79 ; H-stop, speckle : 1,00 → 2,08) —
+  les images corrompues « retardent » leur cristallisation. Un compteur de couches, gratuit en
+  production, devient un moniteur de dérive.</li>
+</ul>
+<figure>
+  <img src="assets/figures/fig_exp04_arret_brightness_down.png" alt="Arrêt anticipé calibré — brightness_down">
+  <figcaption>brightness_down — exactitude (gauche) et profondeur moyenne de sortie N̄* (droite) par sévérité.
+  Run 20260901T183051Z_breastmnist_898385f7.</figcaption>
+</figure>
+<figure>
+  <img src="assets/figures/fig_exp04_arret_speckle.png" alt="Arrêt anticipé calibré — speckle_noise">
+  <figcaption>speckle_noise — même lecture. Run 20260901T182032Z_breastmnist_a8b68f84.</figcaption>
+</figure>
+
 <h2>Limites et prochaines étapes</h2>
 <ul>
   <li>Les ancres textuelles CLIP <code>openai</code> sont quasi aveugles sur BreastMNIST
