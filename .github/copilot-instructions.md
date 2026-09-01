@@ -13,7 +13,7 @@ thermodynamiques (énergie libre F vs entropie H) sur encodeurs vision-langage *
 | `tlsc-repo/outputs/<run_id>/` | Résultats mesurés (`metrics.json`, `scores.npz`, `analysis.json`, figures) | Jamais modifiés à la main ; `outputs/aggregate/` = synthèse régénérable |
 | `tlsc-repo/docs/` | Notes internes : `JOURNAL.md`, `rapport-exp01.md`, `STATUT.md`, `cadre-theorique.md` | Une entrée JOURNAL par lot de runs |
 | `papers/contribution/` | Papier LaTeX (contribution) | Compiler avec `latexmk -pdf main.tex` (MiKTeX) |
-| `docs/` (racine) | **Site public GitHub Pages** : `index.html`, `results.html`, `plateforme-explicative.html` (copie unique), `assets/figures/` | Déployé depuis `main` — voir checklist de cohérence |
+| `docs/` (racine) | **Site public GitHub Pages** : `index.html`, `results.html`, `research_works.html` (copie unique), `assets/figures/` | Déployé depuis `main` — voir checklist de cohérence |
 | `papers/review/` | Revue de littérature LaTeX | Indépendante du papier de contribution |
 | `archive/` | Documents de cadrage historiques (feuilles de route, plans, guides, notes) | Lecture seule ; jamais autoritatifs |
 | Racine | `README.md` + `02protocoleexperimentalv3.md` (protocole autoritatif, référencé par `tlsc-repo/docs/`) | Ne pas créer de nouveaux fichiers en racine ; les nouveaux docs vont dans `tlsc-repo/docs/`, `docs/` ou `archive/` |
@@ -70,7 +70,7 @@ emplacements concernés avant de committer :
    - `docs/results.html` : tableau des runs canoniques (AUROC, IC, p, run_id) et figures
      à jour avec `outputs/aggregate/summary.csv` ;
    - `docs/index.html` : cartes et liens cohérents avec les pages existantes ;
-   - `docs/plateforme-explicative.html` : **copie unique** (la copie racine a été retirée
+  - `docs/research_works.html` : **copie unique** (la copie racine a été retirée
      le 2026-09-01) ; support pédagogique — aucun chiffre ne doit y être présenté comme mesure.
 4. **Papier** (`papers/contribution/main.tex`) : si un chiffre cité change, mettre à jour le
    tableau + l'abstract, recompiler (`latexmk -pdf`), vérifier zéro référence indéfinie

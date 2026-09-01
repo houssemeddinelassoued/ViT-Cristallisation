@@ -80,3 +80,78 @@ d'invites sauf mention. Détail chiffré : `docs/rapport-exp01.md` §7 et
   bilatéral univarié F sur les photométriques breast où H est peu informatif.
 - Décision : conserver le bivarié comme variante rapportée, pas comme détecteur
   principal ; passer à la cohorte P1.
+
+## 2026-09-01 · exp02 — trajectoires par couche (profondeur N comme variable)
+
+Chantier d'alignement sur le croquis fondateur de l'encadrant (`argmin_N H`,
+`note-meeting.md`). Sonde « logit lens » : boucle explicite sur les 12 blocs du
+ViT visuel, ln_post + proj sur le CLS à chaque profondeur
+(`tlsc/models/layer_probe.py`, 4 tests sur ViT synthétique — la couche 12 égale
+`encode_image` à la précision machine). **Exploratoire déclaré** : pas de seuil
+pré-enregistré ; attente qualitative a priori « H_n décroît avec n sur la source ».
+
+| run_id | Corruption | Meilleure couche (F) | AUROC(F) meilleure / couche 12 |
+|---|---|---|---|
+| 20260901T165926Z_breastmnist_beee8e35 | speckle_noise | 3 (1,000 aux couches 3–7) | 1,000 / 0,814 |
+| 20260901T170336Z_breastmnist_19a29d7c | motion_blur | 11 | 0,982 / 0,885 |
+| 20260901T170957Z_breastmnist_1dfe8046 | brightness_down | 1 | 0,997 / 0,359 |
+
+- **Observé** : signal de décalage bien plus fort en profondeur intermédiaire
+  qu'en sortie ; l'inversion photométrique de la couche 12 disparaît aux
+  premières couches (brightness_down 0,997 en couche 1). Mais la meilleure
+  couche dépend de la corruption (3 / 11 / 1) — pas de N universel.
+- **Attente a priori réfutée** : H_n non monotone sur la source (min 0,323 en
+  couche 4, remontée à 0,517 en couche 12). Pas de « cristallisation en
+  profondeur » sur ce substrat. Consigné tel quel.
+- Avertissement logit lens dans chaque metrics.json (couches intermédiaires
+  jamais alignées à l'espace texte par l'entraînement).
+- Décision : chantier suivant = règle d'arrêt par échantillon calibrée sur la
+  source (H-stop vs F-stop vs N fixe), en simulation depuis les
+  `scores_layers.npz` — aucun nouveau calcul d'encodage requis.
+- Détail : `docs/rapport-exp02.md`.
+
+## 2026-09-01 · exp03 — régimes d'ancrage R1/R2/R3 (centroïdes du croquis fondateur)
+
+Chantier d'alignement 2 : ancres = centroïdes de classe calculés depuis les
+données source (`tlsc/models/data_anchors.py`, 5 tests) + D_inter. Anti-fuite :
+centroïdes sur le split train SOURCE à sévérité 0 uniquement. **Exploratoire
+déclaré.** Runs (git 00f9f37 propre) : fe6d6b35 (speckle_noise), bccf7433
+(brightness_down).
+
+| Régime | D_inter | Bal.acc (sév.0) | speckle F sév.5 | bright_down F sév.5 |
+|---|---|---|---|---|
+| R1 texte | 0,1032 | 0,517 | 0,814 | 0,359 |
+| R2 few-shot k=16 | 0,0208 | 0,597 | 0,977 | 0,845 |
+| R3 centroïdes | 0,0073 | 0,692 | 0,977 | 0,844 |
+
+- **Observé** : l'inversion photométrique de F était une propriété des ancres
+  *textuelles* — elle disparaît dès k = 16 (0,359 → 0,845). La faiblesse
+  zero-shot venait des ancres (bal.acc 0,517 → 0,692 sous R3). D_inter seule
+  est trompeuse : maximale pour les ancres les moins utiles (gap de modalité).
+  H se dégrade en détecteur sous R2/R3 (0,25–0,54) — la dominance de F
+  s'accentue.
+- Décision : R2 (32 étiquettes source) = meilleur compromis observé ; croiser
+  ensuite meilleure couche (exp02) × ancres R2 ; formaliser un critère de
+  qualité d'ancrage combinant D_inter et distance ancres–nuage.
+- Détail : `docs/rapport-exp03.md`.
+
+## 2026-09-01 · exp04 — arrêt anticipé calibré (« sortir quand H < ε »)
+
+Chantier d'alignement 3 : règle d'arrêt par échantillon du croquis fondateur
+(`tlsc/eval/early_exit.py`, 5 tests). Seuils ε (H et F) et couche fixe calibrés
+sur une moitié stratifiée du split test source (77 images) ; évaluation sur
+l'autre moitié (79), sévérités 0–5. **Exploratoire déclaré.** Runs
+(git 3ef3ebe propre) : a8b68f84 (speckle), a1a557b5 (motion_blur),
+898385f7 (brightness_down). Ancres R1.
+
+- **Observé (1)** : la règle calibrée sort en couche ≈ 1 avec exactitude
+  préservée (0,731 contre 0,705 pleine profondeur) — ~92 % de calcul économisé,
+  mais *trivialement* : sous ancres R1 quasi aveugles, la profondeur n'apporte
+  aucun gain diagnostique. Sur ce couple substrat/tâche, argmin_N H est
+  dégénéré (N* = 1). Consigné tel quel.
+- **Observé (2), exploitable** : la profondeur de sortie N̄* croît avec la
+  sévérité (F-stop brightness_down 1,00 → 2,79 ; H-stop speckle 1,00 → 2,08) —
+  l'arrêt anticipé est lui-même un moniteur de dérive, gratuit en production.
+- Décision : test non trivial de la règle = croisement ancres R2 (exp03) ×
+  arrêt calibré (exp04) ; quantifier N̄* en AUROC comme détecteur.
+- Détail : `docs/rapport-exp04.md`.

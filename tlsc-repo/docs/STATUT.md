@@ -15,8 +15,8 @@
   plans, guides et notes aux encadrants. Ils décrivent des versions antérieures
   du protocole ; en cas de divergence sur les cohortes, baselines ou
   identifiants d'ablation, la v3 prévaut.
-- `plateforme-explicative.html` n'existe plus qu'en **une seule copie**,
-  `../docs/plateforme-explicative.html` (site public) ; la copie racine a été
+- `research_works.html` n'existe plus qu'en **une seule copie**,
+  `../docs/research_works.html` (site public) ; la copie racine a été
   retirée (2026-09-01). C'est un support pédagogique, pas une source de mesures.
 - `thermodynamic_vit_infographic.html` a été retiré du projet (2026-09-01) : sa maquette
   décrivait une architecture différente (adaptation au moment du test, sortie anticipée)
@@ -26,14 +26,20 @@
 
 Le dépôt implémente le noyau Gibbs/CLIP, l'expérience P0 zero-shot
 (`experiments/exp01_zero_training.py`), l'analyse statistique appariée
-(`experiments/exp01_analysis.py` : DeLong + bootstrap stratifié) et
-l'agrégation multi-runs (`experiments/exp01_aggregate.py`), y compris le
-détecteur bilatéral `two_sided_shift_score` de `tlsc/eval/metrics.py`
-(médiane calibrée sur la source seule). Les cohortes P0 couvertes sont
-BreastMNIST-C (7 corruptions officielles) et PneumoniaMNIST-C (4 corruptions).
-TPT, C-TPT, l'adaptation visuelle, la sortie anticipée, les cohortes P1/P2 et
-la calibration conforme restent à implémenter et à valider avant toute
-revendication correspondante.
+(`experiments/exp01_analysis.py` : DeLong + bootstrap stratifié),
+l'agrégation multi-runs (`experiments/exp01_aggregate.py`), les détecteurs
+bilatéral et bivarié de `tlsc/eval/metrics.py`, la sonde par couche
+(`tlsc/models/layer_probe.py` + `experiments/exp02_layer_trajectories.py`,
+exploratoire déclarée — profondeur N comme variable), les régimes
+d'ancrage R1/R2/R3 (`tlsc/models/data_anchors.py` +
+`experiments/exp03_anchor_regimes.py`, centroïdes source et D_inter,
+exploratoire déclarée) et l'arrêt anticipé calibré (`tlsc/eval/early_exit.py`
++ `experiments/exp04_early_exit.py`, règle H < epsilon du croquis fondateur,
+split calibration/évaluation stratifié, exploratoire déclarée). Les cohortes P0
+couvertes sont BreastMNIST-C (7 corruptions officielles) et PneumoniaMNIST-C
+(4 corruptions). Le croisement ancres R2 × arrêt calibré, N* comme détecteur,
+TPT, C-TPT, l'adaptation visuelle, les cohortes P1/P2 et la calibration conforme
+restent à implémenter et à valider avant toute revendication correspondante.
 
 Le papier issu de l'expérience 1 se trouve dans `../../papers/contribution/` (main.tex + refs.bib) ;
 chaque valeur y est rattachée à un run de `outputs/`.
