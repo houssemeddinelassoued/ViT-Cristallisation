@@ -80,3 +80,32 @@ d'invites sauf mention. Détail chiffré : `docs/rapport-exp01.md` §7 et
   bilatéral univarié F sur les photométriques breast où H est peu informatif.
 - Décision : conserver le bivarié comme variante rapportée, pas comme détecteur
   principal ; passer à la cohorte P1.
+
+## 2026-09-01 · exp02 — trajectoires par couche (profondeur N comme variable)
+
+Chantier d'alignement sur le croquis fondateur de l'encadrant (`argmin_N H`,
+`note-meeting.md`). Sonde « logit lens » : boucle explicite sur les 12 blocs du
+ViT visuel, ln_post + proj sur le CLS à chaque profondeur
+(`tlsc/models/layer_probe.py`, 4 tests sur ViT synthétique — la couche 12 égale
+`encode_image` à la précision machine). **Exploratoire déclaré** : pas de seuil
+pré-enregistré ; attente qualitative a priori « H_n décroît avec n sur la source ».
+
+| run_id | Corruption | Meilleure couche (F) | AUROC(F) meilleure / couche 12 |
+|---|---|---|---|
+| 20260901T165926Z_breastmnist_beee8e35 | speckle_noise | 3 (1,000 aux couches 3–7) | 1,000 / 0,814 |
+| 20260901T170336Z_breastmnist_19a29d7c | motion_blur | 11 | 0,982 / 0,885 |
+| 20260901T170957Z_breastmnist_1dfe8046 | brightness_down | 1 | 0,997 / 0,359 |
+
+- **Observé** : signal de décalage bien plus fort en profondeur intermédiaire
+  qu'en sortie ; l'inversion photométrique de la couche 12 disparaît aux
+  premières couches (brightness_down 0,997 en couche 1). Mais la meilleure
+  couche dépend de la corruption (3 / 11 / 1) — pas de N universel.
+- **Attente a priori réfutée** : H_n non monotone sur la source (min 0,323 en
+  couche 4, remontée à 0,517 en couche 12). Pas de « cristallisation en
+  profondeur » sur ce substrat. Consigné tel quel.
+- Avertissement logit lens dans chaque metrics.json (couches intermédiaires
+  jamais alignées à l'espace texte par l'entraînement).
+- Décision : chantier suivant = règle d'arrêt par échantillon calibrée sur la
+  source (H-stop vs F-stop vs N fixe), en simulation depuis les
+  `scores_layers.npz` — aucun nouveau calcul d'encodage requis.
+- Détail : `docs/rapport-exp02.md`.
