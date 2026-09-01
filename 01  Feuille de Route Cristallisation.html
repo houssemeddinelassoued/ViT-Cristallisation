@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feuille de Route Cristallisation</title>
+<meta name="description" content="Audit critique et plan d’action">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&display=swap">
+<style>:root{color-scheme:light}html{-webkit-text-size-adjust:100%}
+body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif;background:#fafafa}
+img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+:root{
+  --ground:#F5F6F8; --surface:#FFFFFF; --surface-2:#EAEDF1;
+  --ink:#111721; --ink-2:#3D4757; --ink-3:#6B7788;
+  --line:#DBDFE6; --line-2:#C3CAD4;
+  --cold:#0E6E7C; --cold-soft:#E0EFF1;
+  --hot:#AF4720;  --hot-soft:#F8E7DF;
+  --warn:#8A6212; --warn-soft:#F5EBD6;
+  --good:#2A6B4F; --good-soft:#DFEEE6;
+  --shadow:0 1px 2px rgba(17,23,33,.05), 0 8px 24px -16px rgba(17,23,33,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C1116; --surface:#141A21; --surface-2:#1B222B;
+    --ink:#E7EBF1; --ink-2:#AFB9C6; --ink-3:#7B8798;
+    --line:#242C36; --line-2:#343E4B;
+    --cold:#54C3D1; --cold-soft:#0F272C;
+    --hot:#E4855A;  --hot-soft:#2A1710;
+    --warn:#DCB264; --warn-soft:#26200E;
+    --good:#71C49B; --good-soft:#10241A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C1116; --surface:#141A21; --surface-2:#1B222B;
+  --ink:#E7EBF1; --ink-2:#AFB9C6; --ink-3:#7B8798;
+  --line:#242C36; --line-2:#343E4B;
+  --cold:#54C3D1; --cold-soft:#0F272C;
+  --hot:#E4855A;  --hot-soft:#2A1710;
+  --warn:#DCB264; --warn-soft:#26200E;
+  --good:#71C49B; --good-soft:#10241A;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16px; line-height:1.62; margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1360px; margin:0 auto; padding:0 28px 120px;}
+.cols{display:grid; grid-template-columns:1fr; gap:0;}
+@media (min-width:1120px){
+  .cols{grid-template-columns:236px minmax(0,1fr); gap:56px; align-items:start;}
+}
+
+/* ── Rail ─────────────────────────────────────────── */
+.rail{display:none;}
+@media (min-width:1120px){
+  .rail{display:block; position:sticky; top:0; padding:56px 0 40px; max-height:100vh; overflow-y:auto;}
+}
+.rail-label{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+  padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--line);
+}
+.rail ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px;}
+.rail a{
+  display:grid; grid-template-columns:22px 1fr; gap:8px;
+  padding:5px 8px 5px 0; text-decoration:none; color:var(--ink-2);
+  font-size:13.5px; line-height:1.35; border-radius:3px;
+}
+.rail a:hover{color:var(--cold); background:var(--surface-2);}
+.rail a span{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-3); padding-top:2px;}
+
+/* ── Header ───────────────────────────────────────── */
+header{padding:60px 0 0; max-width:74ch;}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--cold); margin:0 0 20px;
+}
+h1{
+  font-family:"Source Serif 4",Georgia,serif; font-weight:700;
+  font-size:clamp(2.1rem,4.6vw,3.15rem); line-height:1.08; letter-spacing:-.018em;
+  margin:0 0 18px; text-wrap:balance;
+}
+.lede{font-size:1.115rem; line-height:1.6; color:var(--ink-2); margin:0 0 30px; max-width:62ch;}
+.meta{
+  display:flex; flex-wrap:wrap; gap:0 30px; row-gap:12px;
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ink-3);
+  padding:16px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.meta b{display:block; font-weight:500; color:var(--ink); font-size:12.5px; letter-spacing:0;}
+.meta i{font-style:normal; letter-spacing:.1em; text-transform:uppercase; font-size:10px;}
+
+/* ── Sections ─────────────────────────────────────── */
+.rule{height:2px; border:0; margin:64px 0 40px;
+  background:linear-gradient(90deg,var(--hot) 0%,var(--warn) 26%,var(--cold) 72%,transparent 100%);
+  opacity:.85;}
+section{max-width:74ch; scroll-margin-top:24px;}
+h2{
+  font-family:"Source Serif 4",Georgia,serif; font-weight:600;
+  font-size:clamp(1.5rem,2.6vw,1.92rem); line-height:1.2; letter-spacing:-.012em;
+  margin:0 0 8px; text-wrap:balance;
+}
+h2 em{font-family:"IBM Plex Mono",monospace; font-style:normal; font-size:.62em;
+  font-weight:500; color:var(--cold); letter-spacing:.06em; margin-right:12px;}
+.sub{color:var(--ink-3); font-size:14.5px; margin:0 0 30px; max-width:60ch;}
+h3{
+  font-family:"IBM Plex Sans",sans-serif; font-weight:600; font-size:1.02rem;
+  letter-spacing:-.005em; margin:38px 0 10px; color:var(--ink);
+}
+h3 code{font-size:.85em;}
+p{margin:0 0 16px; max-width:68ch;}
+ul,ol{margin:0 0 16px; padding-left:20px; max-width:68ch;}
+li{margin-bottom:7px;}
+li::marker{color:var(--ink-3);}
+strong{font-weight:600;}
+a{color:var(--cold);}
+code{font-family:"IBM Plex Mono",monospace; font-size:.855em;
+  background:var(--surface-2); padding:1px 5px; border-radius:3px; color:var(--ink);}
+
+/* ── Math ─────────────────────────────────────────── */
+.m{font-family:"Source Serif 4",Georgia,serif; font-style:italic; font-size:1.045em;}
+.m sub,.m sup{font-style:normal; font-size:.68em;}
+.eq{
+  background:var(--surface); border:1px solid var(--line); border-left:2px solid var(--cold);
+  border-radius:0 4px 4px 0; padding:18px 22px; margin:20px 0 22px; overflow-x:auto;
+}
+.eq .body{font-family:"Source Serif 4",Georgia,serif; font-size:1.12rem; line-height:1.9;
+  text-align:center; white-space:nowrap; min-width:0;}
+.eq .tex{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-3);
+  margin-top:14px; padding-top:11px; border-top:1px dashed var(--line);
+  white-space:pre-wrap; word-break:break-word; line-height:1.6;
+}
+.eq .cap{font-size:12.5px; color:var(--ink-3); margin-top:12px; text-align:center;}
+
+/* ── Findings ─────────────────────────────────────── */
+.finding{
+  background:var(--surface); border:1px solid var(--line); border-radius:5px;
+  padding:18px 20px 18px 22px; margin-bottom:14px; position:relative; box-shadow:var(--shadow);
+}
+.finding::before{content:""; position:absolute; left:0; top:-1px; bottom:-1px; width:3px;
+  border-radius:5px 0 0 5px; background:var(--line-2);}
+.finding.b::before{background:var(--hot);}
+.finding.j::before{background:var(--warn);}
+.finding.o::before{background:var(--cold);}
+.f-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; margin-bottom:9px;}
+.f-id{font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600; color:var(--ink-3);}
+.f-title{font-weight:600; font-size:15.5px; line-height:1.35; flex:1 1 240px;}
+.chip{
+  font-family:"IBM Plex Mono",monospace; font-size:9.5px; font-weight:600;
+  letter-spacing:.11em; text-transform:uppercase; padding:3px 7px; border-radius:3px; white-space:nowrap;
+}
+.chip.b{background:var(--hot-soft); color:var(--hot);}
+.chip.j{background:var(--warn-soft); color:var(--warn);}
+.chip.o{background:var(--cold-soft); color:var(--cold);}
+.chip.g{background:var(--good-soft); color:var(--good);}
+.finding p{font-size:14.5px; margin:0 0 10px; color:var(--ink-2);}
+.finding p:last-child{margin-bottom:0;}
+.fix{
+  font-size:13.5px; color:var(--ink-2); background:var(--surface-2);
+  border-radius:4px; padding:10px 13px; margin-top:11px;
+}
+.fix b{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--cold); display:block; margin-bottom:4px;}
+
+/* ── Tables ───────────────────────────────────────── */
+.tw{overflow-x:auto; margin:22px 0 26px; border:1px solid var(--line); border-radius:5px; background:var(--surface);}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:520px;}
+th{
+  font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
+  text-align:left; padding:11px 14px; border-bottom:1px solid var(--line-2); white-space:nowrap;
+}
+td{padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; color:var(--ink-2);}
+tbody tr:last-child td{border-bottom:0;}
+td:first-child{color:var(--ink); font-weight:500;}
+.num{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; white-space:nowrap;}
+
+/* ── Callout ──────────────────────────────────────── */
+.call{
+  border:1px solid var(--line); border-left:3px solid var(--hot);
+  background:var(--hot-soft); border-radius:0 5px 5px 0; padding:20px 22px; margin:26px 0;
+}
+.call.cold{border-left-color:var(--cold); background:var(--cold-soft);}
+.call .k{
+  font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--hot); margin-bottom:9px;
+}
+.call.cold .k{color:var(--cold);}
+.call p{font-size:14.5px; margin-bottom:11px;}
+.call p:last-child{margin-bottom:0;}
+
+/* ── Tree ─────────────────────────────────────────── */
+pre.tree{
+  font-family:"IBM Plex Mono",monospace; font-size:12.5px; line-height:1.72;
+  background:var(--surface); border:1px solid var(--line); border-radius:5px;
+  padding:20px 22px; overflow-x:auto; margin:22px 0; color:var(--ink-2);
+}
+pre.tree b{color:var(--ink); font-weight:600;}
+pre.tree i{color:var(--ink-3); font-style:normal;}
+pre.tree u{color:var(--cold); text-decoration:none; font-weight:500;}
+
+/* ── Milestones ───────────────────────────────────── */
+.gate{
+  display:grid; grid-template-columns:auto 1fr; gap:0 18px;
+  padding:20px 0; border-bottom:1px solid var(--line);
+}
+.gate:last-of-type{border-bottom:0;}
+.gate-id{
+  font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; color:var(--cold);
+  padding-top:2px; letter-spacing:.04em;
+}
+.gate h4{margin:0 0 6px; font-size:15.5px; font-weight:600; line-height:1.35;}
+.gate p{font-size:14px; margin:0 0 9px; color:var(--ink-2);}
+.gate .crit{
+  font-size:13px; color:var(--ink-2); border-left:2px solid var(--line-2);
+  padding:2px 0 2px 13px; margin-top:9px;
+}
+.gate .crit b{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--ink-3); margin-right:8px;}
+
+/* ── Next ─────────────────────────────────────────── */
+.next{
+  background:var(--surface); border:1px solid var(--line-2); border-radius:6px;
+  padding:28px 30px; margin-top:12px; box-shadow:var(--shadow);
+}
+.next ol{padding-left:0; list-style:none; margin:0; display:flex; flex-direction:column; gap:16px;}
+.next li{display:grid; grid-template-columns:26px 1fr; gap:12px; margin:0;}
+.next li em{
+  font-family:"IBM Plex Mono",monospace; font-style:normal; font-size:12px;
+  font-weight:600; color:var(--cold); padding-top:2px;
+}
+.next li b{display:block; font-weight:600; margin-bottom:3px;}
+.next li span{font-size:14px; color:var(--ink-2);}
+
+footer{
+  max-width:74ch; margin-top:56px; padding-top:22px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--ink-3);
+}
+</style>
+
+<div class="wrap">
+<div class="cols">
+
+<nav class="rail" aria-label="Sommaire">
+  <div class="rail-label">Sommaire</div>
+  <ol>
+    <li><a href="#audit"><span>01</span>Audit critique</a></li>
+    <li><a href="#theorie"><span>02</span>Reformulation théorique</a></li>
+    <li><a href="#code"><span>03</span>Architecture logicielle</a></li>
+    <li><a href="#protocole"><span>04</span>Protocole expérimental</a></li>
+    <li><a href="#physique"><span>05</span>Test de la transition</a></li>
+    <li><a href="#jalons"><span>06</span>Jalons go / no-go</a></li>
+    <li><a href="#redaction"><span>07</span>Stratégie de publication</a></li>
+    <li><a href="#risques"><span>08</span>Risques</a></li>
+    <li><a href="#suite"><span>09</span>Prochaine action</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header>
+  <p class="eyebrow">Plan d'action — révision scientifique</p>
+  <h1>Thermodynamic Latent&nbsp;Space Crystallization</h1>
+  <p class="lede">La thèse centrale est bonne et publiable. La formulation actuelle, elle, comporte trois défauts qui l'invalideraient en relecture&nbsp;: un terme d'énergie sans effet, une circularité entre adaptation et sortie anticipée, et un budget de calcul qui ne tient pas. Ce document les corrige et propose un protocole falsifiable calibré sur le matériel disponible.</p>
+  <div class="meta">
+    <div><i>Auteur</i><b>Houssem Eddine Lassoued</b></div>
+    <div><i>Encadrement</i><b>Dr. A. Ben Aicha · Pr. H. Fathallah</b></div>
+    <div><i>Matériel</i><b>RTX 4070 · i7 · 32 Go</b></div>
+    <div><i>Cadence</i><b>Jalons scientifiques, sans date imposée</b></div>
+  </div>
+</header>
+
+<hr class="rule">
+
+<!-- ═══════════════ 01 ═══════════════ -->
+<section id="audit">
+  <h2><em>01</em>Audit critique de l'état actuel</h2>
+  <p class="sub">Douze constats issus de la lecture croisée des trois documents du projet. Trois sont bloquants&nbsp;: tant qu'ils ne sont pas traités, tout code écrit produira des résultats ininterprétables.</p>
+
+  <div class="call">
+    <div class="k">Constat prioritaire</div>
+    <p>Le tableau «&nbsp;Synthèse des Performances&nbsp;» (§4.3) présente des chiffres — 87,3&nbsp;% d'accuracy OOD, −42,5&nbsp;% de FLOPs, 5,4 couches, 14,2&nbsp;ms — qu'<strong>aucune expérience n'a produits</strong>. Ce sont des objectifs, pas des mesures.</p>
+    <p>Il faut les requalifier dès maintenant dans les documents du projet en «&nbsp;<em>hypothèses de performance à vérifier</em>&nbsp;». Un tableau de résultats non mesurés qui migre par inadvertance vers un manuscrit soumis constitue une faute d'intégrité scientifique, et la rétractation est définitive pour une carrière qui commence. Ce n'est pas une précaution formelle&nbsp;: c'est le point le plus important de ce document.</p>
+    <p>Ces chiffres ne sont d'ailleurs pas atteignables tels quels — <strong>ils sont physiquement incohérents entre eux</strong>, ce que démontre le constat F04 ci-dessous. Les traiter comme une cible à atteindre conduirait à forcer les expériences vers un résultat impossible.</p>
+  </div>
+
+  <h3>Défauts de formulation</h3>
+
+  <div class="finding b">
+    <div class="f-head"><span class="f-id">F01</span><span class="f-title">Le terme de répulsion a un gradient nul&nbsp;: l'énergie se réduit exactement à TENT</span><span class="chip b">Bloquant</span></div>
+    <p>Les centroïdes <span class="m">μ<sub>0</sub></span>, <span class="m">μ<sub>1</sub></span> sont décrits comme «&nbsp;ancrés de manière immuable&nbsp;» en Phase&nbsp;1. Si ce sont des constantes, alors <span class="m">D<sub>inter</sub></span>&nbsp;=&nbsp;‖<span class="m">μ<sub>0</sub></span>&nbsp;−&nbsp;<span class="m">μ<sub>1</sub></span>‖² est une constante, donc ∇<sub><span class="m">θ</span></sub><span class="m">D<sub>inter</sub></span>&nbsp;=&nbsp;0.</p>
+    <p>La minimisation en ligne de <span class="m">ℰ</span>&nbsp;=&nbsp;<span class="m">ℋ<sub>intra</sub></span>&nbsp;−&nbsp;<span class="m">λD<sub>inter</sub></span> est donc <strong>rigoureusement identique</strong> à la minimisation de <span class="m">ℋ<sub>intra</sub></span> seule, c'est-à-dire à TENT (Wang et&nbsp;al., 2021). En l'état, la contribution «&nbsp;thermodynamique&nbsp;» est un habillage lexical de la baseline. Les documents écrivent d'ailleurs <span class="m">μ<sub>0</sub></span>(<span class="m">θ</span>) ailleurs, ce qui contredit l'ancrage immuable — la contradiction est interne.</p>
+    <div class="fix"><b>Correction</b>Prototypes souples ré-estimés sur le flux de test, dont le gradient est non nul, avec un terme d'ancrage qui pénalise la dérive. Détail en §02.2.</div>
+  </div>
+
+  <div class="finding b">
+    <div class="f-head"><span class="f-id">F02</span><span class="f-title">Circularité entre l'objectif d'adaptation et le critère de sortie</span><span class="chip b">Bloquant</span></div>
+    <p>La Phase&nbsp;2 optimise <span class="m">θ</span> pour minimiser <span class="m">ℋ</span>. La Phase&nbsp;3 sort dès que <span class="m">ℋ<sub>n</sub></span>&nbsp;&lt;&nbsp;<span class="m">ε</span>. On adapte donc le modèle pour qu'il franchisse le seuil qui déclenche l'économie de calcul.</p>
+    <p>Conséquence&nbsp;: l'économie de FLOPs est <strong>mécaniquement garantie, même quand le modèle se trompe</strong>. Une sortie précoce plus fréquente ne mesure alors pas une meilleure compréhension de l'image, mais une sur-confiance induite. C'est exactement le mode d'échec que SAR et EATA documentent pour la minimisation d'entropie. Un relecteur de TMI identifiera ce point en première lecture&nbsp;; c'est le risque n°1 du projet.</p>
+    <div class="fix"><b>Correction</b>Découpler les deux statistiques&nbsp;: adapter sur l'entropie, sortir sur l'énergie libre <span class="m">F<sub>n</sub></span>&nbsp;=&nbsp;−<span class="m">T</span>&nbsp;ln&nbsp;<span class="m">Z<sub>n</sub></span>, quantité indépendante de la normalisation softmax. Détail en §02.4.</div>
+  </div>
+
+  <div class="finding b">
+    <div class="f-head"><span class="f-id">F03</span><span class="f-title">Aucune tête de lecture par couche&nbsp;: <span class="m">ℋ<sub>n</sub></span> n'est pas calculable</span><span class="chip b">Bloquant</span></div>
+    <p>Pour évaluer l'entropie à la sortie du bloc <span class="m">n</span>, il faut projeter l'état caché de cette couche dans un espace où des centroïdes existent. Or les centroïdes sont ancrés dans l'espace de sortie de la couche&nbsp;12. Les représentations intermédiaires vivent dans une géométrie différente&nbsp;: comparer <span class="m">z<sub>n</sub></span> à <span class="m">μ<sub>k</sub></span><sup>(12)</sup> n'a pas de sens métrique.</p>
+    <p>Aucun des trois documents ne mentionne ce point, qui conditionne pourtant toute la Phase&nbsp;3.</p>
+    <div class="fix"><b>Correction</b>Douze têtes de projection <span class="m">g<sub>n</sub></span>&nbsp;: ℝ<sup>768</sup>&nbsp;→&nbsp;ℝ<sup>d</sup> et douze jeux de centroïdes <span class="m">μ<sub>k</sub></span><sup>(n)</sup>, entraînés hors ligne, backbone gelé. Coût marginal sur RTX 4070.</div>
+  </div>
+
+  <div class="finding j">
+    <div class="f-head"><span class="f-id">F04</span><span class="f-title">Le budget de calcul annoncé est physiquement impossible</span><span class="chip j">Majeur</span></div>
+    <p>Une passe arrière coûte environ deux fois une passe avant. Une itération TTA (avant&nbsp;+&nbsp;arrière) revient donc à ≈&nbsp;3 passes avant, même si seuls 0,75&nbsp;% des paramètres reçoivent une mise à jour&nbsp;: la rétropropagation doit traverser tout le réseau pour atteindre les LayerNorm des couches basses.</p>
+    <p>Vérification sur le tableau §4.3&nbsp;: ViT-B statique y est mesuré à 24,6&nbsp;ms. TENT, avec une seule itération, devrait donc coûter <strong>≈&nbsp;70&nbsp;ms</strong>, et non 28,1&nbsp;ms. Avec 3 itérations, la méthode proposée partirait de ≈&nbsp;220&nbsp;ms&nbsp;; même en sortant à la couche&nbsp;5, on n'atteint pas 14,2&nbsp;ms. L'écart est d'un facteur 10 environ.</p>
+    <p>Autrement dit&nbsp;: <strong>TTA et efficience sont antagonistes</strong>. Une méthode qui adapte à chaque image ne peut pas être plus rapide qu'une inférence statique. C'est le point qui fragilise le plus la promesse du projet, et il faut le regarder en face avant d'écrire une ligne de code.</p>
+    <div class="fix"><b>Correction</b>Adaptation <em>sélective et gatée</em>&nbsp;: la TTA n'est déclenchée que sur les cas détectés hors-domaine par l'énergie libre, elle est tronquée à la profondeur de sortie candidate, et amortie sur un tampon glissant. Le coût n'est alors payé que sur la minorité de cas difficiles. Détail en §02.5.</div>
+  </div>
+
+  <div class="finding j">
+    <div class="f-head"><span class="f-id">F05</span><span class="f-title">Deux définitions incompatibles de <span class="m">ℋ<sub>intra</sub></span> coexistent</span><span class="chip j">Majeur</span></div>
+    <p>Les instructions projet définissent <span class="m">ℋ<sub>intra</sub></span>&nbsp;=&nbsp;−Σ<sub><span class="m">k</span></sub>&nbsp;<span class="m">p<sub>k</sub></span>&nbsp;log&nbsp;<span class="m">p<sub>k</sub></span> sur les postérieurs de classe (objectif TENT), tandis que la description complète parle d'une «&nbsp;entropie de Shannon sur la distribution des distances euclidiennes aux centroïdes&nbsp;». Ce sont deux objets mathématiques distincts. Par ailleurs le qualificatif «&nbsp;intra-classe&nbsp;» est impropre&nbsp;: sans étiquettes, aucune classe n'est connue au moment du test.</p>
+    <div class="fix"><b>Correction</b>Une définition unique, via une mesure de Gibbs sur les distances aux centroïdes — qui réconcilie les deux lectures et donne à la métaphore physique un contenu formel. §02.1.</div>
+  </div>
+
+  <div class="finding j">
+    <div class="f-head"><span class="f-id">F06</span><span class="f-title">Le seuil <span class="m">ε</span>&nbsp;=&nbsp;0,45&nbsp;nats est un hyperparamètre affiché, pas un résultat</span><span class="chip j">Majeur</span></div>
+    <p>Trois problèmes se cumulent. <strong>(a)</strong> Il n'est pas normalisé&nbsp;: le maximum d'entropie vaut ln&nbsp;2&nbsp;=&nbsp;0,693 pour <span class="m">K</span>&nbsp;=&nbsp;2 mais ln&nbsp;14&nbsp;=&nbsp;2,64 pour ChestX-ray14 — le même seuil signifie des choses opposées selon la cohorte. <strong>(b)</strong> Il est constant sur les 12 couches, alors que l'entropie décroît structurellement avec la profondeur&nbsp;: un seuil fixe crée un biais de profondeur systématique. <strong>(c)</strong> Pour <span class="m">K</span>&nbsp;=&nbsp;2, <span class="m">ε</span>&nbsp;=&nbsp;0,45 correspond à <span class="m">p<sub>max</sub></span>&nbsp;≈&nbsp;0,87 — une barre de confiance faible pour une décision diagnostique.</p>
+    <div class="fix"><b>Correction</b>Seuils par couche <span class="m">ε<sub>n</sub></span> calibrés par contrôle conforme du risque sur un jeu de calibration, avec garantie explicite du type «&nbsp;dégradation ≤&nbsp;<span class="m">α</span> avec probabilité 1&nbsp;−&nbsp;<span class="m">δ</span>&nbsp;». <span class="m">ε</span> devient une sortie de la méthode, pas une entrée.</div>
+  </div>
+
+  <div class="finding j">
+    <div class="f-head"><span class="f-id">F07</span><span class="f-title">Cristallisation et effondrement sont géométriquement indiscernables</span><span class="chip j">Majeur</span></div>
+    <p>La minimisation d'entropie non régularisée converge vers une solution dégénérée où tous les échantillons sont assignés à une seule classe — c'est le <em>collapse</em> documenté par EATA et SAR, et l'objet d'une littérature 2025-2026 active sur l'effondrement neuronal en TTA (NCTTA, CVPR&nbsp;2026).</p>
+    <p>Or un espace latent effondré présente exactement la signature que le projet appelle «&nbsp;cristallisation&nbsp;»&nbsp;: entropie basse, vecteurs condensés. <strong>Sans le terme répulsif actif, la métrique de succès du projet est aussi sa métrique d'échec.</strong> L'analogie physique est d'ailleurs éclairante ici&nbsp;: un cristal exige la condensation <em>et</em> le maintien de sites distincts dans le réseau. Une condensation vers un site unique n'est pas un cristal.</p>
+    <div class="fix"><b>Correction</b>C'est précisément ce que le terme <span class="m">λD</span> rétabli (F01) accomplit. Sa justification théorique devient l'argument central du papier face à TENT. Diagnostic obligatoire&nbsp;: entropie de la distribution marginale des prédictions, à reporter systématiquement.</div>
+  </div>
+
+  <h3>Ajustements de protocole</h3>
+
+  <div class="finding o">
+    <div class="f-head"><span class="f-id">F08</span><span class="f-title">Camelyon16 est hors budget&nbsp;; Camelyon17-WILDS est le bon substitut</span><span class="chip o">Modéré</span></div>
+    <p>Camelyon16 est un jeu de lames entières gigapixel dont le prétraitement seul mobiliserait des semaines sur une RTX&nbsp;4070. Camelyon17-WILDS fournit 455&nbsp;000 patchs 96×96 issus de <strong>5 hôpitaux distincts</strong>, avec une partition OOD officielle et des baselines publiées — c'est-à-dire un décalage de distribution <em>réel</em> plutôt que simulé, ce que les relecteurs de TMI exigent.</p>
+  </div>
+
+  <div class="finding o">
+    <div class="f-head"><span class="f-id">F09</span><span class="f-title">Les baselines datent de 2021-2022</span><span class="chip o">Modéré</span></div>
+    <p>TENT (ICLR&nbsp;2021) et AdaViT ne suffisent plus pour une soumission en 2026. Il faut y ajouter EATA, SAR, DeYO et CoTTA côté TTA, ainsi qu'une baseline de sortie anticipée à seuil de confiance <em>calibré</em>. Et surtout la composition <strong>TENT&nbsp;+&nbsp;sortie calibrée</strong>, qui est le contrôle décisif&nbsp;: si la méthode proposée ne la bat pas, il n'y a pas de contribution.</p>
+  </div>
+
+  <div class="finding o">
+    <div class="f-head"><span class="f-id">F10</span><span class="f-title">Simulations de bruit seules&nbsp;: preuve insuffisante</span><span class="chip o">Modéré</span></div>
+    <p>Un bruit gaussien ajouté ne reproduit pas un changement de constructeur de scanner. Les corruptions synthétiques (via MedMNIST-C, qui modélise des corruptions réalistes par modalité) sont utiles pour l'itération rapide et pour balayer une sévérité continue — indispensable au test de transition de phase — mais elles ne peuvent pas porter la démonstration principale. Le décalage réel inter-hôpitaux doit être l'expérience de tête.</p>
+  </div>
+
+  <div class="finding o">
+    <div class="f-head"><span class="f-id">F11</span><span class="f-title">Dimension latente&nbsp;: ViT-B/16 a une largeur de 768</span><span class="chip o">Modéré</span></div>
+    <p>L'espace ℝ<sup>512</sup> mentionné partout n'est pas l'espace natif du backbone. C'est la sortie d'une tête de projection qu'il faut expliciter&nbsp;; <span class="m">d</span> devient un hyperparamètre (128 / 256 / 512) à ablater, la dimension jouant le rôle de «&nbsp;taille du système&nbsp;» dans l'analyse de transition de phase (§05).</p>
+  </div>
+
+  <div class="finding o">
+    <div class="f-head"><span class="f-id">F12</span><span class="f-title">RGPD&nbsp;/&nbsp;HIPAA&nbsp;: l'argument de §5.2 est incomplet</span><span class="chip o">Modéré</span></div>
+    <p>Affirmer qu'aucune donnée n'est conservée est exact pour les poids, mais la TTA amortie sur un tampon glissant conserve <em>de fait</em> des représentations de patients antérieurs en mémoire vive pendant la durée du tampon. C'est défendable, mais cela doit être décrit précisément — durée de rétention, portée, réinitialisation — plutôt qu'écarté. Un relecteur clinique le relèvera.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ═══════════════ 02 ═══════════════ -->
+<section id="theorie">
+  <h2><em>02</em>Reformulation théorique</h2>
+  <p class="sub">Cinq corrections qui transforment la métaphore physique en formalisme opérant. L'intérêt n'est pas cosmétique&nbsp;: chacune résout un défaut de l'audit et produit au passage un argument de nouveauté face à TENT.</p>
+
+  <h3>2.1 · Mesure de Gibbs sur les distances aux centroïdes</h3>
+  <p>Soit <span class="m">z<sub>n</sub></span>&nbsp;=&nbsp;<span class="m">g<sub>n</sub></span>(<span class="m">h<sub>n</sub></span><sup>[CLS]</sup>)&nbsp;∈&nbsp;ℝ<sup><span class="m">d</span></sup> la projection de l'état caché de la couche <span class="m">n</span>. On définit le postérieur non pas par un softmax de logits, mais par une distribution de Boltzmann d'énergie <span class="m">E<sub>k</sub></span>(<span class="m">z</span>)&nbsp;=&nbsp;‖<span class="m">z</span>&nbsp;−&nbsp;<span class="m">μ<sub>k</sub></span>‖²&nbsp;:</p>
+
+  <div class="eq">
+    <div class="body"><span class="m">p<sub>k</sub></span><sup>(<span class="m">n</span>)</sup>(<span class="m">z</span>)&nbsp;=&nbsp;<span class="m">e</span><sup>−‖<span class="m">z</span>−<span class="m">μ<sub>k</sub></span><sup>(<span class="m">n</span>)</sup>‖²/<span class="m">T</span></sup>&nbsp;/&nbsp;<span class="m">Z<sub>n</sub></span>(<span class="m">z</span>)&nbsp;,&nbsp;&nbsp;&nbsp;<span class="m">Z<sub>n</sub></span>(<span class="m">z</span>)&nbsp;=&nbsp;Σ<sub><span class="m">j</span></sub>&nbsp;<span class="m">e</span><sup>−‖<span class="m">z</span>−<span class="m">μ<sub>j</sub></span><sup>(<span class="m">n</span>)</sup>‖²/<span class="m">T</span></sup></div>
+    <div class="tex">p_k^{(n)}(z) = \frac{\exp\!\left(-\lVert z - \mu_k^{(n)}\rVert^2 / T\right)}{Z_n(z)}, \qquad Z_n(z) = \sum_{j=1}^{K} \exp\!\left(-\lVert z - \mu_j^{(n)}\rVert^2 / T\right)</div>
+  </div>
+
+  <p>Trois quantités en découlent, désormais <em>distinctes</em> et toutes interprétables physiquement&nbsp;:</p>
+  <ul>
+    <li>l'<strong>entropie de Gibbs</strong> <span class="m">ℋ<sub>n</sub></span>&nbsp;=&nbsp;−Σ<sub><span class="m">k</span></sub>&nbsp;<span class="m">p<sub>k</sub></span>&nbsp;ln&nbsp;<span class="m">p<sub>k</sub></span> — le désordre de l'assignation&nbsp;;</li>
+    <li>l'<strong>énergie libre</strong> <span class="m">F<sub>n</sub></span>&nbsp;=&nbsp;−<span class="m">T</span>&nbsp;ln&nbsp;<span class="m">Z<sub>n</sub></span> — qui est exactement le <em>energy score</em> de Liu et&nbsp;al. (2020), détecteur OOD reconnu&nbsp;;</li>
+    <li>l'<strong>énergie moyenne</strong> ⟨<span class="m">E</span>⟩&nbsp;=&nbsp;Σ<sub><span class="m">k</span></sub>&nbsp;<span class="m">p<sub>k</sub></span>&nbsp;‖<span class="m">z</span>&nbsp;−&nbsp;<span class="m">μ<sub>k</sub></span>‖², reliée aux deux autres par l'identité thermodynamique <span class="m">F</span>&nbsp;=&nbsp;⟨<span class="m">E</span>⟩&nbsp;−&nbsp;<span class="m">T</span><span class="m">ℋ</span>.</li>
+  </ul>
+  <p>La température <span class="m">T</span> cesse d'être une image&nbsp;: c'est un paramètre réel, calibrable, qui contrôle la netteté de l'assignation. Cette seule reformulation règle F05 et fournit à F02 la statistique indépendante dont il a besoin.</p>
+
+  <h3>2.2 · Une énergie en ligne dont le gradient n'est pas nul</h3>
+  <p>Sur un tampon de test <span class="m">B</span>, on estime des prototypes souples différentiables&nbsp;:</p>
+  <div class="eq">
+    <div class="body"><span class="m">μ̂<sub>k</sub></span>(<span class="m">θ</span>)&nbsp;=&nbsp;Σ<sub><span class="m">i</span>∈<span class="m">B</span></sub>&nbsp;<span class="m">p<sub>k</sub></span>(<span class="m">z<sub>i</sub></span>)&nbsp;<span class="m">z<sub>i</sub></span>&nbsp;/&nbsp;Σ<sub><span class="m">i</span>∈<span class="m">B</span></sub>&nbsp;<span class="m">p<sub>k</sub></span>(<span class="m">z<sub>i</sub></span>)</div>
+    <div class="tex">\hat{\mu}_k(\theta) = \frac{\sum_{i \in B} p_k(z_i)\, z_i}{\sum_{i \in B} p_k(z_i)}</div>
+  </div>
+  <p>d'où l'objectif d'adaptation, à minimiser sur <span class="m">θ<sub>adapt</sub></span> uniquement&nbsp;:</p>
+  <div class="eq">
+    <div class="body"><span class="m">ℰ</span><sub>online</sub>(<span class="m">θ</span>)&nbsp;=&nbsp;(1/|<span class="m">B</span>|)&nbsp;Σ<sub><span class="m">i</span></sub>&nbsp;<span class="m">ℋ</span>(<span class="m">p</span>(<span class="m">z<sub>i</sub></span>))&nbsp;−&nbsp;<span class="m">λ</span>&nbsp;‖<span class="m">μ̂<sub>0</sub></span>&nbsp;−&nbsp;<span class="m">μ̂<sub>1</sub></span>‖²&nbsp;+&nbsp;<span class="m">β</span>&nbsp;Σ<sub><span class="m">k</span></sub>&nbsp;‖<span class="m">μ̂<sub>k</sub></span>&nbsp;−&nbsp;<span class="m">μ<sub>k</sub></span>‖²</div>
+    <div class="tex">\mathcal{E}_{\text{online}}(\theta) = \frac{1}{|B|}\sum_{i \in B} \mathcal{H}\big(p(z_i)\big) \;-\; \lambda \big\lVert \hat{\mu}_0 - \hat{\mu}_1 \big\rVert^2 \;+\; \beta \sum_{k} \big\lVert \hat{\mu}_k - \mu_k \big\rVert^2</div>
+    <div class="cap">Condensation · Répulsion anti-effondrement · Ancrage anti-dérive</div>
+  </div>
+  <p>Le terme <span class="m">λ</span> retrouve un gradient (F01) et acquiert une <em>fonction</em> précise&nbsp;: empêcher la fusion des sites du réseau, c'est-à-dire l'effondrement de F07. Le terme <span class="m">β</span> empêche la dérive des prototypes loin des ancres apprises hors ligne. C'est là, et non dans le vocabulaire physique, que réside la nouveauté défendable face à TENT — et l'énoncé se démontre&nbsp;: on peut établir que le minimiseur de <span class="m">ℋ</span> seule est dégénéré, et que <span class="m">λ</span>&nbsp;&gt;&nbsp;0 exclut ce minimiseur. Cette proposition mérite d'être la Proposition&nbsp;1 du papier.</p>
+
+  <h3>2.3 · Têtes de lecture et centroïdes par couche</h3>
+  <p>Hors ligne (Phase&nbsp;1), backbone gelé&nbsp;: pour chaque <span class="m">n</span>&nbsp;∈&nbsp;{1…12}, une tête légère <span class="m">g<sub>n</sub></span> (LayerNorm + Linear 768&nbsp;→&nbsp;<span class="m">d</span>) est entraînée par perte contrastive supervisée, puis <span class="m">μ<sub>k</sub></span><sup>(<span class="m">n</span>)</sup> est fixé comme moyenne de classe des embeddings de la cohorte source. Coût&nbsp;: quelques millions de paramètres au total, entraînables en heures sur RTX&nbsp;4070. Résout F03 et rend la trajectoire <span class="m">ℋ<sub>n</sub></span>(<span class="m">n</span>) mesurable — c'est-à-dire la figure centrale du papier.</p>
+
+  <h3>2.4 · Découplage adaptation / sortie</h3>
+  <p>On adapte sur <span class="m">ℰ</span><sub>online</sub>. On sort sur une statistique <em>différente</em>&nbsp;: l'énergie libre <span class="m">F<sub>n</sub></span>, éventuellement combinée à l'accord entre la prédiction de la couche <span class="m">n</span> et une moyenne mobile des couches profondes. Les seuils <span class="m">ε<sub>n</sub></span> ne sont pas choisis mais <strong>calibrés par contrôle conforme du risque</strong> sur un jeu de calibration&nbsp;: on garantit que la perte d'accuracy due à la sortie anticipée reste inférieure à <span class="m">α</span> avec probabilité 1&nbsp;−&nbsp;<span class="m">δ</span>.</p>
+  <div class="call cold">
+    <div class="k">Pourquoi c'est l'argument clinique décisif</div>
+    <p>Un radiologue n'achète pas «&nbsp;42&nbsp;% de FLOPs en moins&nbsp;». Il achète «&nbsp;42&nbsp;% de FLOPs en moins <em>avec une garantie statistique que la dégradation diagnostique reste sous 1&nbsp;%</em>&nbsp;». Le passage d'un seuil heuristique à une garantie conforme est ce qui fait basculer le travail d'un papier d'efficience vers un papier d'IA médicale déployable — et c'est exactement le registre attendu par TMI.</p>
+  </div>
+
+  <h3>2.5 · Adaptation sélective et gatée</h3>
+  <p>Réponse directe à F04. Trois mécanismes cumulés&nbsp;:</p>
+  <ul>
+    <li><strong>Déclenchement conditionnel</strong> — la TTA n'est lancée que si <span class="m">F<sub>n</sub></span> dépasse un seuil de détection OOD. Une image nette et typique traverse le réseau, cristallise tôt, et n'est jamais adaptée&nbsp;: coût inférieur au statique.</li>
+    <li><strong>Troncature</strong> — la rétropropagation ne remonte que jusqu'à la couche de sortie candidate, pas jusqu'à la couche&nbsp;1.</li>
+    <li><strong>Amortissement</strong> — les <span class="m">θ<sub>adapt</sub></span> sont partagés sur un tampon glissant du même domaine, avec réinitialisation au changement de domaine détecté.</li>
+  </ul>
+  <p>Le budget devient alors cohérent, et l'histoire scientifique aussi&nbsp;: <em>on ne dépense du calcul que là où le désordre le justifie</em>. C'est une thèse plus forte, et surtout vraie, que «&nbsp;la TTA rend l'inférence plus rapide&nbsp;».</p>
+</section>
+
+<hr class="rule">
+
+<!-- ═══════════════ 03 ═══════════════ -->
+<section id="code">
+  <h2><em>03</em>Architecture logicielle</h2>
+  <p class="sub">Un dépôt dont chaque module correspond à un objet du formalisme — de sorte qu'une erreur de théorie devienne un test unitaire qui échoue.</p>
+
+<pre class="tree"><b>tlsc/</b>
+├── <b>configs/</b>            <i>hydra — datasets, backbones, méthodes, ablations</i>
+├── <b>data/</b>
+│   ├── medmnistc.py     <i>itération rapide, sévérité continue</i>
+│   ├── camelyon17.py    <i>WILDS, split OOD officiel par hôpital</i>
+│   ├── chest.py         <i>RSNA → NIH ChestX-ray14, lecture DICOM</i>
+│   └── shift.py         <i>corruptions paramétrées par sévérité s</i>
+├── <b>models/</b>
+│   ├── backbone.py      <i>ViT-S/16, ViT-B/16 — hooks par bloc</i>
+│   ├── heads.py         <u>g_n : 768 → d, une par couche</u>
+│   └── prompts.py       <i>visual prompts p_3, θ_adapt</i>
+├── <b>core/</b>
+│   ├── gibbs.py         <u>p_k, H, Z, F, ⟨E⟩ — le cœur formel</u>
+│   ├── energy.py        <u>ℰ_online : H − λD + β·ancrage</u>
+│   └── centroids.py     <i>ancrage hors ligne, prototypes souples</i>
+├── <b>adapt/</b>
+│   ├── baselines.py     <i>TENT · EATA · SAR · CoTTA · MEMO · DeYO</i>
+│   ├── tlsc.py          <u>notre méthode — sélective, tronquée, amortie</u>
+│   └── state.py         <u>snapshot / restore de θ_adapt (anti-dérive)</u>
+├── <b>exit/</b>
+│   ├── criteria.py      <i>H · F · accord-EMA · marge</i>
+│   ├── conformal.py     <u>calibration des ε_n, garantie (α, δ)</u>
+│   └── controller.py    <i>boucle d'inférence dynamique</i>
+├── <b>eval/</b>
+│   ├── metrics.py       <i>AUROC, F1, bal-acc, ECE, risk–coverage</i>
+│   ├── budget.py        <u>FLOPs incluant les passes ARRIÈRE</u>
+│   └── latency.py       <i>p50 / p95 mesurés, CUDA sync correct</i>
+├── <b>physics/</b>
+│   ├── order.py         <i>paramètre d'ordre χ, susceptibilité</i>
+│   └── transition.py    <i>balayage de s, analyse d'échelle en d</i>
+├── <b>experiments/</b>       <i>un script = une figure ou un tableau</i>
+├── <b>tests/</b>              <i>voir garde-fous ci-dessous</i>
+└── <b>paper/</b>              <i>main.tex · references.bib · figures/</i>
+</pre>
+
+  <h3>Quatre tests non négociables</h3>
+  <p>Ils encodent les invariants que l'audit a montrés fragiles. Écrits <em>avant</em> les expériences, ils empêchent les résultats non interprétables.</p>
+  <ol>
+    <li><strong>Gel effectif du backbone.</strong> Après une passe TTA complète, assertion que 99,25&nbsp;% des paramètres sont bit-à-bit identiques et que leur gradient est <code>None</code>. Sans ce test, la revendication centrale du papier n'est pas vérifiée.</li>
+    <li><strong>Cohérence de la sortie anticipée.</strong> Les logits produits par une sortie à la couche <span class="m">n</span> doivent être strictement égaux à ceux d'une passe complète tronquée à <span class="m">n</span> — garantit que le mécanisme de sortie n'introduit pas de divergence numérique.</li>
+    <li><strong>Propriétés de l'entropie.</strong> Distribution uniforme ⇒ <span class="m">ℋ</span>&nbsp;=&nbsp;ln&nbsp;<span class="m">K</span>&nbsp;; distribution dégénérée ⇒ <span class="m">ℋ</span>&nbsp;=&nbsp;0&nbsp;; identité <span class="m">F</span>&nbsp;=&nbsp;⟨<span class="m">E</span>⟩&nbsp;−&nbsp;<span class="m">T</span><span class="m">ℋ</span> vérifiée à la précision machine.</li>
+    <li><strong>Absence de dérive inter-échantillons.</strong> Deux inférences successives sur la même image doivent produire des logits identiques après restauration de <span class="m">θ<sub>adapt</sub></span>. C'est le test qui protège de la fuite d'information entre patients — et un argument direct pour la section conformité.</li>
+  </ol>
+
+  <h3>Contraintes matérielles (RTX 4070, 12 Go)</h3>
+  <ul>
+    <li>Précision mixte <code>bf16</code> systématique&nbsp;; <code>torch.compile</code> sur le backbone une fois le code stabilisé.</li>
+    <li><strong>ViT-S/16 comme modèle principal</strong> pour toutes les explorations et ablations (itération rapide, lots de 64 à 224²), <strong>ViT-B/16 en confirmation</strong> sur la configuration finale seulement. Initialisation depuis des poids ImageNet-21k ou DINOv2 — pas d'entraînement <em>from scratch</em>, hors budget.</li>
+    <li><code>torch.func.functional_call</code> pour une TTA sans état, plus propre que la copie profonde répétée du module.</li>
+    <li>Sous-échantillonnage stratifié de Camelyon17 pour l'exploration&nbsp;; passage au jeu complet uniquement pour les résultats finaux.</li>
+  </ul>
+</section>
+
+<hr class="rule">
+
+<!-- ═══════════════ 04 ═══════════════ -->
+<section id="protocole">
+  <h2><em>04</em>Protocole expérimental</h2>
+  <p class="sub">Trois paliers de cohortes, une matrice d'ablation dont une ligne décide du sort du projet, et un traitement statistique qui résiste à la relecture.</p>
+
+  <h3>Cohortes</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Palier</th><th>Cohorte</th><th>Nature du décalage</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td>P0</td><td>MedMNIST-C</td><td>Corruptions réalistes par modalité, sévérité 1–5</td><td>Validation de la mécanique · balayage continu pour §05</td></tr>
+      <tr><td>P1</td><td>Camelyon17-WILDS</td><td>5 hôpitaux réels, variabilité de coloration</td><td><strong>Expérience de tête</strong> — décalage réel, baselines publiées</td></tr>
+      <tr><td>P2</td><td>RSNA → ChestX-ray14</td><td>Inter-institution, acquisition DICOM</td><td>Généralisation à une seconde modalité</td></tr>
+      <tr><td>P3</td><td>ISIC 2019 → 2020</td><td>Inter-appareil dermoscopique</td><td>Optionnel — seulement si P1 et P2 sont concluants</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Camelyon16 est écarté (F08). Le principe est simple&nbsp;: les corruptions synthétiques servent à <em>comprendre</em>, le décalage réel sert à <em>démontrer</em>.</p>
+
+  <h3>Matrice d'ablation</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Réf.</th><th>Configuration</th><th>Ce que la ligne établit</th></tr></thead>
+    <tbody>
+      <tr><td class="num">A0</td><td>Source-only, statique</td><td>Plancher de référence</td></tr>
+      <tr><td class="num">A1</td><td>Recalibration des statistiques LayerNorm</td><td>Baseline étonnamment forte, souvent omise</td></tr>
+      <tr><td class="num">A2</td><td>TENT</td><td>Référence historique du TTA</td></tr>
+      <tr><td class="num">A3</td><td>EATA · SAR · DeYO</td><td>SoTA TTA 2022–2024</td></tr>
+      <tr><td class="num">A4</td><td>Sortie anticipée calibrée seule</td><td>Efficience sans adaptation</td></tr>
+      <tr><td class="num">A5</td><td><strong>TENT + sortie calibrée</strong></td><td><strong>Contrôle décisif</strong> — la composition naïve des deux briques</td></tr>
+      <tr><td class="num">A6</td><td>Nôtre, <span class="m">λ</span>&nbsp;=&nbsp;0</td><td>Isole l'apport du terme répulsif (F07)</td></tr>
+      <tr><td class="num">A7</td><td>Nôtre, sortie sur <span class="m">ℋ</span> au lieu de <span class="m">F</span></td><td>Quantifie l'effet de circularité (F02)</td></tr>
+      <tr><td class="num">A8</td><td>Nôtre, complet</td><td>Méthode proposée</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p><strong>A5 est la ligne qui décide du projet.</strong> Si A8 n'excède pas A5 de façon statistiquement significative sur P1, la contribution se réduit à une reformulation vocabulaire de deux méthodes existantes, et il faut pivoter plutôt que persévérer. Cette ligne doit être exécutée <em>tôt</em>, pas en fin de parcours — c'est le jalon J2.</p>
+
+  <h3>Métriques</h3>
+  <ul>
+    <li><strong>Diagnostic</strong> — AUROC (primaire, robuste au déséquilibre), accuracy équilibrée, F1, sensibilité à spécificité fixée à 0,95, un régime cliniquement pertinent.</li>
+    <li><strong>Calibration</strong> — ECE, score de Brier, diagrammes de fiabilité. Non optionnel&nbsp;: c'est ce qui distingue la cristallisation de la sur-confiance (F02).</li>
+    <li><strong>Coût</strong> — FLOPs <em>incluant les passes arrière</em>, latence p50/p95 mesurée avec synchronisation CUDA correcte, profondeur moyenne de sortie <span class="m">N*</span>, énergie en joules si un relevé est possible.</li>
+    <li><strong>Sécurité</strong> — courbe risque–couverture et AURC sur les cas «&nbsp;non cristallisés&nbsp;» renvoyés à l'expert. C'est la métrique qu'un lecteur clinicien regardera en premier.</li>
+    <li><strong>Diagnostic d'effondrement</strong> — entropie de la distribution marginale des prédictions, à chaque couche. Une chute signale un effondrement, pas une cristallisation.</li>
+  </ul>
+
+  <h3>Traitement statistique</h3>
+  <p>5 graines aléatoires minimum, moyenne ± écart-type systématiques, intervalles de confiance par bootstrap apparié, test de DeLong pour les différences d'AUROC, correction de Holm-Bonferroni pour les comparaisons multiples. Aucune sélection d'hyperparamètre sur le jeu de test cible — la calibration de <span class="m">ε<sub>n</sub></span>, <span class="m">T</span>, <span class="m">λ</span>, <span class="m">β</span> se fait sur un split de validation issu du domaine source ou d'un domaine tenu à l'écart. Ce point est le plus fréquemment violé dans la littérature TTA&nbsp;; le respecter est en soi un argument de qualité.</p>
+</section>
+
+<hr class="rule">
+
+<!-- ═══════════════ 05 ═══════════════ -->
+<section id="physique">
+  <h2><em>05</em>Le test falsifiable de la transition de phase</h2>
+  <p class="sub">La question que posera tout relecteur de Nature MI ou de TMI&nbsp;: la physique fait-elle un travail formel, ou décore-t-elle un résultat d'ingénierie&nbsp;? Il faut y répondre par une expérience, pas par une analogie.</p>
+
+  <p>Définissons un paramètre d'ordre normalisé — la <em>cristallinité</em> — et un paramètre de contrôle&nbsp;:</p>
+  <div class="eq">
+    <div class="body"><span class="m">χ<sub>n</sub></span>(<span class="m">s</span>)&nbsp;=&nbsp;1&nbsp;−&nbsp;<span class="m">ℋ<sub>n</sub></span>(<span class="m">s</span>)&nbsp;/&nbsp;ln&nbsp;<span class="m">K</span>&nbsp;∈&nbsp;[0,&nbsp;1]&nbsp;,&nbsp;&nbsp;&nbsp;<span class="m">s</span>&nbsp;=&nbsp;sévérité du décalage</div>
+    <div class="tex">\chi_n(s) = 1 - \frac{\mathcal{H}_n(s)}{\ln K} \in [0,1]</div>
+  </div>
+  <p>Une véritable transition de phase laisse des signatures mesurables, et seulement celles-là&nbsp;:</p>
+  <ul>
+    <li><strong>Non-linéarité abrupte</strong> de <span class="m">χ</span> en fonction de <span class="m">s</span> — et non une décroissance douce.</li>
+    <li><strong>Pic de susceptibilité</strong> ∂<span class="m">χ</span>/∂<span class="m">s</span> à une valeur critique <span class="m">s<sub>c</sub></span>.</li>
+    <li><strong>Comportement d'échelle</strong>&nbsp;: le pic s'affine quand la «&nbsp;taille du système&nbsp;» croît — ici la dimension latente <span class="m">d</span> ou la taille du tampon. C'est l'analogue direct de l'analyse d'échelle en taille finie, et c'est la preuve la plus difficile à contester.</li>
+  </ul>
+  <div class="call cold">
+    <div class="k">Pré-enregistrement du critère</div>
+    <p>Si le balayage sur MedMNIST-C (P0, sévérité continue) ne révèle <em>ni</em> transition abrupte <em>ni</em> pic de susceptibilité, le vocabulaire de transition de phase est abandonné et le travail est repositionné en «&nbsp;<em>energy-based test-time adaptation with risk-controlled early exit</em>&nbsp;» — ce qui reste une contribution solide et publiable.</p>
+    <p>Décider ce critère <strong>avant</strong> de voir les courbes est ce qui protège contre le reproche le plus meurtrier en relecture&nbsp;: la physique décorative. Et si le pic apparaît, l'argument devient extrêmement fort, parce qu'il aura été annoncé à l'avance.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ═══════════════ 06 ═══════════════ -->
+<section id="jalons">
+  <h2><em>06</em>Jalons go / no-go</h2>
+  <p class="sub">Sans date imposée, la progression est pilotée par des critères de passage. Chaque jalon possède une condition d'échec explicite et une bifurcation prévue — décider à l'avance ce qui constituerait un échec est ce qui distingue une recherche d'une illustration.</p>
+
+  <div class="gate">
+    <div class="gate-id">J0</div>
+    <div>
+      <h4>Assainissement documentaire et socle formel</h4>
+      <p>Requalifier le tableau §4.3 en objectifs. Fixer la définition unique de <span class="m">ℋ</span>, rédiger les propositions de §02 avec leurs démonstrations, arrêter la notation du papier.</p>
+      <div class="crit"><b>Passage</b>Un document théorique LaTeX autoportant, sans les contradictions F01, F05, F11.</div>
+    </div>
+  </div>
+
+  <div class="gate">
+    <div class="gate-id">J1</div>
+    <div>
+      <h4>Mécanique opérationnelle sur MedMNIST-C</h4>
+      <p>Dépôt exécutable de bout en bout, quatre tests non négociables au vert, courbes <span class="m">ℋ<sub>n</sub></span>(<span class="m">n</span>) tracées, TTA numériquement stable.</p>
+      <div class="crit"><b>Passage</b>Entropie décroissante avec la profondeur, aucune divergence, gel du backbone vérifié par assertion.</div>
+      <div class="crit"><b>Échec</b>Problème d'implémentation — on corrige, on ne pivote pas.</div>
+    </div>
+  </div>
+
+  <div class="gate">
+    <div class="gate-id">J2</div>
+    <div>
+      <h4>Supériorité sur le contrôle décisif (A5)</h4>
+      <p>Camelyon17-WILDS, décalage réel, 5 graines. Comparaison A8 contre A5 (TENT + sortie calibrée).</p>
+      <div class="crit"><b>Passage</b>Gain d'AUROC significatif à budget de calcul égal ou inférieur.</div>
+      <div class="crit"><b>Échec</b>Pivot vers la contribution la plus défendable&nbsp;: la sortie anticipée à risque contrôlé en imagerie médicale, sans la TTA. Ce repli reste publiable en MICCAI ou MIDL — il ne faut pas le vivre comme une défaite.</div>
+    </div>
+  </div>
+
+  <div class="gate">
+    <div class="gate-id">J3</div>
+    <div>
+      <h4>Honnêteté du budget de calcul</h4>
+      <p>Comptabilisation complète, passes arrière incluses, latence mesurée sur la RTX&nbsp;4070.</p>
+      <div class="crit"><b>Passage</b>Coût total net inférieur à l'inférence statique, grâce à l'adaptation sélective (§02.5).</div>
+      <div class="crit"><b>Échec</b>Repositionner franchement en méthode de <em>robustesse</em> et non d'efficience, et publier le comptage honnête — c'est en soi une contribution utile à un domaine où ce coût est régulièrement passé sous silence.</div>
+    </div>
+  </div>
+
+  <div class="gate">
+    <div class="gate-id">J4</div>
+    <div>
+      <h4>Verdict sur la transition de phase</h4>
+      <p>Balayage de sévérité, susceptibilité, analyse d'échelle en <span class="m">d</span>.</p>
+      <div class="crit"><b>Passage</b>Pic de susceptibilité reproductible ⇒ le cadre thermodynamique est conservé et devient un atout majeur.</div>
+      <div class="crit"><b>Échec</b>Renommage en cadre «&nbsp;energy-based&nbsp;». Aucune perte de substance scientifique.</div>
+    </div>
+  </div>
+
+  <div class="gate">
+    <div class="gate-id">J5</div>
+    <div>
+      <h4>Consolidation multi-cohortes et rédaction</h4>
+      <p>P2 et éventuellement P3, garanties conformes, figures définitives, manuscrit.</p>
+      <div class="crit"><b>Passage</b>Résultats cohérents sur au moins deux modalités, dépôt public reproductible.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ═══════════════ 07 ═══════════════ -->
+<section id="redaction">
+  <h2><em>07</em>Stratégie de publication</h2>
+
+  <h3>Cible réaliste</h3>
+  <p>Un mot franc sur <em>Nature Machine Intelligence</em>&nbsp;: cette revue publie soit des paradigmes véritablement nouveaux étayés par des preuves exceptionnelles, soit des travaux validés cliniquement sur cohortes prospectives multi-sites. Une méthode de TTA évaluée sur des benchmarks publics, si bonne soit-elle, n'y passera pas — non par manque de qualité, mais par inadéquation de format. Le viser d'emblée coûterait plusieurs mois pour un refus de bureau.</p>
+  <p>La trajectoire réaliste, et bien plus efficace&nbsp;:</p>
+  <ul>
+    <li><strong>Jalon</strong> — MICCAI, MIDL ou ISBI (8 pages) dès que J2 et J3 sont franchis. Retours de relecture rapides, visibilité, et matière consolidée.</li>
+    <li><strong>Cible principale</strong> — <em>IEEE TMI</em> ou <em>Medical Image Analysis</em>, version longue avec garanties conformes, multi-cohortes et analyse physique. C'est l'audience exacte de ce travail.</li>
+    <li><strong>Nature MI</strong> — envisageable ultérieurement <em>si</em> J4 réussit et qu'une validation sur données hospitalières réelles s'y ajoute. À traiter comme un objectif à deux ans, pas comme la première soumission.</li>
+  </ul>
+
+  <h3>Ordre de rédaction</h3>
+  <p>Contre-intuitif mais nettement plus efficace&nbsp;: <strong>Méthodes → Expériences → Discussion → Introduction → Résumé</strong>. L'introduction ne peut affirmer le <em>gap</em> qu'une fois les résultats connus, et le résumé se rédige en dernier, quand la contribution réelle — parfois différente de celle espérée — est établie. La séquence de «&nbsp;sprints&nbsp;» du plan initial place au contraire l'abstract en Sprint&nbsp;3, avant toute expérience&nbsp;: c'est ce qui conduit à écrire un papier autour de chiffres souhaités. Il faut inverser cet ordre.</p>
+
+  <h3>Figures qui portent la démonstration</h3>
+  <ol>
+    <li><span class="m">ℋ<sub>n</sub></span> en fonction de la profondeur, par sévérité de décalage, avant/après adaptation — la figure identitaire du papier.</li>
+    <li>Projection UMAP de l'espace latent aux couches 1, 6, 12&nbsp;: gaz → cristal, avec les centroïdes ancrés.</li>
+    <li>Diagramme de phase <span class="m">χ</span>(<span class="m">s</span>,&nbsp;<span class="m">n</span>) en carte de chaleur, avec la frontière critique.</li>
+    <li>Courbe risque–couverture, méthode contre baselines — l'argument clinique.</li>
+    <li>AUROC en fonction du budget de calcul réel&nbsp;: c'est le graphique où A8 doit visiblement dominer A5.</li>
+  </ol>
+</section>
+
+<hr class="rule">
+
+<!-- ═══════════════ 08 ═══════════════ -->
+<section id="risques">
+  <h2><em>08</em>Registre des risques</h2>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Risque</th><th>Gravité</th><th>Parade</th></tr></thead>
+    <tbody>
+      <tr><td>L'apport se réduit à TENT + sortie anticipée</td><td><span class="chip b">Critique</span></td><td>Exécuter A5 dès J2, avant tout investissement lourd</td></tr>
+      <tr><td>L'efficience nette est négative</td><td><span class="chip b">Critique</span></td><td>Adaptation sélective gatée (§02.5)&nbsp;; sinon repositionnement en robustesse</td></tr>
+      <tr><td>Effondrement pris pour cristallisation</td><td><span class="chip j">Élevé</span></td><td>Terme répulsif actif + entropie marginale reportée à chaque couche</td></tr>
+      <tr><td>Physique jugée décorative en relecture</td><td><span class="chip j">Élevé</span></td><td>Test de transition pré-enregistré (§05) et repli assumé</td></tr>
+      <tr><td>Camelyon17 trop lourd pour la RTX 4070</td><td><span class="chip o">Modéré</span></td><td>ViT-S/16, bf16, sous-échantillonnage stratifié, jeu complet en fin de course</td></tr>
+      <tr><td>Instabilité de la TTA à lot unitaire</td><td><span class="chip o">Modéré</span></td><td>Entropie marginale sur augmentations (MEMO) ou tampon glissant</td></tr>
+      <tr><td>Antériorité 2025-2026 sur l'effondrement en TTA</td><td><span class="chip o">Modéré</span></td><td>Veille mensuelle&nbsp;; positionner l'apport sur la <em>garantie conforme</em>, moins encombrée</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ═══════════════ 09 ═══════════════ -->
+<section id="suite">
+  <h2><em>09</em>Prochaine action</h2>
+  <p class="sub">Le plan s'arrête ici pour arbitrage. Trois entrées possibles dans l'exécution, par ordre de rendement.</p>
+  <div class="next">
+    <ol>
+      <li><em>01</em><div><b>Requalifier le tableau §4.3 dans les documents du projet</b><span>Dix minutes de travail, et le risque le plus grave du projet disparaît. À faire avant toute autre chose, quelle que soit la suite retenue.</span></div></li>
+      <li><em>02</em><div><b>Rédiger le socle théorique corrigé (§02) en LaTeX</b><span>Définitions, Proposition&nbsp;1 sur la dégénérescence du minimiseur entropique et le rôle de <span class="m">λ</span>, algorithme en pseudo-code académique. C'est ce qui conditionne la valeur de tout le code écrit ensuite.</span></div></li>
+      <li><em>03</em><div><b>Monter le squelette de dépôt et les quatre tests non négociables</b><span>Exécutable le jour même sur données jouets, puis sur MedMNIST-C. Théorie et code se valident alors mutuellement.</span></div></li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  Document de travail — audit et plan d'action, 30 août 2026. Les constats F01 à F12 renvoient aux trois documents du projet&nbsp;: <em>Description Complète du Projet</em>, <em>Plan de Recherche</em>, <em>Guide des Connaissances</em>. Aucune valeur numérique de performance citée ici ne provient d'une mesure&nbsp;; les chiffres discutés sont ceux, non mesurés, des documents source.
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,245 @@
+%% Review paper — ScienceDirect / Elsevier (elsarticle)
+%% Compile: latexmk -pdf main.tex
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{pifont}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\emergencystretch=3em
+
+\newdefinition{remark}{Remark}
+
+\newcommand{\bz}{\mathbf{z}}
+\newcommand{\bmu}{\boldsymbol{\mu}}
+
+\journal{Medical Image Analysis}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Test-Time Adaptation, Early Exiting, and Distribution-Free Risk Control for Vision Transformers: A Survey Through the Lens of Energy-Based Observables, with Applications to Medical Imaging}
+
+\author[1]{Houssem Eddine Lassoued\corref{cor1}}
+\ead{houssem.lassoued@example.edu}
+\author[1]{Anis Ben Aicha}
+\author[1]{Habib Fathallah}
+\cortext[cor1]{Corresponding author.}
+\affiliation[1]{organization={University Research Laboratory},
+            city={Tunis},
+            country={Tunisia}}
+
+\begin{abstract}
+Vision Transformers (ViTs) deployed in clinical imaging pipelines face continuous distribution shift induced by scanner vendors, acquisition protocols, staining procedures, and patient motion. Three families of mechanisms have emerged to mitigate the resulting degradation: (i) \emph{test-time adaptation} (TTA), which updates a small fraction of parameters on unlabeled test data; (ii) \emph{early exiting}, which modulates inference depth per sample; and (iii) \emph{distribution-free risk control}, which calibrates decision thresholds with finite-sample statistical guarantees. This survey reviews these three literatures through a unifying energy-based vocabulary: the softmax posterior over class-conditional distances is a Boltzmann distribution, its log-partition function is the Helmholtz free energy popularized for out-of-distribution detection, and entropy minimization in TTA corresponds to a condensation dynamic whose degenerate minimizers (representation collapse) are now well documented. We systematically map which pairwise combinations of the three mechanisms have been published---early exiting with risk control, TTA with early exiting---and establish that their three-way combination remains open, with the central theoretical obstacle being that per-sample adaptation invalidates the fixed-score assumption underlying conformal risk control. We further catalogue the known failure modes relevant to clinical deployment: marginal collapse under entropy minimization, unbounded repulsion regularizers, exchangeability violations under domain shift, exit-conditional selection bias, and the documented unreliability of conformal prediction sets in dermatology and histopathology. We conclude with a research agenda for risk-controlled adaptive-depth inference under distribution shift.
+\end{abstract}
+
+\begin{keyword}
+Vision Transformer \sep test-time adaptation \sep early exit \sep conformal prediction \sep risk control \sep energy-based models \sep out-of-distribution detection \sep medical imaging
+\end{keyword}
+
+\end{frontmatter}
+
+%% =====================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Deep neural networks for medical image analysis are typically trained on curated source cohorts and deployed under conditions that differ from training: different scanner manufacturers, radiation doses, contrast agents, staining protocols, and acquisition noise. A Vision Transformer (ViT) with frozen weights projects such shifted inputs into a latent space whose class structure degrades, and the resulting predictions become both less accurate and, more insidiously, miscalibrated \citep{geifman2017selective,mehrtens2023pitfalls}. In diagnostic settings the consequences are not merely statistical.
+
+Three largely independent research programs address components of this problem:
+
+\begin{enumerate}
+\item \textbf{Test-time adaptation (TTA)} updates a small set of parameters---typically normalization statistics and affine parameters---by minimizing an unsupervised objective, most often prediction entropy, on the unlabeled test stream \citep{wang2021tent,liang2020shot,niu2022eata,niu2023sar}.
+\item \textbf{Early exiting} attaches intermediate classification heads to the backbone and halts inference as soon as a per-layer confidence criterion is met, trading depth for compute \citep{meng2022adavit,yin2022avit,xu2023lgvit,bajpai2025beem}.
+\item \textbf{Distribution-free risk control} calibrates decision thresholds so that a user-specified risk (e.g., accuracy degradation) is bounded with finite-sample validity, via the Learn-then-Test framework \citep{angelopoulos2025ltt} and conformal risk control \citep{angelopoulos2024crc}.
+\end{enumerate}
+
+Each program has matured separately, and pairwise combinations have recently appeared: early exiting with risk control \citep{schuster2022calm,jazbec2024fast}, and TTA with early exiting \citep{jia2024tinytta}. The three-way combination---adaptive-depth inference that adapts at test time \emph{and} carries a statistical guarantee on the induced degradation---has, to the best of our knowledge, not been published in a peer-reviewed venue. The authors of \citet{jazbec2024fast} explicitly designate the relaxation of the i.i.d.\ assumption toward test-time shift as future work.
+
+This survey makes three contributions:
+
+\begin{enumerate}
+\item We review the energy-based reading of softmax classifiers and vision-language models (Section~\ref{sec:energy}), showing that the Gibbs/Boltzmann vocabulary---partition function, Helmholtz free energy, temperature---is already established in the out-of-distribution (OOD) detection literature \citep{liu2020energy,grathwohl2020jem,ming2022mcm,ming2023cider,yuan2024tea}, and clarifying which statements are established results versus notational conventions.
+\item We review entropy-minimization TTA and its failure modes (Section~\ref{sec:tta}), with particular attention to \emph{representation collapse} and the regularization mechanisms that exclude it---diversity terms \citep{liang2020shot}, redundancy filters \citep{niu2022eata}, sharpness-aware updates \citep{niu2023sar}, and prototype-scattering / variance-hinge mechanisms from self-supervised learning \citep{bardes2022vicreg,zbontar2021barlow,caron2020swav,caron2021dino}. We highlight two technical pitfalls of soft-prototype repulsion terms: insensitivity to marginal collapse and unboundedness under representation rescaling.
+\item We map the intersection of early exiting and risk control (Section~\ref{sec:riskcontrol}), identify the open triplet and its central theoretical difficulty (Section~\ref{sec:gap}), and compile the objections any clinical instantiation must answer (Section~\ref{sec:clinical}), foremost among them the documented pitfalls of conformal prediction in medical imaging \citep{mehrtens2023pitfalls}.
+\end{enumerate}
+
+\subsection{Survey methodology}
+\label{sec:method}
+
+Sections~\ref{sec:energy}--\ref{sec:clinical} cite only publications that appeared in Q1--Q2 journals (JCR) or CORE A/A* conferences: NeurIPS, ICML, ICLR, CVPR, ICCV, ACM Multimedia (A*), MICCAI (A); \emph{Annals of Statistics}, \emph{Annals of Applied Statistics}, IJCV, IEEE TMI, \emph{Medical Image Analysis} (Q1). Non-peer-reviewed preprints are discussed separately in Section~\ref{sec:preprints} and are never cited as established results. Primary sources were read directly; claims are attributed to the specific equation or section in which they appear whenever the attribution carries weight.
+
+%% =====================================================================
+\section{Energy-Based Readings of Softmax Classifiers and Vision-Language Models}
+\label{sec:energy}
+
+\subsection{The Boltzmann posterior and its observables}
+
+Let $\bz \in \mathbb{S}^{d-1}$ be a normalized embedding and $\{\bmu_k\}_{k=1}^{K} \subset \mathbb{S}^{d-1}$ a set of class anchors. Define the configuration energy $E_k(\bz) = \lVert \bz - \bmu_k \rVert^2$ and the posterior
+\begin{equation}
+p_k(\bz) = \frac{\exp\!\big(-E_k(\bz)/T\big)}{Z(\bz)}, \qquad
+Z(\bz) = \sum_{j=1}^{K} \exp\!\big(-E_j(\bz)/T\big),
+\label{eq:boltzmann}
+\end{equation}
+with temperature $T > 0$. Three observables follow: the Gibbs entropy $\mathcal{H} = -\sum_k p_k \ln p_k$, the free energy $F = -T \ln Z$, and the mean energy $\langle E \rangle = \sum_k p_k E_k$, linked by the thermodynamic identity $F = \langle E \rangle - T\mathcal{H}$.
+
+It is essential to state precisely which parts of this construction are novel and which are not. None of the following is new:
+
+\begin{itemize}
+\item \textbf{The free-energy score.} \citet{liu2020energy} introduce the OOD score $E(x) = -T \log \sum_i e^{f_i(x)/T}$ and name it, verbatim, the \emph{Helmholtz free energy}, together with the Gibbs distribution and the partition function $Z$. \citet{grathwohl2020jem} had concurrently established the energy-based reading of any softmax classifier.
+\item \textbf{The Boltzmann form of CLIP scores.} The Maximum Concept Matching (MCM) score of \citet{ming2022mcm}, $\max_i e^{s_i/\tau} / \sum_j e^{s_j/\tau}$ over CLIP cosine similarities, is a Boltzmann posterior in all but name; the paper already benchmarks the energy score of \citet{liu2020energy} on CLIP.
+\item \textbf{The hyperspherical equivalence.} CIDER \citep{ming2023cider} derives explicitly that a von Mises--Fisher mixture on $\mathbb{S}^{d-1}$ with concentration $\kappa = 1/\tau$ yields the cosine-similarity softmax. Since $\lVert \bz - \bmu \rVert^2 = 2 - 2\langle \bz, \bmu\rangle$ on the sphere, the squared-distance energy in Eq.~\eqref{eq:boltzmann} and the cosine-similarity form differ only by an affine reparametrization; the correspondence $T = 2\tau$ between the distance temperature and the learned CLIP temperature is a normalization convention, not a result.
+\item \textbf{Energy in TTA.} TEA \citep{yuan2024tea} employs the Boltzmann distribution and partition function explicitly as a test-time adaptation objective, on standard classifiers.
+\end{itemize}
+
+Further structure appears in zero-shot OOD detection: NegLabel \citep{jiang2024neglabel} builds a score that is a ratio of two partition functions (though never named as such), CLIPN \citep{wang2023clipn} trains a negation text encoder without any energetic framing, and GL-MCM \citep{miyai2025glmcm} extends MCM to local features.
+
+\subsection{What remains open}
+
+Two observations delimit the genuinely open territory. First, recent surveys of OOD detection in the vision-language era contain no occurrence of ``free energy,'' ``Gibbs measure,'' or ``partition function'' applied to CLIP as a \emph{unified operational framework}: the individual observables are published, the unifying statement is not. Second, the physical interpretation of the learned temperature is empirically fragile: MCM re-tunes $\tau$ freely ($\tau = 1$ rather than the learned $\tau \approx 0.01$), which weakens any claim that the learned $\tau$ \emph{is} the physical temperature of the system.
+
+The open opportunity is therefore not a new formulation but a new \emph{operationalization}: measuring $F$ layer by layer as a per-depth halting criterion (Section~\ref{sec:gap}), rather than as a terminal OOD score.
+
+\subsection{Why free energy, not entropy, should gate decisions}
+
+A property of Eq.~\eqref{eq:boltzmann} with direct architectural consequences: under a uniform translation of the energy landscape, $E_k \mapsto E_k + c$, the posterior and hence the entropy are invariant, while the free energy is covariant, $F \mapsto F + c$. A sample equidistant from---but very far from---all anchors, the typical signature of an OOD input, therefore exhibits \emph{low} entropy yet \emph{high} free energy. Entropy alone cannot distinguish a confident decision from a confidently out-of-domain one; free energy can. This is the principled basis, already implicit in \citet{liu2020energy}, for decoupling the adaptation objective (entropy) from the halting criterion (free energy) in any joint TTA/early-exit system (Section~\ref{sec:gap}).
+
+%% =====================================================================
+\section{Test-Time Adaptation: Entropy Minimization and Its Failure Modes}
+\label{sec:tta}
+
+\subsection{From information maximization to entropy minimization}
+
+The information-maximization lineage begins with RIM \citep{gomes2010rim}, which maximizes $I(x;y) = H(\bar\sigma) - \bar H(\sigma)$: minimize per-sample conditional entropy while keeping the marginal entropy high. SHOT \citep{liang2020shot} instantiates this for source-free domain adaptation, combining entropy minimization with the diversity term $\mathcal{L}_{\mathrm{div}} = \sum_k \hat p_k \log \hat p_k$ and, in its Eq.~(4), the soft-prototype estimator
+\begin{equation}
+\hat{c}_k = \frac{\sum_{x} \delta_k(x)\, g(x)}{\sum_{x} \delta_k(x)},
+\label{eq:softproto}
+\end{equation}
+i.e., the responsibility-weighted class mean that many later works reuse. TENT \citep{wang2021tent} discards the diversity term entirely and minimizes pure prediction entropy over the affine parameters of normalization layers---a design whose collapse under long or difficult streams is now well documented \citep{niu2023sar}.
+
+Subsequent stabilizations diversify the mechanism rather than the objective: EATA \citep{niu2022eata} adds a sample-redundancy \emph{filter} (not an additive diversity loss) plus a Fisher-based anti-forgetting penalty; SAR \citep{niu2023sar} adds sharpness-aware minimization and documents the collapse dynamics---logit-norm inflation and single-class domination; DELTA \citep{zhao2023delta} renormalizes statistics and reweights samples dynamically; TSD \citep{wang2023tsd} enforces feature alignment and uniformity via hard prototypes and self-distillation; DeYO \citep{lee2024deyo} shows that entropy alone is an unreliable adaptation signal and constructs a disentangled criterion.
+
+\subsection{Collapse and its exclusion: lessons from self-supervised learning}
+
+Representation collapse---all samples assigned to one class, or all embeddings condensed to one point---is the degenerate global minimizer of the entropy term. The self-supervised literature offers four published exclusion mechanisms: the \emph{bounded} variance hinge of VICReg \citep{bardes2022vicreg}, the cross-correlation decorrelation of Barlow Twins \citep{zbontar2021barlow}, Sinkhorn equipartition in SwAV \citep{caron2020swav}, and centering-plus-sharpening in DINO \citep{caron2021dino}.
+
+A tempting design for binary TTA is to add a \emph{repulsion} term between soft prototypes, $-\lambda \lVert \hat\bmu_0 - \hat\bmu_1 \rVert^2$, with $\hat\bmu_k$ as in Eq.~\eqref{eq:softproto}. Two technical pitfalls of this construction deserve to be stated explicitly, because both are silent:
+
+\begin{remark}[Insensitivity to marginal collapse]
+The normalization in Eq.~\eqref{eq:softproto} makes $\hat\bmu_k$ invariant to the scale of the class marginal $\hat\pi_k$. If $p_1(\bz_i) = \varepsilon \alpha_i$ with $\varepsilon \to 0$ and non-constant $\alpha_i$, then $\hat\pi_1 \to 0$---total collapse of predictions onto class $0$---while $\lVert \hat\bmu_0 - \hat\bmu_1 \rVert^2$ remains large. Only \emph{uniform} collapse (both prototypes merging) is penalized. The SHOT diversity term, by contrast, forbids both modes.
+\end{remark}
+
+\begin{remark}[Unboundedness under rescaling]
+$\lVert \hat\bmu_0 - \hat\bmu_1 \rVert^2$ has no upper bound in general. When the adaptable parameters include LayerNorm gains $\gamma$, the network can decrease the objective by inflating representation scale ($\gamma \mapsto c\gamma$ gives $D \mapsto c^2 D$) without improving any angular separation. This failure produces perfectly plausible loss curves. It is precisely why VICReg employs a bounded hinge. Published remedies: normalize embeddings before prototype computation (bounding the term in $[0,4]$ on the sphere); multiply by $\hat\pi_0 \hat\pi_1$, recovering a soft between-class scatter $\operatorname{tr} S_B$ and restoring marginal-collapse pressure; or use a Fisher-ratio objective $D_{\mathrm{inter}} / \operatorname{tr} S_W$, which is bounded and scale-invariant.
+\end{remark}
+
+The methodological conclusion for the field: soft-prototype repulsion should be presented as the binary, $O(Bd)$ specialization of known mechanisms (SHOT's information maximization, prototype scattering), and SHOT-IM belongs in the ablation matrix of any work employing it.
+
+\subsection{Anchored prototypes and inert regularizers}
+
+A related pitfall concerns \emph{anchored} (frozen) prototypes: if $\bmu_0, \bmu_1$ are constants, the gradient of $\lVert \bmu_0 - \bmu_1\rVert^2$ with respect to the adapted parameters is identically zero, and the regularized objective is exactly equivalent to pure entropy minimization---i.e., to TENT. Differentiable soft prototypes (Eq.~\ref{eq:softproto}) are required for the repulsion to exert any force. This distinction, elementary as it is, separates a functioning anti-collapse mechanism from a lexical decoration, and we flag it because the error is easy to make and invisible in aggregate metrics: a proposition of the form ``for all $\lambda > 0$ no collapsed configuration is a global minimizer, provided a separated configuration is reachable'' holds only in the soft-prototype case. The corresponding diagnostic---reporting the \emph{entropy of the marginal prediction distribution} per layer---should be standard practice, since a collapsed space displays exactly the signature of successful adaptation (low entropy, condensed vectors) on all other curves.
+
+%% =====================================================================
+\section{Early Exiting and Distribution-Free Risk Control}
+\label{sec:riskcontrol}
+
+\subsection{Adaptive-depth inference in Vision Transformers}
+
+Dynamic-depth ViTs modulate computation per sample: AdaViT \citep{meng2022adavit} learns a usage policy over heads, blocks, and tokens; A-ViT \citep{yin2022avit} halts individual tokens adaptively; LGViT \citep{xu2023lgvit} attaches heterogeneous exit heads trained with distillation; BEEM \citep{bajpai2025beem} treats exit heads as weighted experts. All rely on confidence-style heuristics (entropy or max-probability thresholds) and none carries a formal guarantee on the accuracy cost of exiting early. Selective classification \citep{geifman2017selective} provides the risk--coverage vocabulary in which such guarantees are naturally expressed.
+
+\subsection{Risk control for early exits}
+
+The Learn-then-Test framework \citep{angelopoulos2025ltt} converts threshold selection into multiple hypothesis testing, yielding distribution-free, finite-sample control of any monotone risk; conformal risk control \citep{angelopoulos2024crc} extends conformal prediction from coverage to general bounded losses. Two works apply this machinery to early exiting. CALM \citep{schuster2022calm} calibrates per-layer exit thresholds in language models via LTT---but the guaranteed quantity is \emph{consistency with the full model}, never correctness. \citet{jazbec2024fast} transfer the scheme to vision, controlling the \emph{performance gap} between the early-exit and full models under a strict i.i.d.\ assumption between calibration and deployment. Both works assume the score function is \emph{fixed} at calibration time.
+
+On the adaptive side of the shift problem, \citet{bajpai2025greedy} adjust exit thresholds online with bandit feedback under unsupervised drift---handling shift, but without distributional guarantees. TinyTTA \citep{jia2024tinytta} is, to our knowledge, the only peer-reviewed work combining TTA and early exiting: an entropy-based halting criterion on an adapted MCU-scale model. It offers no statistical guarantee, and the circularity discussed in Section~\ref{sec:gap}---exiting on the very quantity that adaptation minimizes---is not addressed.
+
+\subsection{Conformal validity under distribution shift}
+
+The guarantee of split conformal prediction rests on exchangeability of calibration and test scores---violated by construction under domain shift. Three lines of attack exist. Weighted conformal prediction \citep{tibshirani2019covariate} restores validity when the likelihood ratio between source and target covariate distributions is known or well estimated. \citet{barber2023beyond} bound the coverage loss under arbitrary non-exchangeability by $\sum_i \tilde w_i\, d_{\mathrm{TV}}(Z_i, Z_{n+1})$---a bound whose total-variation terms are, in practice, not estimable in clinical deployments. Adaptive conformal inference \citep{gibbs2021adaptive} guarantees coverage \emph{on time average} along a stream, not per instant. Each option therefore trades a different assumption for validity, and none provides instantaneous, assumption-free coverage under shift; any system claiming otherwise should be scrutinized.
+
+\begin{table}[t]
+\centering
+\caption{Coverage of the three mechanisms by representative peer-reviewed works. \ding{51} = addressed with guarantee where applicable; (\ding{51}) = addressed heuristically; --- = absent.}
+\label{tab:triplet}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccl}
+\toprule
+Work & Venue & TTA & Early exit & Risk control & Guaranteed quantity \\
+\midrule
+TENT \citep{wang2021tent} & ICLR'21 & \ding{51} & --- & --- & none \\
+EATA / SAR \citep{niu2022eata,niu2023sar} & ICML'22/ICLR'23 & \ding{51} & --- & --- & none \\
+AdaViT / A-ViT \citep{meng2022adavit,yin2022avit} & CVPR'22 & --- & \ding{51} & --- & none \\
+LGViT \citep{xu2023lgvit} & ACM MM'23 & --- & \ding{51} & --- & none \\
+BEEM \citep{bajpai2025beem} & ICLR'25 & --- & \ding{51} & --- & none \\
+CALM \citep{schuster2022calm} & NeurIPS'22 & --- & \ding{51} & \ding{51} & consistency w/ full model \\
+Fast yet Safe \citep{jazbec2024fast} & NeurIPS'24 & --- & \ding{51} & \ding{51} & performance gap (i.i.d.) \\
+Beyond Greedy Exits \citep{bajpai2025greedy} & NeurIPS'25 & (\ding{51}) & \ding{51} & --- & regret only \\
+TinyTTA \citep{jia2024tinytta} & NeurIPS'24 & \ding{51} & \ding{51} & --- & none \\
+\midrule
+\emph{Open: TTA + early exit + risk control} & --- & \ding{51} & \ding{51} & \ding{51} & degradation under shift \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+%% =====================================================================
+\section{The Open Intersection}
+\label{sec:gap}
+
+Table~\ref{tab:triplet} summarizes the landscape: every pairwise combination of \{TTA, early exiting, risk control\} is published; the triplet is not. We identify three requirements that a first system at this intersection must satisfy, each grounded in a documented obstacle.
+
+\paragraph{(1) Validity under sample-dependent scores.}
+TTA modifies the network---hence the exit score---\emph{per sample or per batch}. This breaks the fixed-score assumption underlying both LTT \citep{angelopoulos2025ltt} and conformal risk control \citep{angelopoulos2024crc}: the calibrated thresholds were computed for a predictor that no longer exists at test time. This is the central theoretical difficulty, and it is genuine; no published result covers threshold validity when the score function is itself data-dependent through adaptation.
+
+\paragraph{(2) Decoupling the adaptation objective from the halting criterion.}
+TinyTTA exits on entropy after adapting to minimize entropy. SAR \citep{niu2023sar} documents that entropy minimization drifts toward trivial solutions (logit-norm inflation, class domination); a post-adaptation threshold $\mathcal{H} < \varepsilon$ therefore measures the optimizer's progress, not the model's certainty---the economy of compute is mechanically guaranteed \emph{even when the model is wrong}. The translation-covariance argument of Section~\ref{sec:energy} suggests the principled decoupling: adapt on entropy, halt on free energy, since the latter retains the distance-to-anchors information that entropy discards.
+
+\paragraph{(3) Honest accounting of compute and coverage.}
+A backward pass costs roughly twice a forward pass and must traverse the network down to the earliest adapted layer even when only $\sim$0.05\% of parameters receive updates. With $S$ adaptation iterations, relative backward cost $\kappa \approx 2$, probe layer at mid-depth and mean exit depth at mid-depth, the net-gain condition reduces to adapting fewer than roughly one third of samples---a falsifiable prediction that any evaluation should confront, subtracting backward-pass cost from claimed savings. Symmetrically, the coverage loss under shift must be quantified (weighted conformal where ratios are estimable, time-averaged validity for streams) rather than asserted.
+
+%% =====================================================================
+\section{Objections from Clinical Deployment}
+\label{sec:clinical}
+
+Any instantiation of risk-controlled adaptive inference in medical imaging must answer five objections drawn from the peer-reviewed literature.
+
+\textbf{(i) Circularity of post-adaptation confidence.} As above: thresholds on the minimized quantity certify optimization, not correctness \citep{niu2023sar,lee2024deyo}.
+
+\textbf{(ii) Double exchangeability violation.} Source calibration versus out-of-domain test data, \emph{and} a model modified per sample. The coverage-loss bound of \citet{barber2023beyond} is not estimable in clinical settings; claims of validity must specify the regime (source$\to$source: valid; source$\to$target: approximate, to be validated empirically; held-out target$\to$target: valid).
+
+\textbf{(iii) Exit-conditional selection bias.} The subpopulation reaching layer $n$ is conditioned on \emph{not} having exited earlier; it is not the calibration population. Per-layer thresholds calibrated marginally are therefore miscalibrated conditionally on depth.
+
+\textbf{(iv) Documented pitfalls of conformal prediction in medical imaging.} \citet{mehrtens2023pitfalls} establish, precisely in dermatology and histopathology, that conformal sets are unreliable under distribution shift; that they should not be used to \emph{select} predictions; that they are unreliable per subgroup (hence per scanner vendor); and that their value is limited for small label spaces---including the binary case. These findings must be engaged in the discussion of any clinical system, not circumvented.
+
+\textbf{(v) Marginal versus conditional coverage.} A guarantee on the average risk protects no individual patient or site. Mondrian-style stratification (per device, per site) is the minimal mitigation.
+
+%% =====================================================================
+\section{Preprints to Monitor}
+\label{sec:preprints}
+
+Two non-peer-reviewed manuscripts occupy parts of the identified gap and should be tracked, though not cited as established: a NeurIPS-submission-stage preprint on entropy--energy duality in TTA, which would articulate the decoupling of Section~\ref{sec:gap} if validated; and $\Delta$Energy (arXiv:2510.11296), which applies the log-partition score to CLIP cosine similarities. Additional preprints of relevance concern geometric anti-collapse regularization on centroids in TTA, prototype scattering losses, inter-prototype repulsion in TTA, neural collapse in TTA, risk-controlled early exiting on ViTs via distillation, and TTA-plus-conformal systems that explicitly abandon guarantees. The pace of this activity confirms both the timeliness of the intersection and the narrowness of the remaining window.
+
+%% =====================================================================
+\section{Research Agenda and Conclusion}
+\label{sec:conclusion}
+
+This survey traversed three literatures under one vocabulary. The energy-based reading of softmax and CLIP scores is established piecewise---free energy \citep{liu2020energy,grathwohl2020jem}, Boltzmann posteriors on CLIP \citep{ming2022mcm}, the hyperspherical equivalence \citep{ming2023cider}, energy objectives in TTA \citep{yuan2024tea}---but its unified operationalization as layer-wise observables gating adaptive inference is not. Entropy-minimization TTA is mature yet fragile, with collapse mechanics now documented \citep{niu2023sar} and exclusion mechanisms imported from self-supervision \citep{bardes2022vicreg,caron2020swav}; we highlighted two silent pitfalls of soft-prototype repulsion (marginal-collapse blindness; unboundedness under rescaling) and their published remedies. Early exiting with risk control exists \citep{schuster2022calm,jazbec2024fast} but only under fixed scores and i.i.d.\ calibration; TTA with early exiting exists \citep{jia2024tinytta} but without guarantees and with a circular halting criterion.
+
+The agenda that follows is concrete: (1) extend Learn-then-Test-style calibration to sample-dependent score functions, the key lemma missing for the triplet; (2) adopt halting criteria decoupled from the adaptation objective, for which free energy is the natural candidate; (3) report marginal-prediction entropy per layer as a standard collapse diagnostic; (4) account for backward-pass cost in all compute claims; (5) evaluate on real inter-institution shift (e.g., multi-hospital histopathology cohorts) rather than synthetic corruption alone, and stratify all guarantees per acquisition device. The first system meeting these requirements will define risk-controlled adaptive-depth inference under distribution shift; the components are ready, and the intersection is, at the time of writing, open.
+
+%% =====================================================================
+\section*{Declaration of competing interest}
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Acknowledgements}
+This work was carried out under the supervision of Dr.\ Anis Ben Aicha and Pr.\ Habib Fathallah.
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{refs}
+
+\end{document}

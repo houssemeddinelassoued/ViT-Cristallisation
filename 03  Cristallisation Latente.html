@@ -1,0 +1,1429 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cristallisation Latente</title>
+<meta name="description" content="Base de connaissances interactive">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<style>:root{color-scheme:light}html{-webkit-text-size-adjust:100%}
+body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif;background:#fafafa}
+img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+:root{
+  --ground:#F2F5F8; --surface:#FFFFFF; --surface-2:#E9EDF2; --sunk:#F7F9FB;
+  --ink:#0E1620; --ink-2:#44515F; --ink-m:#6E7B89;
+  --line:#DBE1E8; --line-2:#C2CBD5;
+  --cold:#0B6B7A; --cold-2:#BFE0E4; --cold-3:#EAF4F5;
+  --hot:#B04A22;  --hot-2:#E9C4B0;  --hot-3:#FAEDE6;
+  --lang:#3B4CA0; --lang-3:#EAECF8;
+  --good:#2A6B4F; --good-3:#E4F0E9;
+  --sh-sm:0 1px 2px rgba(14,22,32,.05);
+  --sh:0 1px 2px rgba(14,22,32,.05), 0 10px 30px -18px rgba(14,22,32,.25);
+  --sh-lg:0 2px 4px rgba(14,22,32,.04), 0 24px 60px -28px rgba(14,22,32,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16.5px; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+
+/* ─── shell ─────────────────────────────────────────── */
+.shell{max-width:1440px; margin:0 auto; padding:0 24px 100px;}
+.grid{display:grid; grid-template-columns:1fr;}
+.grid > *{min-width:0;} main{min-width:0;} section{min-width:0;} .col{min-width:0;}
+.split > *{min-width:0;}
+@media (min-width:1080px){ .grid{grid-template-columns:210px minmax(0,1fr); gap:52px; align-items:start;} }
+
+nav.rail{display:none;}
+@media (min-width:1080px){
+  nav.rail{display:block; position:sticky; top:0; padding:40px 0; max-height:100vh; overflow-y:auto;}
+}
+.rail .brand{
+  font-family:"Newsreader",Georgia,serif; font-size:17px; font-weight:600;
+  letter-spacing:-.01em; margin-bottom:4px; line-height:1.2;
+}
+.rail .brand span{display:block; font-family:"IBM Plex Mono",monospace; font-size:9.5px;
+  font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--cold); margin-top:6px;}
+.rail ol{list-style:none; margin:22px 0 0; padding:0; border-left:1px solid var(--line);}
+.rail a{
+  display:block; padding:5px 0 5px 14px; margin-left:-1px; text-decoration:none;
+  color:var(--ink-m); font-size:13px; line-height:1.34; border-left:2px solid transparent;
+}
+.rail a:hover{color:var(--cold);}
+.rail a.on{color:var(--ink); font-weight:600; border-left-color:var(--cold);}
+
+/* ─── hero ──────────────────────────────────────────── */
+.hero{padding:44px 0 0;}
+.kicker{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500;
+  letter-spacing:.17em; text-transform:uppercase; color:var(--cold); margin:0 0 22px;
+}
+h1{
+  font-family:"Newsreader",Georgia,serif; font-weight:500;
+  font-size:clamp(2.5rem,6.2vw,4.5rem); line-height:1.02; letter-spacing:-.025em;
+  margin:0 0 22px; max-width:16ch; text-wrap:balance;
+}
+h1 em{font-style:italic; color:var(--cold);}
+.hero-lede{font-size:1.16rem; line-height:1.58; color:var(--ink-2); max-width:56ch; margin:0 0 34px;}
+
+.stage{
+  background:var(--surface); border:1px solid var(--line); border-radius:10px;
+  box-shadow:var(--sh-lg); overflow:hidden; margin-bottom:22px;
+}
+.stage canvas{display:block; width:100%; height:auto;}
+.stage-bar{
+  display:flex; flex-wrap:wrap; align-items:center; gap:18px;
+  padding:14px 20px; border-top:1px solid var(--line); background:var(--sunk);
+}
+.stage-bar label{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--ink-m); white-space:nowrap;
+}
+.stage-bar input[type=range]{flex:1 1 200px; min-width:140px;}
+.state-pill{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  padding:4px 11px; border-radius:20px; white-space:nowrap;
+  background:var(--cold-3); color:var(--cold); border:1px solid var(--cold-2);
+}
+.state-pill.gas{background:var(--hot-3); color:var(--hot); border-color:var(--hot-2);}
+
+input[type=range]{
+  -webkit-appearance:none; appearance:none; height:4px; border-radius:2px;
+  background:var(--line-2); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--cold); border:2px solid var(--surface); box-shadow:var(--sh-sm); cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:14px; height:14px; border-radius:50%; background:var(--cold);
+  border:2px solid var(--surface); cursor:pointer;
+}
+input[type=range]:focus-visible{outline:2px solid var(--cold); outline-offset:3px;}
+
+/* ─── sections ──────────────────────────────────────── */
+section{padding:64px 0 0; scroll-margin-top:16px;}
+.col{max-width:70ch;}
+h2{
+  font-family:"Newsreader",Georgia,serif; font-weight:500;
+  font-size:clamp(1.75rem,3.4vw,2.5rem); line-height:1.12; letter-spacing:-.018em;
+  margin:0 0 10px; text-wrap:balance;
+}
+.sec-no{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--cold); display:block; margin-bottom:12px;
+}
+.dek{font-size:1.06rem; color:var(--ink-2); margin:0 0 26px; max-width:60ch;}
+h3{font-size:1.04rem; font-weight:600; margin:34px 0 10px;}
+h4{font-size:.94rem; font-weight:600; margin:24px 0 8px; color:var(--ink-2);}
+p{margin:0 0 16px;}
+ul,ol{margin:0 0 16px; padding-left:20px;} li{margin-bottom:7px;} li::marker{color:var(--ink-m);}
+a{color:var(--cold);}
+strong{font-weight:600;}
+code{font-family:"IBM Plex Mono",monospace; font-size:.85em; background:var(--surface-2);
+  padding:1px 5px; border-radius:3px;}
+.m{font-family:"Newsreader",Georgia,serif; font-style:italic; font-size:1.06em;}
+.m sub,.m sup{font-style:normal; font-size:.66em;}
+
+/* ─── panels & cards ────────────────────────────────── */
+.panel{
+  background:var(--surface); border:1px solid var(--line); border-radius:10px;
+  box-shadow:var(--sh); margin:26px 0 30px; overflow:hidden;
+}
+.panel-head{
+  display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:12px;
+  padding:15px 20px; border-bottom:1px solid var(--line); background:var(--sunk);
+}
+.panel-head b{font-size:14.5px; font-weight:600;}
+.panel-head span{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--cold);}
+.panel-body{padding:20px;}
+.panel-foot{padding:13px 20px; border-top:1px solid var(--line); background:var(--sunk);
+  font-size:13.5px; color:var(--ink-2);}
+
+.split{display:grid; grid-template-columns:1fr; gap:20px;}
+@media (min-width:820px){ .split{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);} }
+
+.readout{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px;
+  background:var(--line); border:1px solid var(--line); border-radius:7px; overflow:hidden;}
+.ro{background:var(--surface); padding:11px 13px;}
+.ro dt{font-family:"IBM Plex Mono",monospace; font-size:9.5px; font-weight:600;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--ink-m); margin-bottom:3px;}
+.ro dd{margin:0; font-family:"IBM Plex Mono",monospace; font-size:19px; font-weight:500;
+  font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
+.ro.wide{grid-column:1 / -1;}
+.ro small{display:block; font-family:"IBM Plex Sans",sans-serif; font-size:11.5px;
+  color:var(--ink-m); margin-top:3px; letter-spacing:0;}
+
+.ctrl{margin-bottom:16px;}
+.ctrl-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:6px;}
+.ctrl-top label{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--ink-m);}
+.ctrl-top output{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600;
+  font-variant-numeric:tabular-nums;}
+.ctrl input[type=range]{width:100%;}
+
+.seg{display:inline-flex; background:var(--surface-2); border-radius:7px; padding:3px; gap:3px;}
+.seg button{
+  font:inherit; font-size:12.5px; font-weight:500; border:0; cursor:pointer;
+  background:transparent; color:var(--ink-2); padding:6px 13px; border-radius:5px;
+}
+.seg button[aria-pressed=true]{background:var(--surface); color:var(--ink); font-weight:600; box-shadow:var(--sh-sm);}
+.seg button:focus-visible{outline:2px solid var(--cold); outline-offset:2px;}
+
+.btn{
+  font:inherit; font-size:13px; font-weight:500; cursor:pointer;
+  background:var(--surface); color:var(--ink-2); border:1px solid var(--line-2);
+  padding:7px 15px; border-radius:6px;
+}
+.btn:hover{border-color:var(--cold); color:var(--cold);}
+.btn:focus-visible{outline:2px solid var(--cold); outline-offset:2px;}
+
+canvas.plot{display:block; width:100%; height:auto; border-radius:7px; background:var(--sunk);
+  border:1px solid var(--line); touch-action:none; cursor:crosshair;}
+
+.verdict{
+  font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600;
+  padding:9px 13px; border-radius:6px; text-align:center; letter-spacing:.03em;
+}
+.verdict.ok{background:var(--good-3); color:var(--good);}
+.verdict.no{background:var(--hot-3); color:var(--hot);}
+
+/* ─── callouts ──────────────────────────────────────── */
+.call{
+  border:1px solid var(--line); border-left:3px solid var(--cold);
+  background:var(--cold-3); border-radius:0 8px 8px 0; padding:18px 20px; margin:24px 0;
+}
+.call.warm{border-left-color:var(--hot); background:var(--hot-3);}
+.call.lang{border-left-color:var(--lang); background:var(--lang-3);}
+.call .k{font-family:"IBM Plex Mono",monospace; font-size:9.5px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--cold); margin-bottom:8px;}
+.call.warm .k{color:var(--hot);} .call.lang .k{color:var(--lang);}
+.call p{font-size:14.5px; margin-bottom:10px;} .call p:last-child{margin-bottom:0;}
+
+.eq{
+  background:var(--sunk); border:1px solid var(--line); border-radius:8px;
+  padding:16px 20px; margin:18px 0; overflow-x:auto;
+}
+.eq .b{font-family:"Newsreader",Georgia,serif; font-size:1.14rem; line-height:1.9;
+  text-align:center; white-space:nowrap;}
+.eq .c{font-size:12.5px; color:var(--ink-m); text-align:center; margin-top:10px;}
+
+/* ─── tables ────────────────────────────────────────── */
+.tw{overflow-x:auto; margin:22px 0 26px; border:1px solid var(--line);
+  border-radius:8px; background:var(--surface); box-shadow:var(--sh-sm);}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:540px;}
+th{font-family:"IBM Plex Mono",monospace; font-size:9.5px; font-weight:600; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--ink-m); text-align:left; padding:11px 14px;
+  border-bottom:1px solid var(--line-2); white-space:nowrap; background:var(--sunk);}
+td{padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; color:var(--ink-2);}
+tbody tr:last-child td{border-bottom:0;}
+td:first-child{color:var(--ink); font-weight:500;}
+tr.hi td{background:var(--cold-3);}
+tr.empty td{color:var(--ink-m);}
+.mono{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;}
+.chip{font-family:"IBM Plex Mono",monospace; font-size:9.5px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; padding:3px 7px; border-radius:3px; white-space:nowrap;}
+.chip.c{background:var(--cold-3); color:var(--cold);}
+.chip.h{background:var(--hot-3); color:var(--hot);}
+.chip.g{background:var(--good-3); color:var(--good);}
+.chip.n{background:var(--surface-2); color:var(--ink-m);}
+
+/* ─── figures ───────────────────────────────────────── */
+figure{margin:26px 0 30px; background:var(--surface); border:1px solid var(--line);
+  border-radius:10px; padding:24px 22px 18px; box-shadow:var(--sh-sm);}
+figure svg{display:block; width:100%; height:auto; max-width:100%; color:var(--ink-2);}
+figcaption{font-size:13px; color:var(--ink-m); margin-top:16px; padding-top:13px;
+  border-top:1px solid var(--line); line-height:1.5;}
+
+/* ─── milestones ────────────────────────────────────── */
+.gate{display:grid; grid-template-columns:auto 1fr; gap:0 18px; padding:20px 0;
+  border-bottom:1px solid var(--line);}
+.gate:last-child{border-bottom:0;}
+.gate-id{font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:600;
+  color:var(--cold); padding-top:3px;}
+.gate h4{margin:0 0 6px; font-size:15px;}
+.gate p{font-size:14px; margin:0 0 8px; color:var(--ink-2);}
+.gate .c2{font-size:13px; border-left:2px solid var(--line-2); padding:2px 0 2px 13px; margin-top:8px;}
+.gate .c2 b{font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--ink-m); margin-right:8px;}
+
+/* ─── deliverables ──────────────────────────────────── */
+.cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin:22px 0;}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:9px;
+  padding:17px 18px; box-shadow:var(--sh-sm);}
+.card .t{font-family:"IBM Plex Mono",monospace; font-size:9.5px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--cold); margin-bottom:7px;}
+.card b{display:block; font-size:14.5px; margin-bottom:5px; line-height:1.35;}
+.card p{font-size:13px; color:var(--ink-2); margin:0; line-height:1.5;}
+
+/* ─── glossary ──────────────────────────────────────── */
+details{background:var(--surface); border:1px solid var(--line); border-radius:8px;
+  margin-bottom:8px; overflow:hidden;}
+details[open]{box-shadow:var(--sh-sm);}
+summary{padding:13px 17px; cursor:pointer; font-weight:600; font-size:14.5px; list-style:none;
+  display:flex; justify-content:space-between; align-items:center; gap:12px;}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+"; font-family:"IBM Plex Mono",monospace; color:var(--cold);
+  font-size:16px; font-weight:400;}
+details[open] summary::after{content:"−";}
+summary:focus-visible{outline:2px solid var(--cold); outline-offset:-2px;}
+details .d{padding:0 17px 15px; font-size:14px; color:var(--ink-2); line-height:1.6;}
+details .d code{font-size:.86em;}
+
+.sr-only{position:absolute!important; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;}
+footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line);
+  font-size:13px; color:var(--ink-m); max-width:70ch;}
+footer a{color:var(--cold);}
+</style>
+
+<div class="shell"><div class="grid">
+
+<nav class="rail" aria-label="Sommaire">
+  <div class="brand">Cristallisation latente<span>Base de connaissances</span></div>
+  <ol>
+    <li><a href="#probleme">01 · Le problème</a></li>
+    <li><a href="#these">02 · Place dans la thèse</a></li>
+    <li><a href="#clip">03 · CLIP est une mesure de Gibbs</a></li>
+    <li><a href="#labo">04 · Le laboratoire latent</a></li>
+    <li><a href="#prop1">05 · Cristal ou effondrement</a></li>
+    <li><a href="#phases">06 · Les trois phases</a></li>
+    <li><a href="#budget">07 · Le budget de calcul</a></li>
+    <li><a href="#garantie">08 · La garantie</a></li>
+    <li><a href="#protocole">09 · Protocole</a></li>
+    <li><a href="#jalons">10 · Jalons</a></li>
+    <li><a href="#resultats">11 · Résultats</a></li>
+    <li><a href="#livrables">12 · Livrables</a></li>
+    <li><a href="#glossaire">13 · Glossaire</a></li>
+    <li><a href="#references">14 · Références</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ══════════ HERO ══════════ -->
+<div class="hero">
+  <p class="kicker">Thermodynamic Latent Space Crystallization</p>
+  <h1>Quand l'appareil change, le modèle <em>doute</em>.</h1>
+  <p class="hero-lede">Un encodeur gelé ne se dégrade pas seulement quand la pathologie change — mais quand l'échographe change. Cet axe de recherche traite l'espace latent comme un système thermodynamique : on mesure son désordre, on le fait cristalliser au moment de l'examen, et on arrête l'inférence dès que la décision est prise.</p>
+
+  <div class="stage">
+    <canvas id="hero" width="1200" height="440" role="img" aria-label="Nuage de représentations latentes passant d'un état dispersé à un état condensé autour de deux ancres de décision"></canvas>
+    <div class="stage-bar">
+      <label for="heroS">Sévérité du décalage d'acquisition</label>
+      <input type="range" id="heroS" min="0" max="100" value="0" aria-label="Sévérité du décalage">
+      <span class="state-pill" id="heroPill">état cristallisé</span>
+    </div>
+  </div>
+  <p class="dek" style="max-width:64ch">Déplacez le curseur : c'est le même patient, le même diagnostic. Seul l'appareil a changé. Les représentations quittent les ancres et se dispersent — et la décision devient un tirage.</p>
+</div>
+
+<!-- ══════════ 01 ══════════ -->
+<section id="probleme">
+  <div class="col">
+    <span class="sec-no">01 — Le problème</span>
+    <h2>Le bruit d'acquisition est du même ordre que le signal</h2>
+    <p class="dek">En échographie des glandes salivaires, modalité de référence pour le syndrome de Sjögren, la variabilité technique rivalise avec la variabilité pathologique que l'on cherche à mesurer.</p>
+
+    <p>Un modèle mis au point sur les images d'un centre se dégrade sur celles d'un autre, sans que la maladie ait changé. Les causes sont purement techniques : constructeur de l'échographe, préréglages, fréquence de la sonde, gain, profondeur, compression dynamique — et la main de l'opérateur.</p>
+    <p>Le système de cotation OMERACT, aujourd'hui central dans l'évaluation échographique du syndrome de Sjögren, fait l'objet d'études de concordance inter-observateurs qui montrent une variabilité résiduelle notable. Trois circonstances aggravent la situation dans une maladie rare : les cohortes sont petites, les annotations coûteuses car elles exigent un expert, et les études sont multicentriques par nécessité — donc exposées au décalage <em>réel</em>, non simulé.</p>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 900 300" role="img" aria-label="Un même examen acquis sur trois échographes différents produit trois projections distinctes dans l'espace latent, dont une bascule du côté de la mauvaise ancre de décision">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <text x="0" y="14" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" letter-spacing="1.4">MÊME PATIENT · MÊME DIAGNOSTIC</text>
+      <ellipse cx="72" cy="120" rx="52" ry="40" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M40 128 q18 -22 34 -6 q14 14 30 -6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/>
+      <text x="72" y="182" font-size="12" text-anchor="middle" fill="currentColor">glande parotide</text>
+
+      <line x1="132" y1="100" x2="248" y2="62"  stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+      <line x1="132" y1="120" x2="248" y2="120" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+      <line x1="132" y1="140" x2="248" y2="178" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+      <text x="190" y="52"  font-size="11" text-anchor="middle" fill="currentColor">appareil A</text>
+      <text x="190" y="112" font-size="11" text-anchor="middle" fill="currentColor">appareil B</text>
+      <text x="190" y="196" font-size="11" text-anchor="middle" fill="currentColor">appareil C</text>
+
+      <rect x="252" y="40" width="112" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <rect x="252" y="98" width="112" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <rect x="252" y="156" width="112" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <text x="308" y="67"  font-size="11" text-anchor="middle" fill="currentColor">image</text>
+      <text x="308" y="125" font-size="11" text-anchor="middle" fill="currentColor">image</text>
+      <text x="308" y="183" font-size="11" text-anchor="middle" fill="currentColor">image</text>
+
+      <line x1="368" y1="62"  x2="470" y2="105" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+      <line x1="368" y1="120" x2="470" y2="120" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+      <line x1="368" y1="178" x2="470" y2="136" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+      <text x="419" y="72" font-size="10.5" text-anchor="middle" fill="currentColor" font-family="IBM Plex Mono, monospace">encodeur gelé</text>
+
+      <rect x="478" y="34" width="404" height="232" rx="8" fill="none" stroke="currentColor" stroke-width="1" opacity=".45"/>
+      <text x="494" y="56" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" letter-spacing="1.2">ESPACE LATENT</text>
+
+      <circle cx="576" cy="176" r="7" fill="#0B6B7A"/>
+      <text x="576" y="204" font-size="11.5" text-anchor="middle" fill="#0B6B7A" font-weight="600">ancre « sain »</text>
+      <circle cx="794" cy="112" r="7" fill="#B04A22"/>
+      <text x="794" y="94" font-size="11.5" text-anchor="middle" fill="#B04A22" font-weight="600">ancre « pathologique »</text>
+      <line x1="576" y1="176" x2="794" y2="112" stroke="currentColor" stroke-width="1" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="640" y1="228" x2="736" y2="52" stroke="currentColor" stroke-width="1" stroke-dasharray="2 5" opacity=".7"/>
+      <text x="700" y="248" font-size="10" fill="currentColor" opacity=".8">frontière de décision</text>
+
+      <circle cx="600" cy="166" r="4.5" fill="none" stroke="#0B6B7A" stroke-width="1.8"/>
+      <text x="600" y="150" font-size="10.5" text-anchor="middle" fill="currentColor">A</text>
+      <circle cx="628" cy="184" r="4.5" fill="none" stroke="#0B6B7A" stroke-width="1.8"/>
+      <text x="628" y="204" font-size="10.5" text-anchor="middle" fill="currentColor">B</text>
+      <circle cx="706" cy="140" r="5.5" fill="#B04A22"/>
+      <text x="706" y="124" font-size="10.5" text-anchor="middle" fill="#B04A22" font-weight="600">C</text>
+    </svg>
+    <figcaption>Le même examen, encodé par le même modèle gelé, se projette à trois endroits selon l'appareil qui l'a acquis. L'acquisition C franchit la frontière de décision : le modèle change de diagnostic parce que la sonde a changé — et rien dans sa sortie ne l'en avertit.</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 02 ══════════ -->
+<section id="these">
+  <div class="col">
+    <span class="sec-no">02 — Place dans la thèse</span>
+    <h2>Un axe méthodologique, pas une application de plus</h2>
+    <p class="dek">La thèse porte sur les applications de l'IA à l'imagerie médicale, avec le syndrome de Sjögren comme terrain principal. Cet axe en constitue le socle méthodologique.</p>
+
+    <h3>L'acquis</h3>
+    <p>Le travail antérieur repose sur un modèle vision-langage de type CLIP, exploité en encodeur gelé. Son intérêt en imagerie médicale est double : il fournit un espace de représentation structuré sans exiger un grand jeu annoté — atout déterminant pour une maladie rare — et il permet de définir les classes par du texte plutôt que par des exemples.</p>
+
+    <h3>La limite</h3>
+    <p>C'est celle décrite plus haut : l'encodeur gelé ne résiste pas au changement d'appareil. Et la parade habituelle — réentraîner sur les données du nouveau centre — suppose des annotations qu'on n'a pas, et un transfert de données que la réglementation complique.</p>
+
+    <h3>La réponse</h3>
+    <p>Adapter le modèle <em>au moment de l'examen</em>, sans étiquette, sans réentraînement, en n'ajustant qu'une fraction infime de ses paramètres. Trois propriétés rendent cette voie particulièrement adaptée au terrain :</p>
+    <ul>
+      <li>elle ne consomme aucune annotation ;</li>
+      <li>elle n'exige pas de rassembler les données de plusieurs centres en un même lieu ;</li>
+      <li>elle traite le décalage au moment où il se manifeste.</li>
+    </ul>
+
+    <div class="call">
+      <div class="k">Statut de l'axe</div>
+      <p>Ce n'est pas une application supplémentaire de l'IA au syndrome de Sjögren, mais une <strong>contribution méthodologique transverse</strong>, dont Sjögren constitue le terrain de validation le plus exigeant — et qui serait transposable aux autres pathologies de la thèse.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 03 ══════════ -->
+<section id="clip">
+  <div class="col">
+    <span class="sec-no">03 — L'observation centrale</span>
+    <h2>L'inférence de CLIP <em>est déjà</em> une mesure de Gibbs</h2>
+    <p class="dek">Ce n'est pas une analogie plaquée de l'extérieur. C'est la lecture exacte de ce que fait le modèle — et c'est ce qui articule cet axe au travail antérieur.</p>
+
+    <p>Posons l'énergie de configuration <span class="m">E<sub>k</sub></span>(<span class="m">z</span>) = ‖<span class="m">z</span> − <span class="m">μ<sub>k</sub></span>‖² et le postérieur de Boltzmann associé :</p>
+    <div class="eq"><div class="b"><span class="m">p<sub>k</sub></span>(<span class="m">z</span>) = exp( −<span class="m">E<sub>k</sub></span>(<span class="m">z</span>) / <span class="m">T</span> ) / <span class="m">Z</span>(<span class="m">z</span>)</div></div>
+    <p>Or les plongements de CLIP sont normalisés : ils vivent sur la sphère unité, où ‖<span class="m">z</span> − <span class="m">μ<sub>k</sub></span>‖² = 2 − 2⟨<span class="m">z</span>, <span class="m">μ<sub>k</sub></span>⟩. Donc :</p>
+    <div class="eq">
+      <div class="b">−‖<span class="m">z</span> − <span class="m">μ<sub>k</sub></span>‖² / <span class="m">T</span> &nbsp;=&nbsp; (2/<span class="m">T</span>)·⟨<span class="m">z</span>, <span class="m">μ<sub>k</sub></span>⟩ &nbsp;−&nbsp; 2/<span class="m">T</span></div>
+      <div class="c">Le second terme ne dépend pas de <span class="m">k</span> : il disparaît dans la normalisation.</div>
+    </div>
+    <div class="eq">
+      <div class="b"><span class="m">p<sub>k</sub></span>(<span class="m">z</span>) = softmax<sub><span class="m">k</span></sub>( ⟨<span class="m">z</span>, <span class="m">μ<sub>k</sub></span>⟩ / (<span class="m">T</span>/2) )</div>
+      <div class="c">C'est exactement l'inférence zero-shot de CLIP, avec <span class="m">T</span> = 2<span class="m">τ</span>.</div>
+    </div>
+
+    <div class="call lang">
+      <div class="k">Ce que cela change</div>
+      <p>Les ancres <span class="m">μ<sub>k</sub></span> sont les <strong>plongements textuels des classes</strong> — elles n'ont pas à être apprises. La température apprise <span class="m">τ</span> devient une grandeur physique. Et les trois observables ci-dessous se calculent sur l'encodeur existant, sans le modifier d'une ligne.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><b>Vérification numérique de l'équivalence</b><span>interactif</span></div>
+    <div class="panel-body">
+      <div class="split">
+        <div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="tau">Température CLIP · τ</label><output id="tauV">0.0100</output></div>
+            <input type="range" id="tau" min="1" max="200" value="10">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="cos0">Similarité ⟨z, μ₀⟩</label><output id="cos0V">0.28</output></div>
+            <input type="range" id="cos0" min="-100" max="100" value="28">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="cos1">Similarité ⟨z, μ₁⟩</label><output id="cos1V">0.22</output></div>
+            <input type="range" id="cos1" min="-100" max="100" value="22">
+          </div>
+        </div>
+        <div>
+          <dl class="readout">
+            <div class="ro"><dt>CLIP · softmax(cos/τ)</dt><dd id="cA">—</dd></div>
+            <div class="ro"><dt>Gibbs · exp(−d²/T)</dt><dd id="cB">—</dd></div>
+            <div class="ro wide"><dt>écart maximal</dt><dd id="cD">—</dd><small>Nul à la précision machine, pour tout τ et toute similarité.</small></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="panel-foot">Les deux formules calculent la probabilité de la classe 0. Elles coïncident parce qu'elles sont, littéralement, la même expression.</div>
+  </div>
+
+  <div class="col">
+    <h3>Trois observables au lieu d'une</h3>
+    <p>De la mesure de Gibbs découlent trois grandeurs distinctes, là où la pratique n'en exploite qu'une :</p>
+    <ul>
+      <li><strong>L'entropie</strong> <span class="m">ℋ</span> = −Σ <span class="m">p<sub>k</sub></span> ln <span class="m">p<sub>k</sub></span> — le désordre de l'assignation. C'est ce que minimise l'adaptation classique.</li>
+      <li><strong>L'énergie libre</strong> <span class="m">F</span> = −<span class="m">T</span> ln <span class="m">Z</span> — le niveau absolu d'adéquation aux ancres.</li>
+      <li><strong>L'énergie moyenne</strong> ⟨<span class="m">E</span>⟩ = Σ <span class="m">p<sub>k</sub></span> <span class="m">E<sub>k</sub></span>.</li>
+    </ul>
+    <p>Liées par l'identité thermodynamique <span class="m">F</span> = ⟨<span class="m">E</span>⟩ − <span class="m">T</span>·<span class="m">ℋ</span>, que la section suivante vous laisse vérifier en direct.</p>
+  </div>
+</section>
+
+<!-- ══════════ 04 ══════════ -->
+<section id="labo">
+  <div class="col">
+    <span class="sec-no">04 — Le laboratoire latent</span>
+    <h2>Pourquoi l'entropie ne peut pas servir de critère d'arrêt</h2>
+    <p class="dek">Déplacez le point dans le plan et changez le champ affiché. Vous verrez, en deux gestes, la Proposition 2 et son corollaire clinique.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><b>Champ de phase de l'espace latent</b><span>interactif · glissez le point</span></div>
+    <div class="panel-body">
+      <div class="split">
+        <div>
+          <canvas id="lab" class="plot" width="1160" height="760" role="img" aria-label="Carte du plan latent colorée par la cristallinité ou par l'énergie libre, avec trois ancres de décision et un point déplaçable"></canvas>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap">
+            <div class="seg" role="group" aria-label="Champ affiché">
+              <button id="fChi" aria-pressed="true">Cristallinité χ</button>
+              <button id="fF" aria-pressed="false">Énergie libre F</button>
+            </div>
+            <span style="font-size:12.5px;color:var(--ink-m)" id="fieldNote">χ = 1 − ℋ / ln K · l'ordre apparent</span>
+          </div>
+        </div>
+        <div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="TT">Température · T</label><output id="TTV">0.60</output></div>
+            <input type="range" id="TT" min="8" max="200" value="60">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="cc">Décalage uniforme · c</label><output id="ccV">0.00</output></div>
+            <input type="range" id="cc" min="0" max="300" value="0">
+          </div>
+          <dl class="readout" style="margin-top:18px">
+            <div class="ro"><dt>Entropie ℋ</dt><dd id="rH">—</dd></div>
+            <div class="ro"><dt>Énergie libre F</dt><dd id="rF">—</dd></div>
+            <div class="ro"><dt>Énergie ⟨E⟩</dt><dd id="rE">—</dd></div>
+            <div class="ro"><dt>Cristallinité χ</dt><dd id="rX">—</dd></div>
+            <div class="ro wide"><dt>F − (⟨E⟩ − T·ℋ)</dt><dd id="rId">—</dd><small>L'identité thermodynamique, vérifiée en direct.</small></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="panel-foot"><strong>Deux expériences à faire.</strong> ① Poussez le décalage uniforme <span class="m">c</span> : l'entropie ne bouge pas d'un millième, l'énergie libre se décale exactement de <span class="m">c</span>. ② Éloignez le point vers un coin, puis basculez entre les deux champs : la cristallinité y annonce un ordre parfait, l'énergie libre y voit une zone rouge.</div>
+  </div>
+
+  <div class="col">
+    <div class="call warm">
+      <div class="k">Corollaire clinique</div>
+      <p>Une image éloignée de <em>toutes</em> les ancres — signature typique d'un examen issu d'un appareil non vu — présente une entropie basse, donc une confiance apparente élevée, tout en ayant une énergie libre élevée.</p>
+      <p><strong>C'est le mode de défaillance le plus dangereux : un modèle confiant et hors de son domaine de validité.</strong> L'entropie ne le détecte pas. L'énergie libre le détecte. D'où le découplage retenu : on <em>adapte</em> en agissant sur l'entropie, on <em>arrête</em> en observant l'énergie libre.</p>
+    </div>
+    <p style="font-size:14.5px;color:var(--ink-2)"><em>Précision d'honnêteté :</em> l'énergie libre est apparentée à des scores déjà employés isolément pour la détection hors-distribution — le score énergétique de Liu et al. (2020), le maximum de similarité conceptuelle utilisé pour CLIP. L'apport revendiqué n'est pas le score, mais son unification avec l'entropie dans un même cadre et son emploi comme critère d'arrêt assorti d'une garantie.</p>
+  </div>
+</section>
+
+<!-- ══════════ 05 ══════════ -->
+<section id="prop1">
+  <div class="col">
+    <span class="sec-no">05 — Proposition 1</span>
+    <h2>Un cristal, ce n'est pas un effondrement</h2>
+    <p class="dek">Un cristal exige la condensation <em>et</em> le maintien de sites distincts. Une condensation vers un site unique n'est pas un cristal — et c'est précisément vers cela que converge toute minimisation d'incertitude non régularisée.</p>
+
+    <p>La simulation ci-dessous est fidèle au mécanisme réel : les représentations sont contraintes sur la sphère unité — comme après une couche de normalisation — et le modèle ne dispose que d'une <strong>transformation partagée</strong> par tous les échantillons, à l'image des paramètres <span class="m">θ<sub>adapt</sub></span>. Les deux classes ont été rendues inséparables par le décalage.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><b>Descente de gradient sur l'énergie en ligne</b><span>simulation · 80 échantillons</span></div>
+    <div class="panel-body">
+      <div class="split">
+        <div>
+          <canvas id="col" class="plot" width="1160" height="700" role="img" aria-label="Simulation montrant un nuage de points sur un cercle se condensant soit sur une ancre unique soit sur deux ancres distinctes selon la valeur du coefficient de répulsion"></canvas>
+        </div>
+        <div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="lam">Coefficient de répulsion · λ</label><output id="lamV">0.00</output></div>
+            <input type="range" id="lam" min="0" max="30" value="0">
+          </div>
+          <dl class="readout">
+            <div class="ro"><dt>Entropie moyenne</dt><dd id="sH">—</dd></div>
+            <div class="ro"><dt>Répulsion D</dt><dd id="sD">—</dd></div>
+            <div class="ro wide"><dt>Entropie marginale</dt><dd id="sHm">—</dd><small>Diagnostic d'effondrement. Proche de ln 2 ≈ 0,693 : sites maintenus. Proche de 0 : effondrement.</small></div>
+            <div class="ro wide"><dt>Verdict</dt><dd><span id="sV" class="verdict ok">—</span></dd></div>
+          </dl>
+          <button class="btn" id="colReset" style="margin-top:14px">Relancer la descente</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel-foot">Avec λ = 0, l'entropie tombe à zéro — mais tous les échantillons ont rejoint une seule ancre. Le modèle a « résolu » son incertitude en déclarant toutes les glandes identiques. Dès λ ≈ 0,05, les deux sites sont maintenus.</div>
+  </div>
+
+  <div class="col">
+    <div class="call">
+      <div class="k">Proposition 1</div>
+      <p>Toute configuration effondrée atteint une entropie nulle : c'est donc un minimiseur global du terme de condensation pris isolément. Sur ces configurations les prototypes se confondent et la répulsion s'annule, tandis qu'une configuration séparée atteint une énergie strictement négative.</p>
+      <p><strong>Pour tout λ &gt; 0, aucune configuration effondrée n'est un minimiseur global de l'énergie en ligne, dès lors qu'une configuration séparée est atteignable.</strong></p>
+    </div>
+    <p>C'est l'énoncé qui distingue formellement la méthode de la minimisation d'entropie classique, et qui donne au terme de répulsion une fonction — sans lui, il n'en aurait aucune. L'énergie complète s'écrit :</p>
+    <div class="eq">
+      <div class="b">ℰ = ⟨ℋ⟩<sub>lot</sub> &nbsp;−&nbsp; λ‖<span class="m">μ̂</span><sub>0</sub> − <span class="m">μ̂</span><sub>1</sub>‖² &nbsp;+&nbsp; β Σ<sub><span class="m">k</span></sub>‖<span class="m">μ̂<sub>k</sub></span> − <span class="m">μ<sub>k</sub></span>‖²</div>
+      <div class="c">condensation · répulsion anti-effondrement · ancrage anti-dérive</div>
+    </div>
+    <p>Les prototypes <span class="m">μ̂<sub>k</sub></span> sont ré-estimés sur le flux de test — c'est cette dépendance aux paramètres qui donne au terme de répulsion un gradient non nul.</p>
+  </div>
+</section>
+
+<!-- ══════════ 06 ══════════ -->
+<section id="phases">
+  <div class="col">
+    <span class="sec-no">06 — Architecture</span>
+    <h2>Trois phases, dont deux au moment de l'examen</h2>
+    <p class="dek">L'ancrage se fait une fois pour toutes hors ligne. L'adaptation et l'arrêt se jouent pendant l'inférence, en quelques millisecondes.</p>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 900 400" role="img" aria-label="Schéma du pipeline en trois phases : ancrage hors ligne des têtes de lecture et des repères, puis sonde et adaptation conditionnelle, puis évaluation couche par couche avec arrêt anticipé ou renvoi à l'expert">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <rect x="0" y="24" width="900" height="96" rx="8" fill="none" stroke="currentColor" stroke-width="1" opacity=".35"/>
+      <text x="14" y="16" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="#0B6B7A" letter-spacing="1.4">PHASE 1 · HORS LIGNE, UNE FOIS</text>
+      <rect x="20" y="46" width="150" height="52" rx="5" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="95" y="70" font-size="12" text-anchor="middle" fill="currentColor">cohorte source</text>
+      <text x="95" y="86" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".7">annotée</text>
+      <line x1="174" y1="72" x2="228" y2="72" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <rect x="232" y="46" width="188" height="52" rx="5" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="326" y="70" font-size="12" text-anchor="middle" fill="currentColor">12 têtes de lecture g₁…g₁₂</text>
+      <text x="326" y="86" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".7">backbone gelé</text>
+      <line x1="424" y1="72" x2="478" y2="72" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <rect x="482" y="46" width="188" height="52" rx="5" fill="none" stroke="#0B6B7A" stroke-width="1.5"/>
+      <text x="576" y="70" font-size="12" text-anchor="middle" fill="#0B6B7A" font-weight="600">12 jeux de repères μₖ⁽ⁿ⁾</text>
+      <text x="576" y="86" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".7">un par couche</text>
+      <text x="700" y="70" font-size="11" fill="currentColor" opacity=".75">figés</text>
+      <line x1="674" y1="72" x2="694" y2="72" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+
+      <line x1="576" y1="102" x2="576" y2="150" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#ar2)"/>
+      <text x="588" y="132" font-size="10.5" fill="currentColor" opacity=".8">repères réutilisés à l'examen</text>
+
+      <rect x="0" y="164" width="900" height="220" rx="8" fill="none" stroke="currentColor" stroke-width="1" opacity=".35"/>
+      <text x="14" y="182" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="#0B6B7A" letter-spacing="1.4">PHASES 2 &amp; 3 · À L'EXAMEN, SANS ÉTIQUETTE</text>
+
+      <rect x="20" y="216" width="112" height="48" rx="5" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="76" y="245" font-size="12" text-anchor="middle" fill="currentColor">image reçue</text>
+      <line x1="136" y1="240" x2="182" y2="240" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <rect x="186" y="216" width="122" height="48" rx="5" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="247" y="238" font-size="12" text-anchor="middle" fill="currentColor">couche sonde</text>
+      <text x="247" y="254" font-size="10.5" text-anchor="middle" fill="currentColor" opacity=".7">on calcule F</text>
+
+      <path d="M308 240 L352 240" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <path d="M356 240 L390 214 L424 240 L390 266 Z" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="390" y="244" font-size="10.5" text-anchor="middle" fill="currentColor">F &gt; seuil ?</text>
+
+      <path d="M390 210 L390 190 L520 190" fill="none" stroke="#B04A22" stroke-width="1.4" marker-end="url(#ar2)"/>
+      <text x="452" y="183" font-size="10.5" text-anchor="middle" fill="#B04A22" font-weight="600">oui · hors domaine</text>
+      <rect x="524" y="168" width="176" height="46" rx="5" fill="none" stroke="#B04A22" stroke-width="1.4"/>
+      <text x="612" y="188" font-size="11.5" text-anchor="middle" fill="#B04A22" font-weight="600">adaptation sélective</text>
+      <text x="612" y="203" font-size="10" text-anchor="middle" fill="currentColor" opacity=".75">1 à 3 pas sur θ_adapt (≈ 0,05 %)</text>
+      <path d="M612 216 L612 232 L430 232" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 4" marker-end="url(#ar2)"/>
+      <text x="524" y="228" font-size="10" fill="currentColor" opacity=".7">re-projette</text>
+
+      <path d="M390 268 L390 300 L436 300" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+      <text x="352" y="292" font-size="10.5" text-anchor="middle" fill="currentColor">non</text>
+
+      <rect x="440" y="278" width="196" height="46" rx="5" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <text x="538" y="298" font-size="12" text-anchor="middle" fill="currentColor">couches n = 1 … 12</text>
+      <text x="538" y="313" font-size="10" text-anchor="middle" fill="currentColor" opacity=".75">F&lt;εₙ ? seuils calibrés</text>
+
+      <path d="M640 292 L716 292" stroke="#0B6B7A" stroke-width="1.5" marker-end="url(#ar2)"/>
+      <text x="678" y="284" font-size="10.5" text-anchor="middle" fill="#0B6B7A" font-weight="600">cristallisé</text>
+      <rect x="720" y="270" width="160" height="44" rx="5" fill="none" stroke="#0B6B7A" stroke-width="1.5"/>
+      <text x="800" y="290" font-size="12" text-anchor="middle" fill="#0B6B7A" font-weight="600">diagnostic · arrêt</text>
+      <text x="800" y="305" font-size="10" text-anchor="middle" fill="currentColor" opacity=".75">blocs suivants non exécutés</text>
+
+      <path d="M538 326 L538 356 L716 356" fill="none" stroke="#B04A22" stroke-width="1.4" marker-end="url(#ar2)"/>
+      <text x="620" y="350" font-size="10.5" text-anchor="middle" fill="#B04A22" font-weight="600">jamais cristallisé</text>
+      <rect x="720" y="334" width="160" height="44" rx="5" fill="none" stroke="#B04A22" stroke-width="1.5"/>
+      <text x="800" y="354" font-size="12" text-anchor="middle" fill="#B04A22" font-weight="600">renvoi à l'expert</text>
+      <text x="800" y="369" font-size="10" text-anchor="middle" fill="currentColor" opacity=".75">relecture prioritaire</text>
+    </svg>
+    <figcaption>L'adaptation n'est pas systématique : elle est déclenchée par l'énergie libre à une couche sonde, ce qui conditionne entièrement la viabilité du budget de calcul. Un examen qui n'atteint jamais l'état cristallisé n'est pas classé de force — il est signalé.</figcaption>
+  </figure>
+
+  <div class="col">
+    <div class="call">
+      <div class="k">Note d'implémentation</div>
+      <p>Les <em>forward hooks</em> de PyTorch observent le calcul mais ne l'interrompent pas : une sortie anticipée implémentée par hooks exécute quand même les douze couches et n'économise aucun FLOP, tout en produisant des courbes plausibles. L'arrêt réel exige une boucle explicite sur les blocs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 07 ══════════ -->
+<section id="budget">
+  <div class="col">
+    <span class="sec-no">07 — Le budget</span>
+    <h2>Adapter coûte cher : la sélectivité n'est pas une option</h2>
+    <p class="dek">Une passe arrière coûte environ le double d'une passe avant, et traverse tout le réseau même lorsque 0,05 % des paramètres seulement sont mis à jour. Une adaptation systématique ne peut pas rendre l'inférence plus rapide.</p>
+    <div class="eq">
+      <div class="b"><span class="m">C</span><sub>tot</sub> = <span class="m">ρ</span> · <span class="m">S</span> · (1 + <span class="m">κ</span>) · <span class="m">C</span>(<span class="m">n</span><sub>sonde</sub>) &nbsp;+&nbsp; <span class="m">C</span>(<span class="m">N</span>*)</div>
+      <div class="c"><span class="m">ρ</span> fraction d'images adaptées · <span class="m">S</span> itérations · <span class="m">κ</span> coût relatif de la passe arrière</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><b>Calculateur de budget</b><span>interactif</span></div>
+    <div class="panel-body">
+      <div class="split">
+        <div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="rho">ρ · fraction adaptée</label><output id="rhoV">1.00</output></div>
+            <input type="range" id="rho" min="0" max="100" value="100">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="SS">S · itérations d'adaptation</label><output id="SSV">1</output></div>
+            <input type="range" id="SS" min="1" max="3" value="1">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="kk">κ · coût passe arrière</label><output id="kkV">2.0</output></div>
+            <input type="range" id="kk" min="10" max="30" value="20">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="np">couche sonde</label><output id="npV">6</output></div>
+            <input type="range" id="np" min="1" max="12" value="6">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-top"><label for="ns">N* · profondeur de sortie moyenne</label><output id="nsV">6</output></div>
+            <input type="range" id="ns" min="1" max="12" value="6">
+          </div>
+        </div>
+        <div>
+          <canvas id="bud" class="plot" width="800" height="300" role="img" aria-label="Comparaison en barres du coût total de la méthode et du coût d'une inférence statique complète"></canvas>
+          <dl class="readout" style="margin-top:16px">
+            <div class="ro"><dt>Coût méthode</dt><dd id="bA">—</dd></div>
+            <div class="ro"><dt>Inférence statique</dt><dd id="bB">12,0</dd></div>
+            <div class="ro wide"><dt>Verdict</dt><dd><span id="bV" class="verdict no">—</span></dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="panel-foot">Avec <span class="m">S</span> = 1, <span class="m">κ</span> = 2 et une sonde en position 6, la condition de gain net se réduit à <strong><span class="m">ρ</span> &lt; 1/3</strong> : le gain existe si et seulement si moins d'un tiers des images sont effectivement adaptées. C'est une prédiction falsifiable, à confronter à la mesure.</div>
+  </div>
+</section>
+
+<!-- ══════════ 08 ══════════ -->
+<section id="garantie">
+  <div class="col">
+    <span class="sec-no">08 — La garantie</span>
+    <h2>Un praticien n'achète pas une économie de calcul</h2>
+    <p class="dek">Il achète une économie de calcul assortie d'une borne sur le risque. C'est ce qui sépare une contribution d'efficience d'une contribution utilisable en clinique.</p>
+
+    <p>Les seuils d'arrêt <span class="m">ε<sub>n</sub></span> ne sont pas choisis mais <strong>calibrés</strong>, par contrôle conforme du risque sur un jeu dédié. La garantie s'énonce ainsi : la dégradation diagnostique imputable à l'arrêt anticipé reste inférieure à un niveau <span class="m">α</span> fixé à l'avance, avec une confiance 1 − <span class="m">δ</span>.</p>
+    <p>Concrètement, on parcourt une grille de seuils du plus conservateur au plus agressif ; pour chacun on estime le risque empirique sur le jeu de calibration, on lui applique une borne supérieure de confiance de Hoeffding, et l'on retient le dernier seuil dont la borne reste sous <span class="m">α</span>.</p>
+
+    <div class="call warm">
+      <div class="k">La réserve qu'il faut énoncer soi-même</div>
+      <p>Cette garantie suppose l'échangeabilité entre le jeu de calibration et le jeu de test — hypothèse <strong>violée par construction en présence de décalage</strong>. Trois régimes doivent donc être rapportés séparément : source vers source (garantie valide), source vers cible (garantie approchée, à valider empiriquement), domaine cible tenu à l'écart vers cible (valide).</p>
+      <p>Ne pas le dire serait la faille la plus facilement exploitable par un relecteur. Le dire soi-même est un signal de sérieux.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 09 ══════════ -->
+<section id="protocole">
+  <div class="col">
+    <span class="sec-no">09 — Protocole</span>
+    <h2>Ce qui sera mesuré, et contre quoi</h2>
+    <p class="dek">Les corruptions synthétiques servent à <em>comprendre</em> — elles seules offrent un paramètre de contrôle continu. Le décalage réel sert à <em>démontrer</em>.</p>
+  </div>
+
+  <div class="tw"><table>
+    <caption class="sr-only">Cohortes du protocole</caption>
+    <thead><tr><th>Palier</th><th>Cohorte</th><th>Nature du décalage</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">P0</td><td>MedMNIST-C</td><td>Corruptions réalistes par modalité, sévérité 1 à 5, dont échographie</td><td>Mécanique, itération rapide, balayage continu</td></tr>
+      <tr class="hi"><td class="mono">P1</td><td>Camelyon17-WILDS</td><td>5 hôpitaux réels, variabilité de coloration</td><td><strong>Expérience de tête</strong> — proxy direct des biopsies de glandes salivaires</td></tr>
+      <tr><td class="mono">P2</td><td>RSNA → ChestX-ray14</td><td>Inter-institution, acquisition DICOM</td><td>Généralisation à une seconde modalité</td></tr>
+      <tr><td class="mono">P3</td><td>Cohorte Sjögren</td><td>Inter-centre réel, échographie ou histologie</td><td>Subordonné à l'accès aux données</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="col"><h3>Matrice d'ablation</h3>
+  <p>Une ligne décide du sort de l'axe, et elle s'exécute tôt.</p></div>
+
+  <div class="tw"><table>
+    <thead><tr><th>Réf</th><th>Configuration</th><th>Ce que la ligne établit</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">A0</td><td>Source-only, statique</td><td>Plancher de référence</td></tr>
+      <tr><td class="mono">A1</td><td>Recalibration des statistiques LayerNorm</td><td>Baseline forte, souvent omise</td></tr>
+      <tr><td class="mono">A2</td><td>TENT</td><td>Référence historique du domaine</td></tr>
+      <tr><td class="mono">A3</td><td>EATA · SAR · DeYO</td><td>État de l'art 2022–2024</td></tr>
+      <tr><td class="mono">A4</td><td>Arrêt anticipé calibré seul</td><td>Efficience sans adaptation</td></tr>
+      <tr class="hi"><td class="mono">A5</td><td><strong>TENT + arrêt calibré</strong></td><td><strong>Contrôle décisif</strong> — la composition naïve des deux briques</td></tr>
+      <tr><td class="mono">A6</td><td>Nôtre, λ = 0</td><td>Isole l'apport du terme de répulsion</td></tr>
+      <tr><td class="mono">A7</td><td>Nôtre, arrêt sur ℋ au lieu de F</td><td>Quantifie l'effet de circularité</td></tr>
+      <tr><td class="mono">A8</td><td>Nôtre, complet</td><td>Méthode proposée</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="col">
+    <div class="call">
+      <div class="k">Pourquoi A5 est la ligne critique</div>
+      <p>Si A8 ne dépasse pas A5 de façon statistiquement significative sur décalage réel, la contribution se réduit à une reformulation lexicale de deux méthodes existantes. La ligne s'exécute donc <strong>au début du protocole, pas à la fin</strong>.</p>
+    </div>
+
+    <h3>Métriques</h3>
+    <ul>
+      <li><strong>Diagnostic</strong> — AUROC (primaire, robuste au déséquilibre), accuracy équilibrée, F1 macro, sensibilité à spécificité fixée à 0,95.</li>
+      <li><strong>Calibration</strong> — ECE à 15 bacs, score de Brier, diagrammes de fiabilité. Non optionnel : c'est la seule chose qui distingue une cristallisation d'une sur-confiance.</li>
+      <li><strong>Coût</strong> — FLOPs passes arrière incluses, latence p50 et p95 avec synchronisation explicite, profondeur moyenne de sortie, fraction <span class="m">ρ</span> effectivement adaptée.</li>
+      <li><strong>Sécurité clinique</strong> — courbe risque–couverture et AURC sur les cas renvoyés à l'expert.</li>
+      <li><strong>Effondrement</strong> — entropie de la distribution marginale des prédictions, par couche.</li>
+    </ul>
+
+    <h3>Traitement statistique</h3>
+    <p>Cinq graines minimum, moyenne et écart-type systématiques, intervalles de confiance par bootstrap apparié, test de DeLong pour les différences d'AUROC, correction de Holm-Bonferroni. <strong>Aucun hyperparamètre n'est sélectionné sur le jeu de test cible</strong> — point le plus fréquemment violé dans la littérature, et le respecter est en soi un argument de qualité.</p>
+  </div>
+</section>
+
+<!-- ══════════ 10 ══════════ -->
+<section id="jalons">
+  <div class="col">
+    <span class="sec-no">10 — Jalons</span>
+    <h2>Décider à l'avance ce qui constituerait un échec</h2>
+    <p class="dek">C'est ce qui distingue une recherche d'une illustration — et ce qui protège, dans six semaines, face à un résultat décevant après des nuits de calcul.</p>
+
+    <div class="gate">
+      <div class="gate-id">J1</div>
+      <div>
+        <h4>Mécanique opérationnelle</h4>
+        <p>MedMNIST-C. Chaîne complète exécutable, tests d'invariants au vert, trajectoire d'entropie tracée.</p>
+        <div class="c2"><b>passage</b>Entropie décroissante en domaine source, aucune divergence, gel du backbone vérifié par assertion.</div>
+        <div class="c2"><b>échec</b>Problème d'implémentation : on corrige, on ne pivote pas.</div>
+      </div>
+    </div>
+    <div class="gate">
+      <div class="gate-id">J2</div>
+      <div>
+        <h4>Supériorité sur le contrôle décisif</h4>
+        <p>Camelyon17-WILDS, décalage réel, cinq graines. A8 contre A5.</p>
+        <div class="c2"><b>passage</b>Gain d'AUROC significatif à budget de calcul égal ou inférieur.</div>
+        <div class="c2"><b>échec</b>Repli sur l'arrêt anticipé à risque contrôlé, sans adaptation. Contribution plus étroite, mais publiable en MICCAI ou MIDL.</div>
+      </div>
+    </div>
+    <div class="gate">
+      <div class="gate-id">J3</div>
+      <div>
+        <h4>Honnêteté du budget</h4>
+        <p>Comptabilisation complète, passes arrière incluses, latence mesurée sur le matériel cible.</p>
+        <div class="c2"><b>passage</b>Coût total net inférieur à l'inférence statique.</div>
+        <div class="c2"><b>échec</b>Repositionnement en méthode de robustesse, et publication du comptage honnête — contribution utile à un domaine qui masque régulièrement ce coût.</div>
+      </div>
+    </div>
+    <div class="gate">
+      <div class="gate-id">J4</div>
+      <div>
+        <h4>Verdict sur la transition de phase</h4>
+        <p>Balayage de sévérité, susceptibilité ∂χ/∂s, analyse d'échelle en dimension latente.</p>
+        <div class="c2"><b>passage</b>Pic de susceptibilité reproductible, s'affinant avec la dimension.</div>
+        <div class="c2"><b>échec</b>Abandon du vocabulaire thermodynamique au profit d'« energy-based ». Aucune perte de substance scientifique.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 11 ══════════ -->
+<section id="resultats">
+  <div class="col">
+    <span class="sec-no">11 — Résultats</span>
+    <h2>Cette section est vide, et c'est délibéré</h2>
+    <p class="dek">Aucune expérience n'a encore été exécutée. Les tableaux existent, prêts à recevoir des mesures — pas des intentions.</p>
+  </div>
+
+  <div class="tw"><table>
+    <thead><tr><th>Réf</th><th>Méthode</th><th>AUROC</th><th>ECE</th><th>FLOPs rel.</th><th>N* moyen</th><th>run id</th></tr></thead>
+    <tbody>
+      <tr class="empty"><td class="mono">A0</td><td>Source-only</td><td>—</td><td>—</td><td class="mono">1,00</td><td class="mono">12,0</td><td>—</td></tr>
+      <tr class="empty"><td class="mono">A2</td><td>TENT</td><td>—</td><td>—</td><td>—</td><td class="mono">12,0</td><td>—</td></tr>
+      <tr class="empty"><td class="mono">A4</td><td>Arrêt calibré</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr class="empty"><td class="mono">A5</td><td>TENT + arrêt calibré</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr class="empty"><td class="mono">A8</td><td>Cristallisation</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="col">
+    <div class="call">
+      <div class="k">La règle</div>
+      <p><strong>Aucune valeur de performance n'est écrite avant d'avoir été produite par un script versionné</strong>, et chaque cellule porte l'identifiant du run qui l'a produite. Un chiffre absent d'un fichier de métriques n'existe pas.</p>
+      <p>La colonne « run id » n'est pas décorative : c'est le dispositif qui rend la règle opposable plutôt que déclarative.</p>
+    </div>
+    <p>Le premier résultat attendu est la trajectoire de l'entropie en fonction de la profondeur du réseau, sous une dizaine de jours de travail. Elle teste une hypothèse non triviale : rien n'impose <em>a priori</em> que le désordre décroisse avec la profondeur. Une réfutation serait à consigner comme telle.</p>
+  </div>
+</section>
+
+<!-- ══════════ 12 ══════════ -->
+<section id="livrables">
+  <div class="col">
+    <span class="sec-no">12 — Livrables</span>
+    <h2>L'état de la documentation</h2>
+    <p class="dek">Développement théorique et revue achevés ; préparation expérimentale engagée ; aucun résultat mesuré.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="t">Note · v2</div><b>Note d'avancement et demande d'orientation</b><p>9 pages. Présente l'axe, son articulation à la thèse, le développement théorique, la revue, et huit questions d'arbitrage.</p></div>
+    <div class="card"><div class="t">Document projet</div><b>Description complète du projet</b><p>Genèse, formalisme de Gibbs, trois phases, protocole, intégration clinique.</p></div>
+    <div class="card"><div class="t">Document projet</div><b>Plan de recherche</b><p>Feuille de route, jalons go/no-go, stratégie de publication, registre des risques.</p></div>
+    <div class="card"><div class="t">Document projet</div><b>Guide des connaissances</b><p>Base documentaire, littérature référencée jusqu'en 2026, règles d'hygiène de la base.</p></div>
+    <div class="card"><div class="t">Référence</div><b>Cadre théorique</b><p>Notation canonique, définitions, Lemme 1, Propositions 1 à 3, Algorithme 1, conjectures ouvertes.</p></div>
+    <div class="card"><div class="t">Référence</div><b>Protocole expérimental</b><p>Cohortes, matrice d'ablation, métriques, traitement statistique, tableaux vides.</p></div>
+    <div class="card"><div class="t">Référence</div><b>Guide d'implémentation</b><p>13 sprints : installation, configuration, code critique fourni, tests d'acceptation, prompts d'assistance.</p></div>
+    <div class="card"><div class="t">Suivi</div><b>Questions en attente</b><p>Les huit questions posées aux encadrants et ce que chaque réponse débloque.</p></div>
+  </div>
+
+  <div class="col">
+    <h3>Ce qui est en place côté code</h3>
+    <ul>
+      <li><strong>Environnement et dépôt</strong> — chaîne PyTorch et CUDA, structure de modules, plan en 13 étapes avec test d'acceptation à chacune.</li>
+      <li><strong>Registre des exécutions</strong> — chaque valeur publiée associée à sa configuration et au commit correspondant.</li>
+      <li><strong>Tests d'invariants</strong> — gel effectif du backbone et absence de dérive entre patients successifs, vérifiés par assertion. Le second est aussi l'argument technique de conformité au RGPD.</li>
+      <li><strong>Critère pré-enregistré</strong> — le test de transition de phase et sa condition d'abandon sont fixés avant l'observation des courbes.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════ 13 ══════════ -->
+<section id="glossaire">
+  <div class="col">
+    <span class="sec-no">13 — Glossaire</span>
+    <h2>Les termes, sans jargon</h2>
+    <p class="dek">Dépliez ce dont vous avez besoin.</p>
+
+    <details><summary>Décalage de distribution (distribution shift)</summary><div class="d">Écart entre les données sur lesquelles un modèle a été entraîné et celles qu'il rencontre en production. En imagerie médicale il est le plus souvent technique — appareil, réglages, protocole — plutôt que clinique. C'est le problème central de cet axe.</div></details>
+    <details><summary>Adaptation au moment du test (TTA)</summary><div class="d">Famille de méthodes qui ajustent un modèle pendant l'inférence, sur les données non étiquetées qu'il est en train de traiter. Elle n'exige ni annotation ni réentraînement, ce qui la rend adaptée aux maladies rares et aux contraintes réglementaires sur le transfert de données.</div></details>
+    <details><summary>Espace latent</summary><div class="d">L'espace vectoriel dans lequel le réseau représente une image après l'avoir encodée. Chaque image devient un point ; la décision consiste à regarder de quel repère ce point est le plus proche.</div></details>
+    <details><summary>Mesure de Gibbs · distribution de Boltzmann</summary><div class="d">Distribution de probabilité issue de la physique statistique, où la probabilité d'un état décroît exponentiellement avec son énergie, à une température près. Ici l'énergie est la distance au repère de classe. La section 03 montre que l'inférence de CLIP en est une.</div></details>
+    <details><summary>Entropie (ℋ)</summary><div class="d">Mesure du désordre d'une distribution de probabilité, en nats. Nulle quand le modèle est certain, maximale (ln K pour K classes) quand il hésite également entre toutes. C'est la grandeur que minimise l'adaptation classique.</div></details>
+    <details><summary>Énergie libre (F)</summary><div class="d">F = −T ln Z. Contrairement à l'entropie, elle dépend du niveau <em>absolu</em> d'adéquation aux repères, et non seulement de leurs écarts relatifs. C'est ce qui lui permet de détecter une image hors du domaine de validité, même quand le modèle s'y montre confiant.</div></details>
+    <details><summary>Cristallinité (χ)</summary><div class="d">χ = 1 − ℋ / ln K, normalisée entre 0 et 1. Paramètre d'ordre au sens de la physique statistique : 0 pour un état totalement désordonné, 1 pour un état parfaitement ordonné.</div></details>
+    <details><summary>Effondrement (collapse)</summary><div class="d">Solution dégénérée où le modèle assigne tous les échantillons à une même classe, atteignant une entropie nulle sans rien avoir compris. Sa signature est indiscernable d'une cristallisation réussie — d'où la nécessité du terme de répulsion et du diagnostic d'entropie marginale.</div></details>
+    <details><summary>Sortie anticipée (early exit)</summary><div class="d">Interruption de l'inférence avant la dernière couche du réseau, quand la décision est déjà acquise. Économise du calcul sur les cas faciles. Nécessite une tête de lecture par couche, et ne fonctionne pas via des forward hooks.</div></details>
+    <details><summary>θ_adapt</summary><div class="d">Le sous-ensemble de paramètres autorisés à bouger pendant l'adaptation : coefficients d'échelle et de décalage des couches de normalisation du backbone, plus quelques jetons de guidage visuel. De l'ordre de 0,05 % du modèle — le reste est strictement gelé, ce qui écarte l'oubli catastrophique.</div></details>
+    <details><summary>Contrôle conforme du risque</summary><div class="d">Procédure statistique qui calibre un seuil de décision de manière à garantir que le risque reste sous un niveau fixé, avec une confiance donnée. Elle suppose l'échangeabilité entre calibration et test — hypothèse à discuter explicitement sous décalage.</div></details>
+    <details><summary>AUROC · ECE · AURC</summary><div class="d"><strong>AUROC</strong> : aire sous la courbe ROC, mesure de discrimination robuste au déséquilibre des classes. <strong>ECE</strong> : erreur de calibration attendue, écart entre confiance annoncée et exactitude réelle. <strong>AURC</strong> : aire sous la courbe risque–couverture, qui mesure la qualité du tri entre cas traités et cas renvoyés à l'expert.</div></details>
+    <details><summary>FLOPs</summary><div class="d">Nombre d'opérations en virgule flottante — la mesure de coût de calcul indépendante du matériel. Le comptage doit inclure les passes arrière de l'adaptation, ce que la littérature omet souvent.</div></details>
+    <details><summary>OMERACT</summary><div class="d">Système de cotation standardisé des anomalies échographiques des glandes salivaires, de grade 0 à 3, utilisé dans l'évaluation du syndrome de Sjögren. Sa reproductibilité inter-observateurs est un objet d'étude en soi.</div></details>
+  </div>
+</section>
+
+<!-- ══════════ 14 ══════════ -->
+<section id="references">
+  <div class="col">
+    <span class="sec-no">14 — Références</span>
+    <h2>La littérature mobilisée</h2>
+
+    <h3>Adaptation au moment du test</h3>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2006.10726">TENT — Wang et al., ICLR 2021</a> · minimisation d'entropie sur les couches de normalisation</li>
+      <li><a href="https://arxiv.org/abs/2204.02610">EATA — Niu et al., ICML 2022</a> · filtrage d'échantillons et régularisation anti-oubli</li>
+      <li><a href="https://arxiv.org/abs/2302.12400">SAR — Niu et al., ICLR 2023</a> · perturbation de netteté ; documente l'effondrement</li>
+      <li><a href="https://arxiv.org/abs/2509.04977">Adapt in the Wild, 2025</a> · régularisation de netteté et de caractéristiques</li>
+      <li><a href="https://arxiv.org/abs/2512.10421">Neural Collapse in TTA, CVPR 2026</a> · effondrement neuronal en adaptation</li>
+    </ul>
+
+    <h3>Modèles vision-langage au moment du test</h3>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2209.07511">TPT — Shu et al., NeurIPS 2022</a> · test-time prompt tuning</li>
+      <li><a href="https://proceedings.iclr.cc/paper_files/paper/2024/file/23ff02034404b65776080cbf7148addd-Paper-Conference.pdf">C-TPT, ICLR 2024</a> · l'adaptation dégrade la calibration</li>
+      <li><a href="https://arxiv.org/abs/2303.00915">BiomedCLIP, 2023</a> · modèle de fondation biomédical</li>
+    </ul>
+
+    <h3>Inférence dynamique</h3>
+    <ul>
+      <li><a href="https://arxiv.org/pdf/2308.00255">LGViT, 2023</a> · sortie anticipée pour Vision Transformers</li>
+      <li><a href="https://proceedings.iclr.cc/paper_files/paper/2025/file/9c84feb75eae1ef6389f31b3ef050b6a-Paper-Conference.pdf">BEEM, ICLR 2025</a> · amélioration des sorties anticipées</li>
+    </ul>
+
+    <h3>Syndrome de Sjögren et imagerie</h3>
+    <ul>
+      <li><a href="https://onlinelibrary.wiley.com/doi/10.1111/1756-185x.70495">Rawat et al., Int J Rheum Dis 2025</a> · revue des méthodes d'apprentissage automatique</li>
+      <li><a href="https://pubmed.ncbi.nlm.nih.gov/38830044/">Deep learning sur images échographiques, 2024</a></li>
+      <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9026431/">Fiabilité du score OMERACT, J Imaging 2022</a> · concordance inter-observateurs</li>
+      <li><a href="https://www.jrheum.org/content/51/3/263">Score OMERACT et IRM, J Rheumatol 2024</a></li>
+    </ul>
+
+    <h3>Jeux de données</h3>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2406.17536">MedMNIST-C, ADSMI @ MICCAI 2024</a> · corruptions réalistes par modalité</li>
+      <li><a href="https://github.com/p-lambda/wilds">WILDS / Camelyon17</a> · décalage inter-hôpitaux réel</li>
+      <li><a href="https://arxiv.org/abs/2512.02497">Benchmark TTA en segmentation médicale, 2025</a></li>
+    </ul>
+  </div>
+
+  <footer>
+    Base de connaissances du projet <em>Thermodynamic Latent Space Crystallization</em> — axe méthodologique de thèse, imagerie médicale et syndrome de Sjögren. Dernière révision : 30 août 2026.<br><br>
+    Les simulations de cette page calculent en direct les quantités qu'elles affichent ; elles ne rejouent aucune donnée enregistrée. Aucune valeur de performance expérimentale n'y figure, parce qu'aucune n'a encore été mesurée.
+  </footer>
+</section>
+
+</main>
+</div></div>
+
+<script>
+(function () {
+  "use strict";
+  var RM = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ── utilitaires ─────────────────────────────────── */
+  function dpr(cv) {
+    var r = window.devicePixelRatio || 1, b = cv.getBoundingClientRect();
+    if (!b.width) return null;
+    var w = Math.round(b.width * r), h = Math.round(b.width * (cv.height / cv.width) * r);
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    var g = cv.getContext("2d");
+    g.setTransform(w / b.width, 0, 0, w / b.width, 0, 0);
+    return { g: g, W: b.width, H: b.width * (h / w) };
+  }
+  function softmax(lo) {
+    var m = -Infinity, i;
+    for (i = 0; i < lo.length; i++) if (lo[i] > m) m = lo[i];
+    var s = 0, e = [];
+    for (i = 0; i < lo.length; i++) { e[i] = Math.exp(lo[i] - m); s += e[i]; }
+    var lse = m + Math.log(s), p = [];
+    for (i = 0; i < lo.length; i++) p[i] = Math.exp(lo[i] - lse);
+    return { p: p, lse: lse };
+  }
+  function entropy(p) {
+    var H = 0;
+    for (var i = 0; i < p.length; i++) if (p[i] > 1e-12) H -= p[i] * Math.log(p[i]);
+    return H;
+  }
+  function mix(a, b, t) {
+    return "rgb(" + Math.round(a[0] + (b[0] - a[0]) * t) + "," +
+      Math.round(a[1] + (b[1] - a[1]) * t) + "," + Math.round(a[2] + (b[2] - a[2]) * t) + ")";
+  }
+  var HOTC = [201, 138, 105], MIDC = [247, 249, 251], COLDC = [138, 194, 201];
+  function ramp(t) {
+    t = Math.max(0, Math.min(1, t));
+    return t < 0.5 ? mix(HOTC, MIDC, t * 2) : mix(MIDC, COLDC, (t - 0.5) * 2);
+  }
+  function rng(seed) {
+    return function () {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var fmt = function (v, n) { return (v).toFixed(n === undefined ? 3 : n).replace(".", ","); };
+
+  /* ══ HERO ═══════════════════════════════════════════ */
+  (function () {
+    var cv = document.getElementById("hero"), sl = document.getElementById("heroS"),
+        pill = document.getElementById("heroPill");
+    if (!cv) return;
+    var r = rng(3), N = 190, pts = [], i;
+    for (i = 0; i < N; i++) {
+      var k = i % 2;
+      pts.push({ k: k, ax: r(), ay: r(), jx: (r() - 0.5), jy: (r() - 0.5), ph: r() * 6.28 });
+    }
+    var auto = true, t0 = performance.now(), sev = 0;
+    sl.addEventListener("input", function () { auto = false; sev = +sl.value / 100; draw(); });
+
+    function draw() {
+      var d = dpr(cv); if (!d) return;
+      var g = d.g, W = d.W, H = d.H;
+      g.clearRect(0, 0, W, H);
+      g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, H);
+
+      var A = { x: W * 0.34, y: H * 0.52 }, B = { x: W * 0.66, y: H * 0.48 };
+      var s = sev, ord = 1 - s;
+
+      g.strokeStyle = "rgba(14,22,32,.10)"; g.setLineDash([3, 5]); g.lineWidth = 1;
+      g.beginPath(); g.moveTo((A.x + B.x) / 2, H * 0.06); g.lineTo((A.x + B.x) / 2, H * 0.94); g.stroke();
+      g.setLineDash([]);
+
+      for (i = 0; i < N; i++) {
+        var p = pts[i], anc = p.k ? B : A;
+        var spread = 0.30 + 1.05 * s;
+        var wob = RM ? 0 : Math.sin((performance.now() / 900) + p.ph) * 2.2 * s;
+        var x = anc.x + (p.jx * W * spread * 0.42) + p.jx * 8 * ord + wob;
+        var y = anc.y + (p.jy * H * spread * 0.55) + p.jy * 8 * ord + wob;
+        var d2a = (x - A.x) * (x - A.x) + (y - A.y) * (y - A.y);
+        var d2b = (x - B.x) * (x - B.x) + (y - B.y) * (y - B.y);
+        var sc = Math.max(1, (W * 0.16) * (W * 0.16));
+        var sm = softmax([-d2a / sc, -d2b / sc]);
+        var chi = 1 - entropy(sm.p) / Math.log(2);
+        g.beginPath(); g.arc(x, y, 2.7 + 1.6 * chi, 0, 6.2832);
+        g.fillStyle = ramp(chi); g.globalAlpha = 0.5 + 0.45 * chi; g.fill(); g.globalAlpha = 1;
+      }
+      [[A, "#0B6B7A", "ancre « sain »"], [B, "#B04A22", "ancre « pathologique »"]].forEach(function (a) {
+        g.beginPath(); g.arc(a[0].x, a[0].y, 7, 0, 6.2832);
+        g.fillStyle = a[1]; g.fill();
+        g.strokeStyle = "#FFFFFF"; g.lineWidth = 2.5; g.stroke();
+        g.font = "600 12px 'IBM Plex Sans', sans-serif"; g.fillStyle = a[1]; g.textAlign = "center";
+        g.fillText(a[2], a[0].x, a[0].y - 16);
+      });
+      var cry = s < 0.42;
+      pill.textContent = cry ? "état cristallisé" : (s < 0.72 ? "cristallisation partielle" : "état dispersé");
+      pill.className = "state-pill" + (cry ? "" : " gas");
+    }
+    function loop(t) {
+      if (auto) {
+        var e = (t - t0) / 1000;
+        sev = 0.5 - 0.5 * Math.cos(e * 0.55);
+        sl.value = Math.round(sev * 100);
+      }
+      draw();
+      requestAnimationFrame(loop);
+    }
+    if (RM) { sev = 0.15; draw(); } else requestAnimationFrame(loop);
+    window.addEventListener("resize", draw);
+  })();
+
+  /* ══ CLIP ⇄ GIBBS ═══════════════════════════════════ */
+  (function () {
+    var tau = document.getElementById("tau"), c0 = document.getElementById("cos0"), c1 = document.getElementById("cos1");
+    if (!tau) return;
+    function up() {
+      var t = +tau.value / 1000, a = +c0.value / 100, b = +c1.value / 100;
+      document.getElementById("tauV").textContent = t.toFixed(4).replace(".", ",");
+      document.getElementById("cos0V").textContent = a.toFixed(2).replace(".", ",");
+      document.getElementById("cos1V").textContent = b.toFixed(2).replace(".", ",");
+      var T = 2 * t;
+      var A = softmax([a / t, b / t]).p[0];
+      var B = softmax([-(2 - 2 * a) / T, -(2 - 2 * b) / T]).p[0];
+      document.getElementById("cA").textContent = A.toFixed(6).replace(".", ",");
+      document.getElementById("cB").textContent = B.toFixed(6).replace(".", ",");
+      var diff = Math.abs(A - B);
+      document.getElementById("cD").textContent = diff < 1e-12 ? "0,0 × 10⁰" : diff.toExponential(1).replace(".", ",");
+    }
+    [tau, c0, c1].forEach(function (e) { e.addEventListener("input", up); });
+    up();
+  })();
+
+  /* ══ LABORATOIRE LATENT ═════════════════════════════ */
+  (function () {
+    var cv = document.getElementById("lab"); if (!cv) return;
+    var TT = document.getElementById("TT"), cc = document.getElementById("cc");
+    var mode = "chi";
+    var MU = [[-0.62, 0.34], [0.66, 0.28], [0.02, -0.62]];
+    var K = MU.length, LNK = Math.log(K);
+    var z = { x: 0.18, y: 0.12 };
+    var off = document.createElement("canvas"), fieldKey = "";
+
+    function toPix(W, H, x, y) { return [W / 2 + x * (W / 2.6), H / 2 - y * (H / 2.6)]; }
+    function toWorld(W, H, px, py) { return [(px - W / 2) / (W / 2.6), (H / 2 - py) / (H / 2.6)]; }
+
+    function obs(x, y, T, c) {
+      var d2 = [], i;
+      for (i = 0; i < K; i++) {
+        var dx = x - MU[i][0], dy = y - MU[i][1];
+        d2.push(dx * dx + dy * dy + c);
+      }
+      var lo = [];
+      for (i = 0; i < K; i++) lo.push(-d2[i] / T);
+      var sm = softmax(lo);
+      var H = entropy(sm.p), F = -T * sm.lse, E = 0;
+      for (i = 0; i < K; i++) E += sm.p[i] * d2[i];
+      return { p: sm.p, H: H, F: F, E: E, chi: 1 - H / LNK };
+    }
+
+    function buildField(W, H, T, c) {
+      var key = mode + "|" + T.toFixed(3) + "|" + c.toFixed(3) + "|" + Math.round(W);
+      if (key === fieldKey) return;
+      fieldKey = key;
+      var GW = 150, GH = Math.round(150 * H / W);
+      off.width = GW; off.height = GH;
+      var og = off.getContext("2d"), im = og.createImageData(GW, GH);
+      var vals = new Float32Array(GW * GH), mn = Infinity, mx = -Infinity, i, j;
+      for (j = 0; j < GH; j++) for (i = 0; i < GW; i++) {
+        var wx = ((i + 0.5) / GW * W - W / 2) / (W / 2.6);
+        var wy = (H / 2 - (j + 0.5) / GH * H) / (H / 2.6);
+        var o = obs(wx, wy, T, c);
+        var v = mode === "chi" ? o.chi : o.F;
+        vals[j * GW + i] = v; if (v < mn) mn = v; if (v > mx) mx = v;
+      }
+      var span = Math.max(1e-6, mx - mn);
+      for (j = 0; j < GH; j++) for (i = 0; i < GW; i++) {
+        var t = (vals[j * GW + i] - mn) / span;
+        if (mode === "F") t = 1 - t;
+        var col = ramp(t), m = /rgb\((\d+),(\d+),(\d+)\)/.exec(col), o4 = (j * GW + i) * 4;
+        im.data[o4] = +m[1]; im.data[o4 + 1] = +m[2]; im.data[o4 + 2] = +m[3]; im.data[o4 + 3] = 255;
+      }
+      og.putImageData(im, 0, 0);
+    }
+
+    function draw() {
+      var d = dpr(cv); if (!d) return;
+      var g = d.g, W = d.W, H = d.H;
+      var T = +TT.value / 100, c = +cc.value / 100;
+      buildField(W, H, T, c);
+      g.imageSmoothingEnabled = true;
+      g.drawImage(off, 0, 0, W, H);
+
+      var i;
+      for (i = 0; i < K; i++) {
+        var q = toPix(W, H, MU[i][0], MU[i][1]);
+        g.beginPath(); g.arc(q[0], q[1], 6.5, 0, 6.2832);
+        g.fillStyle = "#0E1620"; g.fill();
+        g.strokeStyle = "#FFFFFF"; g.lineWidth = 2.5; g.stroke();
+        g.font = "600 11px 'IBM Plex Mono', monospace"; g.fillStyle = "#0E1620"; g.textAlign = "center";
+        g.fillText("μ" + i, q[0], q[1] - 13);
+      }
+      var pz = toPix(W, H, z.x, z.y);
+      g.beginPath(); g.arc(pz[0], pz[1], 11, 0, 6.2832);
+      g.fillStyle = "rgba(255,255,255,.55)"; g.fill();
+      g.beginPath(); g.arc(pz[0], pz[1], 7, 0, 6.2832);
+      g.fillStyle = "#0B6B7A"; g.fill();
+      g.strokeStyle = "#FFFFFF"; g.lineWidth = 2.5; g.stroke();
+      g.font = "600 11px 'IBM Plex Mono', monospace"; g.fillStyle = "#0B6B7A"; g.textAlign = "left";
+      g.fillText("z", pz[0] + 13, pz[1] + 4);
+
+      var o = obs(z.x, z.y, T, c);
+      document.getElementById("TTV").textContent = fmt(T, 2);
+      document.getElementById("ccV").textContent = fmt(c, 2);
+      document.getElementById("rH").textContent = fmt(o.H, 4);
+      document.getElementById("rF").textContent = fmt(o.F, 4);
+      document.getElementById("rE").textContent = fmt(o.E, 4);
+      document.getElementById("rX").textContent = fmt(o.chi, 4);
+      var res = o.F - (o.E - T * o.H);
+      document.getElementById("rId").textContent = Math.abs(res) < 1e-9 ? "0,000000" : res.toExponential(1).replace(".", ",");
+    }
+
+    function setMode(m) {
+      mode = m; fieldKey = "";
+      document.getElementById("fChi").setAttribute("aria-pressed", String(m === "chi"));
+      document.getElementById("fF").setAttribute("aria-pressed", String(m === "F"));
+      document.getElementById("fieldNote").textContent = m === "chi"
+        ? "χ = 1 − ℋ / ln K · l'ordre apparent"
+        : "F = −T ln Z · l'adéquation réelle aux ancres";
+      draw();
+    }
+    document.getElementById("fChi").addEventListener("click", function () { setMode("chi"); });
+    document.getElementById("fF").addEventListener("click", function () { setMode("F"); });
+    [TT, cc].forEach(function (e) { e.addEventListener("input", draw); });
+
+    var drag = false;
+    function at(ev) {
+      var b = cv.getBoundingClientRect();
+      var cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - b.left;
+      var cy = (ev.touches ? ev.touches[0].clientY : ev.clientY) - b.top;
+      var w = toWorld(b.width, b.width * (cv.height / cv.width), cx, cy);
+      z.x = w[0]; z.y = w[1]; draw();
+    }
+    cv.addEventListener("pointerdown", function (e) { drag = true; cv.setPointerCapture(e.pointerId); at(e); });
+    cv.addEventListener("pointermove", function (e) { if (drag) at(e); });
+    cv.addEventListener("pointerup", function () { drag = false; });
+    cv.addEventListener("pointercancel", function () { drag = false; });
+    window.addEventListener("resize", function () { fieldKey = ""; draw(); });
+    draw();
+  })();
+
+  /* ══ EFFONDREMENT (Proposition 1) ═══════════════════ */
+  (function () {
+    var cv = document.getElementById("col"); if (!cv) return;
+    var lamS = document.getElementById("lam"), reset = document.getElementById("colReset");
+    var MU = [[1, 0], [-1, 0]], T = 0.5, K = 2, LN2 = Math.log(2);
+    var pts = [], par = [1, 0, 0, 1, 1.2, 0], steps = 0;
+
+    function init() {
+      var r = rng(11); pts = [];
+      for (var i = 0; i < 80; i++) {
+        var c = i % 2, base = c === 0 ? 0.5 : 2.4;
+        var a = base + (r() - 0.5) * 4.2;
+        pts.push({ x: Math.cos(a), y: Math.sin(a), c: c });
+      }
+      par = [1, 0, 0, 1, 1.2, 0]; steps = 0;
+    }
+    function nrm(x, y) { var n = Math.hypot(x, y) || 1e-9; return [x / n, y / n]; }
+
+    function evalObj(p, lam, beta) {
+      var a = p[0], b = p[1], c = p[2], d = p[3], e = p[4], f = p[5];
+      var n = pts.length, Hs = 0, P = [], Z = [], i, k;
+      for (i = 0; i < n; i++) {
+        var q = nrm(a * pts[i].x + b * pts[i].y + e, c * pts[i].x + d * pts[i].y + f);
+        Z.push(q);
+        var lo = [];
+        for (k = 0; k < K; k++) {
+          var dx = q[0] - MU[k][0], dy = q[1] - MU[k][1];
+          lo.push(-(dx * dx + dy * dy) / T);
+        }
+        var sm = softmax(lo); P.push(sm.p); Hs += entropy(sm.p);
+      }
+      var mh = [];
+      for (k = 0; k < K; k++) {
+        var sx = 0, sy = 0, sw = 0;
+        for (i = 0; i < n; i++) { sx += P[i][k] * Z[i][0]; sy += P[i][k] * Z[i][1]; sw += P[i][k]; }
+        sw = Math.max(sw, 1e-6); mh.push([sx / sw, sy / sw]);
+      }
+      var ddx = mh[0][0] - mh[1][0], ddy = mh[0][1] - mh[1][1], D = ddx * ddx + ddy * ddy;
+      var anc = 0;
+      for (k = 0; k < K; k++) anc += Math.pow(mh[k][0] - MU[k][0], 2) + Math.pow(mh[k][1] - MU[k][1], 2);
+      anc /= K;
+      var pb = [0, 0];
+      for (i = 0; i < n; i++) for (k = 0; k < K; k++) pb[k] += P[i][k] / n;
+      return { E: Hs / n - lam * D + beta * anc, H: Hs / n, D: D, Hm: entropy(pb), Z: Z, P: P, mh: mh };
+    }
+
+    function step(lam, beta) {
+      var h = 1e-4, base = evalObj(par, lam, beta).E, g = [], j;
+      for (j = 0; j < 6; j++) {
+        var p2 = par.slice(); p2[j] += h;
+        g.push((evalObj(p2, lam, beta).E - base) / h);
+      }
+      for (j = 0; j < 6; j++) {
+        par[j] -= 0.06 * g[j];
+        par[j] = Math.max(-4, Math.min(4, par[j]));
+      }
+      steps++;
+    }
+
+    function draw(st) {
+      var d = dpr(cv); if (!d) return;
+      var g = d.g, W = d.W, H = d.H, R = Math.min(W, H) * 0.36, cxp = W / 2, cyp = H / 2;
+      g.clearRect(0, 0, W, H); g.fillStyle = "#F7F9FB"; g.fillRect(0, 0, W, H);
+      g.beginPath(); g.arc(cxp, cyp, R, 0, 6.2832);
+      g.strokeStyle = "rgba(14,22,32,.16)"; g.lineWidth = 1.2; g.stroke();
+
+      var i;
+      for (i = 0; i < st.Z.length; i++) {
+        var x = cxp + st.Z[i][0] * R, y = cyp - st.Z[i][1] * R;
+        var chi = 1 - entropy(st.P[i]) / LN2;
+        g.beginPath(); g.arc(x, y, 4.2, 0, 6.2832);
+        g.fillStyle = pts[i].c ? "#B04A22" : "#0B6B7A";
+        g.globalAlpha = 0.30 + 0.6 * chi; g.fill(); g.globalAlpha = 1;
+      }
+      for (i = 0; i < 2; i++) {
+        var mx = cxp + MU[i][0] * R, my = cyp - MU[i][1] * R;
+        g.beginPath(); g.arc(mx, my, 7, 0, 6.2832);
+        g.fillStyle = "#0E1620"; g.fill();
+        g.strokeStyle = "#FFFFFF"; g.lineWidth = 2.5; g.stroke();
+        g.font = "600 11px 'IBM Plex Mono', monospace"; g.fillStyle = "#0E1620"; g.textAlign = "center";
+        g.fillText("μ" + i, mx, my - 14);
+      }
+      for (i = 0; i < 2; i++) {
+        var hx = cxp + st.mh[i][0] * R, hy = cyp - st.mh[i][1] * R;
+        g.beginPath(); g.arc(hx, hy, 5.5, 0, 6.2832);
+        g.strokeStyle = i ? "#B04A22" : "#0B6B7A"; g.lineWidth = 2; g.stroke();
+      }
+      g.font = "500 11px 'IBM Plex Mono', monospace"; g.fillStyle = "#6E7B89"; g.textAlign = "left";
+      g.fillText("pas : " + steps, 14, 22);
+      g.textAlign = "right";
+      g.fillText("cercles évidés = prototypes souples", W - 14, 22);
+    }
+
+    var raf = null;
+    function loop() {
+      var lam = +lamS.value / 100, beta = 0.5 * lam;
+      document.getElementById("lamV").textContent = fmt(lam, 2);
+      if (steps < 700) { for (var q = 0; q < 3; q++) step(lam, beta); }
+      var st = evalObj(par, lam, beta);
+      draw(st);
+      document.getElementById("sH").textContent = fmt(st.H, 4);
+      document.getElementById("sD").textContent = fmt(st.D, 3);
+      document.getElementById("sHm").textContent = fmt(st.Hm, 4);
+      var v = document.getElementById("sV");
+      if (steps < 120) { v.textContent = "descente en cours…"; v.className = "verdict ok"; }
+      else if (st.Hm < 0.15) { v.textContent = "EFFONDREMENT"; v.className = "verdict no"; }
+      else if (st.Hm > 0.45) { v.textContent = "SITES MAINTENUS"; v.className = "verdict ok"; }
+      else { v.textContent = "régime intermédiaire"; v.className = "verdict ok"; }
+      raf = requestAnimationFrame(loop);
+    }
+    lamS.addEventListener("input", function () { init(); });
+    reset.addEventListener("click", function () { init(); });
+    window.addEventListener("resize", function () { });
+    init();
+    if (RM) {
+      for (var s = 0; s < 700; s++) step(0, 0);
+      var st0 = evalObj(par, 0, 0); draw(st0);
+      document.getElementById("sH").textContent = fmt(st0.H, 4);
+      document.getElementById("sD").textContent = fmt(st0.D, 3);
+      document.getElementById("sHm").textContent = fmt(st0.Hm, 4);
+      document.getElementById("sV").textContent = "EFFONDREMENT";
+      document.getElementById("sV").className = "verdict no";
+    } else loop();
+  })();
+
+  /* ══ BUDGET ═════════════════════════════════════════ */
+  (function () {
+    var ids = ["rho", "SS", "kk", "np", "ns"], el = {};
+    ids.forEach(function (i) { el[i] = document.getElementById(i); });
+    if (!el.rho) return;
+    var cv = document.getElementById("bud");
+    function up() {
+      var rho = +el.rho.value / 100, S = +el.SS.value, k = +el.kk.value / 10,
+          np = +el.np.value, ns = +el.ns.value, L = 12;
+      document.getElementById("rhoV").textContent = fmt(rho, 2);
+      document.getElementById("SSV").textContent = S;
+      document.getElementById("kkV").textContent = fmt(k, 1);
+      document.getElementById("npV").textContent = np;
+      document.getElementById("nsV").textContent = ns;
+      var tot = rho * S * (1 + k) * np + ns;
+      document.getElementById("bA").textContent = fmt(tot, 2);
+      var v = document.getElementById("bV");
+      if (tot < L) { v.textContent = "GAIN NET · −" + fmt((1 - tot / L) * 100, 1) + " %"; v.className = "verdict ok"; }
+      else { v.textContent = "SURCOÛT · +" + fmt((tot / L - 1) * 100, 1) + " %"; v.className = "verdict no"; }
+
+      var d = dpr(cv); if (!d) return;
+      var g = d.g, W = d.W, H = d.H;
+      g.clearRect(0, 0, W, H); g.fillStyle = "#F7F9FB"; g.fillRect(0, 0, W, H);
+      var mx = Math.max(L, tot) * 1.12, pad = 54, bw = (W - pad * 2) * 0.30;
+      function bar(x, val, col, lab) {
+        var hgt = (val / mx) * (H - 76);
+        g.fillStyle = col; g.fillRect(x, H - 40 - hgt, bw, hgt);
+        g.font = "600 13px 'IBM Plex Mono', monospace"; g.fillStyle = "#0E1620"; g.textAlign = "center";
+        g.fillText(fmt(val, 2), x + bw / 2, H - 48 - hgt);
+        g.font = "500 12px 'IBM Plex Sans', sans-serif"; g.fillStyle = "#6E7B89";
+        g.fillText(lab, x + bw / 2, H - 18);
+      }
+      bar(pad, tot, tot < L ? "#0B6B7A" : "#B04A22", "méthode");
+      bar(W - pad - bw, L, "#C2CBD5", "statique (12 blocs)");
+      g.strokeStyle = "rgba(14,22,32,.28)"; g.setLineDash([4, 4]); g.lineWidth = 1;
+      var yl = H - 40 - (L / mx) * (H - 76);
+      g.beginPath(); g.moveTo(pad - 12, yl); g.lineTo(W - pad + 12, yl); g.stroke(); g.setLineDash([]);
+    }
+    ids.forEach(function (i) { el[i].addEventListener("input", up); });
+    window.addEventListener("resize", up);
+    up();
+  })();
+
+  /* ══ SCROLL-SPY ═════════════════════════════════════ */
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll(".rail a"));
+    if (!links.length || !("IntersectionObserver" in window)) return;
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute("href").slice(1)] = a; });
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.remove("on"); });
+          if (map[e.target.id]) map[e.target.id].classList.add("on");
+        }
+      });
+    }, { rootMargin: "-10% 0px -75% 0px" });
+    Object.keys(map).forEach(function (id) {
+      var s = document.getElementById(id); if (s) io.observe(s);
+    });
+  })();
+})();
+</script>
+</body>
+</html>

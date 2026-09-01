@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLSC — Résultats de l'expérience 1</title>
+<style>
+  :root{--bg:#0e1620;--panel:#161e2e;--border:#1f293d;--text:#e6edf3;--muted:#93a4b8;
+        --accent:#5eead4;--ok:#4ade80;--danger:#f87171;--code:#0b0f19}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.65;
+       max-width:980px;margin:0 auto;padding:0 1.5rem 5rem}
+  a{color:var(--accent)}
+  header{padding:1.5rem 0}
+  nav a{margin-right:1rem;font-size:.85rem;color:var(--muted);text-decoration:none}
+  nav a:hover{color:var(--accent)}
+  h1{font-size:1.9rem;margin-bottom:.3rem}
+  h2{font-size:1.35rem;color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:.4rem;margin-top:2.6rem}
+  .lead{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.85rem}
+  th,td{padding:.5rem .7rem;text-align:left;border-bottom:1px solid var(--border)}
+  th{color:var(--accent);background:var(--panel)}
+  code{background:var(--code);padding:.1rem .35rem;border-radius:4px;font-size:.85em}
+  .callout{background:var(--panel);border-left:4px solid var(--accent);border-radius:8px;padding:.9rem 1.1rem;margin:1rem 0}
+  .callout.danger{border-left-color:var(--danger)}
+  .callout .ct{font-weight:700;margin-bottom:.3rem}
+  .pill{display:inline-block;padding:.2rem .7rem;border-radius:999px;font-size:.78rem;font-weight:600}
+  .pill.ok{background:rgba(74,222,128,.12);color:var(--ok);border:1px solid var(--ok)}
+  .pill.no{background:rgba(248,113,113,.12);color:var(--danger);border:1px solid var(--danger)}
+  figure{margin:1.4rem 0;text-align:center}
+  figure img{max-width:100%;border-radius:8px;border:1px solid var(--border)}
+  figcaption{font-size:.8rem;color:var(--muted);margin-top:.5rem}
+  footer{color:var(--muted);font-size:.78rem;border-top:1px solid var(--border);padding-top:1.2rem;margin-top:3rem}
+</style>
+</head>
+<body>
+<header>
+  <nav><a href="index.html">Accueil</a><a href="plateforme-explicative.html">Plateforme explicative</a><a href="https://github.com/houssemeddinelassoued/ViT-Cristallisation">Dépôt GitHub</a></nav>
+  <h1>Résultats de l'expérience 1 — zero-training</h1>
+  <p class="lead">Détection de décalage d'acquisition par énergie libre F vs entropie H, sans aucun entraînement.
+  Modèle ViT-B-16-quickgelu (poids <code>openai</code>), T = 2τ ≈ 0,0200. Chaque chiffre provient d'un
+  <code>outputs/&lt;run_id&gt;/metrics.json</code> versionné dans le dépôt.</p>
+</header>
+
+<h2>Critère pré-enregistré</h2>
+<p>Évalué à la sévérité maximale (5), corruption vs images propres :</p>
+<table>
+<tr><th>#</th><th>Critère</th><th>Seuil</th></tr>
+<tr><td>C1</td><td>AUROC(F)</td><td>≥ 0,70</td></tr>
+<tr><td>C2</td><td>AUROC(H)</td><td>≤ 0,60</td></tr>
+<tr><td>C3</td><td>AUROC(F) − AUROC(H)</td><td>≥ 0,05</td></tr>
+</table>
+<p>La prédiction est confirmée seulement si les trois tiennent.</p>
+
+<h2>Balayage systématique — 11 configurations canoniques</h2>
+<p>BreastMNIST (échographie, 7 corruptions) et PneumoniaMNIST (radiographie, 4 corruptions),
+sévérités 0–5, ensemble d'invites, seed 0. Analyse appariée par DeLong + bootstrap stratifié 10&nbsp;000.</p>
+<table>
+<tr><th>Dataset</th><th>Corruption</th><th>AUROC(F)</th><th>AUROC(H)</th><th>ΔAUROC [IC 95&nbsp;%]</th><th>p (DeLong)</th></tr>
+<tr><td>breast</td><td>pixelate</td><td>1,000</td><td>0,888</td><td>+0,112 [+0,078, +0,150]</td><td>1,9e−9</td></tr>
+<tr><td>breast</td><td>jpeg_compression</td><td>0,920</td><td>0,711</td><td>+0,208 [+0,143, +0,274]</td><td>7,7e−10</td></tr>
+<tr><td>breast</td><td>motion_blur</td><td>0,885</td><td>0,760</td><td>+0,125 [+0,060, +0,190]</td><td>1,7e−4</td></tr>
+<tr><td>breast</td><td>speckle_noise</td><td>0,814</td><td>0,734</td><td>+0,080 [+0,006, +0,154]</td><td>0,032</td></tr>
+<tr><td>pneumonia</td><td>gaussian_blur</td><td>0,970</td><td>0,798</td><td>+0,172 [+0,148, +0,198]</td><td>3,9e−41</td></tr>
+<tr><td>breast</td><td>brightness_up</td><td>0,594</td><td>0,677</td><td>−0,083 [−0,176, +0,012]</td><td>0,083</td></tr>
+<tr><td>breast</td><td>brightness_down</td><td>0,359</td><td>0,563</td><td>−0,204 [−0,297, −0,112]</td><td>1,3e−5</td></tr>
+<tr><td>breast</td><td>contrast_down</td><td>0,299</td><td>0,498</td><td>−0,199 [−0,287, −0,112]</td><td>7,4e−6</td></tr>
+<tr><td>pneumonia</td><td>gaussian_noise</td><td>0,127</td><td>0,462</td><td>−0,335 [−0,368, −0,300]</td><td>1,7e−86</td></tr>
+<tr><td>pneumonia</td><td>brightness_down</td><td>0,200</td><td>0,644</td><td>−0,444 [−0,481, −0,405]</td><td>1,6e−117</td></tr>
+<tr><td>pneumonia</td><td>contrast_down</td><td>0,209</td><td>0,698</td><td>−0,489 [−0,526, −0,452]</td><td>2,9e−148</td></tr>
+</table>
+
+<div class="callout danger">
+  <div class="ct"><span class="pill no">réfuté</span> Verdict pré-enregistré</div>
+  Le critère C2 (AUROC(H) ≤ 0,60) échoue sur les 11 configurations canoniques —
+  <code>prediction_confirmee: false</code> partout. Réfutation consignée telle quelle.
+</div>
+
+<h2>Dichotomie structurel / photométrique</h2>
+<p>F ≫ H sur les corruptions qui détruisent la structure spatiale (pixelate, jpeg, motion_blur,
+speckle, gaussian_blur) ; F passe <strong>sous le hasard</strong> sur les corruptions photométriques
+(brightness, contrast, bruit gaussien radiographique) : les images corrompues se
+<em>rapprochent</em> des ancres textuelles. F est un détecteur signé.</p>
+
+<figure>
+  <img src="assets/figures/fig_grid_detection_breastmnist.png" alt="AUROC(F) et AUROC(H) par corruption, BreastMNIST">
+  <figcaption>BreastMNIST — AUROC(F) et AUROC(H) par sévérité, pour chacune des 7 corruptions.</figcaption>
+</figure>
+<figure>
+  <img src="assets/figures/fig_grid_detection_pneumoniamnist.png" alt="AUROC(F) et AUROC(H) par corruption, PneumoniaMNIST">
+  <figcaption>PneumoniaMNIST — même lecture, réplication sur une seconde modalité.</figcaption>
+</figure>
+<figure>
+  <img src="assets/figures/fig_two_sided.png" alt="Détecteur unilatéral vs bilatéral vs bivarié à sévérité maximale">
+  <figcaption>Comparaison à sévérité maximale : F unilatéral, |F − médiane source| (bilatéral),
+  distance de Mahalanobis (F, H) (bivarié).</figcaption>
+</figure>
+
+<h2>Score bivarié (F, H)</h2>
+<p>Distance de Mahalanobis du couple (F, H) au nuage source, calibrée sur la source seule.
+Gain incrémental : meilleur sur 5 des 11 configurations (dont pneumonia·gaussian_noise 0,803 → 0,837),
+équivalent sur 3, moins bon sur 3. <code>brightness_up</code> reste sous le hasard même en bivarié —
+la cible se rapproche du centre source dans le plan (F, H) ; aucune statistique de distance
+calibrée sur la source ne peut le voir.</p>
+
+<h2>Limites et prochaines étapes</h2>
+<ul>
+  <li>Les ancres textuelles CLIP <code>openai</code> sont quasi aveugles sur BreastMNIST
+  (balanced accuracy 0,517 à sévérité 0) — toute lecture de H vs F est conditionnée à cette
+  géométrie d'ancres faible.</li>
+  <li>Prochaine étape : cohorte P1 (BUSI → UDIAT → BUS-UCLM), décalage inter-centres réel ;
+  contrôle BiomedCLIP sur la configuration finale.</li>
+</ul>
+
+<footer>
+  Source unique admissible : <code>outputs/&lt;run_id&gt;/metrics.json</code> du dépôt.
+  Détail complet et journal de bord dans <code>tlsc-repo/docs/rapport-exp01.md</code> et
+  <code>tlsc-repo/docs/JOURNAL.md</code>.
+</footer>
+</body>
+</html>

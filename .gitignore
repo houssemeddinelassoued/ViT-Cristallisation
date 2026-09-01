@@ -1,0 +1,20 @@
+# Caches d'outils
+.ruff_cache/
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# Artefacts de compilation LaTeX (review-paper/) — seuls .tex, .bib, .pdf final sont versionnés
+review-paper/*.aux
+review-paper/*.bbl
+review-paper/*.blg
+review-paper/*.fdb_latexmk
+review-paper/*.fls
+review-paper/*.log
+review-paper/*.out
+review-paper/*.spl
+review-paper/*.synctex.gz
+
+# Fichiers temporaires d'édition
+*.téléchargement
+~$*

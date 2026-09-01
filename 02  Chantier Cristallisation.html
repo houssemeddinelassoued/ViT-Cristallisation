@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chantier Cristallisation</title>
+<meta name="description" content="Guide d’implémentation en 13 sprints">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap">
+<style>:root{color-scheme:light}html{-webkit-text-size-adjust:100%}
+body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif;background:#fafafa}
+img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+:root{
+  --ground:#F5F6F8; --surface:#FFFFFF; --surface-2:#EAEDF1; --code-bg:#F0F2F5;
+  --ink:#111721; --ink-2:#3D4757; --ink-3:#6B7788;
+  --line:#DBDFE6; --line-2:#C3CAD4;
+  --cold:#0E6E7C; --cold-soft:#E0EFF1;
+  --hot:#AF4720;  --hot-soft:#F8E7DF;
+  --warn:#8A6212; --warn-soft:#F5EBD6;
+  --good:#2A6B4F; --good-soft:#DFEEE6;
+  --kw:#8A3FA0; --str:#2A6B4F; --com:#8A93A0; --fn:#0E6E7C;
+  --shadow:0 1px 2px rgba(17,23,33,.05), 0 8px 24px -16px rgba(17,23,33,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C1116; --surface:#141A21; --surface-2:#1B222B; --code-bg:#10161D;
+    --ink:#E7EBF1; --ink-2:#AFB9C6; --ink-3:#7B8798;
+    --line:#242C36; --line-2:#343E4B;
+    --cold:#54C3D1; --cold-soft:#0F272C;
+    --hot:#E4855A;  --hot-soft:#2A1710;
+    --warn:#DCB264; --warn-soft:#26200E;
+    --good:#71C49B; --good-soft:#10241A;
+    --kw:#C99BD8; --str:#8FCFAE; --com:#6C7686; --fn:#54C3D1;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C1116; --surface:#141A21; --surface-2:#1B222B; --code-bg:#10161D;
+  --ink:#E7EBF1; --ink-2:#AFB9C6; --ink-3:#7B8798;
+  --line:#242C36; --line-2:#343E4B;
+  --cold:#54C3D1; --cold-soft:#0F272C;
+  --hot:#E4855A;  --hot-soft:#2A1710;
+  --warn:#DCB264; --warn-soft:#26200E;
+  --good:#71C49B; --good-soft:#10241A;
+  --kw:#C99BD8; --str:#8FCFAE; --com:#6C7686; --fn:#54C3D1;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink); margin:0;
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1400px; margin:0 auto; padding:0 28px 120px;}
+.cols{display:grid; grid-template-columns:1fr;}
+@media (min-width:1140px){ .cols{grid-template-columns:222px minmax(0,1fr); gap:56px; align-items:start;} }
+
+/* rail */
+.rail{display:none;}
+@media (min-width:1140px){ .rail{display:block; position:sticky; top:0; padding:56px 0 40px; max-height:100vh; overflow-y:auto;} }
+.rail-label{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+  padding-bottom:10px; margin-bottom:10px; border-bottom:1px solid var(--line);}
+.rail-label+.rail-label{margin-top:22px;}
+.rail ol{list-style:none; margin:0 0 4px; padding:0;}
+.rail a{display:grid; grid-template-columns:30px 1fr; gap:6px; padding:4px 6px 4px 0;
+  text-decoration:none; color:var(--ink-2); font-size:13px; line-height:1.32; border-radius:3px;}
+.rail a:hover{color:var(--cold); background:var(--surface-2);}
+.rail a span{font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-3); padding-top:2px;}
+
+/* header */
+header{padding:60px 0 0; max-width:74ch;}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--cold); margin:0 0 20px;}
+h1{font-family:"Source Serif 4",Georgia,serif; font-weight:700;
+  font-size:clamp(2.1rem,4.6vw,3.1rem); line-height:1.08; letter-spacing:-.018em;
+  margin:0 0 18px; text-wrap:balance;}
+.lede{font-size:1.1rem; line-height:1.6; color:var(--ink-2); margin:0 0 30px; max-width:62ch;}
+.meta{display:flex; flex-wrap:wrap; gap:0 30px; row-gap:12px;
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ink-3);
+  padding:16px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.meta b{display:block; font-weight:500; color:var(--ink); font-size:12.5px;}
+.meta i{font-style:normal; letter-spacing:.1em; text-transform:uppercase; font-size:10px;}
+
+/* structure */
+.rule{height:2px; border:0; margin:60px 0 38px;
+  background:linear-gradient(90deg,var(--hot) 0%,var(--warn) 26%,var(--cold) 72%,transparent 100%); opacity:.85;}
+section{max-width:78ch; scroll-margin-top:20px;}
+h2{font-family:"Source Serif 4",Georgia,serif; font-weight:600;
+  font-size:clamp(1.45rem,2.5vw,1.85rem); line-height:1.2; letter-spacing:-.012em;
+  margin:0 0 6px; text-wrap:balance;}
+.sub{color:var(--ink-3); font-size:14.5px; margin:0 0 28px; max-width:62ch;}
+h3{font-weight:600; font-size:1rem; margin:34px 0 10px;}
+h4{font-weight:600; font-size:.92rem; margin:26px 0 8px; color:var(--ink-2);}
+p{margin:0 0 15px; max-width:70ch;}
+ul,ol{margin:0 0 15px; padding-left:20px; max-width:70ch;}
+li{margin-bottom:6px;} li::marker{color:var(--ink-3);}
+a{color:var(--cold);}
+code{font-family:"IBM Plex Mono",monospace; font-size:.85em;
+  background:var(--surface-2); padding:1px 5px; border-radius:3px;}
+.m{font-family:"Source Serif 4",Georgia,serif; font-style:italic; font-size:1.04em;}
+.m sub,.m sup{font-style:normal; font-size:.68em;}
+
+/* sprint header */
+.sprint{display:flex; flex-wrap:wrap; align-items:baseline; gap:12px; margin:0 0 6px;}
+.sprint .tag{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600;
+  color:var(--surface); background:var(--cold); padding:3px 9px; border-radius:3px; letter-spacing:.04em;}
+.sprint h2{margin:0; flex:1 1 auto;}
+.sprint .dur{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-3);
+  border:1px solid var(--line-2); padding:2px 8px; border-radius:20px; white-space:nowrap;}
+
+/* code blocks */
+.blk{margin:16px 0 20px; border:1px solid var(--line); border-radius:5px;
+  background:var(--code-bg); overflow:hidden;}
+.blk .cap{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  padding:8px 14px; background:var(--surface-2); border-bottom:1px solid var(--line);}
+.blk pre{margin:0; padding:15px 16px; overflow-x:auto;
+  font-family:"IBM Plex Mono",monospace; font-size:12.4px; line-height:1.68; color:var(--ink-2);}
+.blk pre b{color:var(--ink); font-weight:600;}
+.blk pre .k{color:var(--kw);} .blk pre .s{color:var(--str);}
+.blk pre .c{color:var(--com); font-style:italic;} .blk pre .f{color:var(--fn);}
+.blk.sh pre{color:var(--ink);} .blk.sh pre .p{color:var(--cold); user-select:none;}
+
+/* prompt block */
+.prompt{margin:18px 0 22px; border:1px solid var(--line); border-left:3px solid var(--cold);
+  background:var(--cold-soft); border-radius:0 5px 5px 0; padding:15px 18px;}
+.prompt .k{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--cold); margin-bottom:8px;}
+.prompt p{font-size:14px; margin:0 0 9px; color:var(--ink-2);}
+.prompt p:last-child{margin-bottom:0;}
+.prompt code{background:var(--surface); font-size:.86em;}
+
+/* acceptance */
+.acc{margin:18px 0 6px; border:1px solid var(--line); border-left:3px solid var(--good);
+  background:var(--good-soft); border-radius:0 5px 5px 0; padding:14px 18px;}
+.acc .k{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--good); margin-bottom:7px;}
+.acc p{font-size:14px; margin:0 0 8px;} .acc p:last-child{margin-bottom:0;}
+
+/* trap */
+.trap{margin:18px 0; border:1px solid var(--line); border-left:3px solid var(--hot);
+  background:var(--hot-soft); border-radius:0 5px 5px 0; padding:14px 18px;}
+.trap .k{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--hot); margin-bottom:7px;}
+.trap p{font-size:14px; margin:0 0 8px;} .trap p:last-child{margin-bottom:0;}
+
+/* tables */
+.tw{overflow-x:auto; margin:20px 0 24px; border:1px solid var(--line); border-radius:5px; background:var(--surface);}
+table{border-collapse:collapse; width:100%; font-size:13.3px; min-width:520px;}
+th{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3); text-align:left; padding:10px 13px;
+  border-bottom:1px solid var(--line-2); white-space:nowrap;}
+td{padding:10px 13px; border-bottom:1px solid var(--line); vertical-align:top; color:var(--ink-2);}
+tbody tr:last-child td{border-bottom:0;}
+td:first-child{color:var(--ink); font-weight:500; white-space:nowrap;}
+.num{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;}
+
+footer{max-width:74ch; margin-top:52px; padding-top:20px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--ink-3);}
+</style>
+
+<div class="wrap"><div class="cols">
+
+<nav class="rail" aria-label="Sommaire">
+  <div class="rail-label">Mise en place</div>
+  <ol>
+    <li><a href="#s0"><span>S0</span>Environnement CUDA</a></li>
+    <li><a href="#s1"><span>S1</span>VSCode &amp; règles IA</a></li>
+    <li><a href="#s2"><span>S2</span>Dépôt</a></li>
+  </ol>
+  <div class="rail-label">Noyau</div>
+  <ol>
+    <li><a href="#s3"><span>S3</span>Observables de Gibbs</a></li>
+    <li><a href="#s4"><span>S4</span>Backbone instrumenté</a></li>
+    <li><a href="#s5"><span>S5</span>Gel &amp; restauration</a></li>
+  </ol>
+  <div class="rail-label">Méthode</div>
+  <ol>
+    <li><a href="#s6"><span>S6</span>Ancrage hors ligne</a></li>
+    <li><a href="#s7"><span>S7</span>Baselines TTA</a></li>
+    <li><a href="#s8"><span>S8</span>Énergie en ligne</a></li>
+    <li><a href="#s9"><span>S9</span>Sortie &amp; conformal</a></li>
+    <li><a href="#s10"><span>S10</span>Évaluation</a></li>
+  </ol>
+  <div class="rail-label">Campagnes</div>
+  <ol>
+    <li><a href="#s11"><span>S11</span>Données</a></li>
+    <li><a href="#s12"><span>S12</span>Jalons J1 → J4</a></li>
+    <li><a href="#ia"><span>A</span>Travailler avec l'IA</a></li>
+    <li><a href="#recap"><span>B</span>Récapitulatif</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header>
+  <p class="eyebrow">Guide d'implémentation — VSCode + assistance IA</p>
+  <h1>Chantier Cristallisation</h1>
+  <p class="lede">Treize sprints, chacun avec ses fichiers, son prompt IA prêt à coller et son test d'acceptation. Le code fourni ici est celui que l'IA écrit mal — noyau numérique, mécanique de gel, comptage de FLOPs, calibration. Recopiez-le. Déléguez le reste.</p>
+  <div class="meta">
+    <div><i>Matériel</i><b>RTX 4070 12 Go · i7 · 32 Go</b></div>
+    <div><i>Pile</i><b>Python 3.11 · PyTorch 2.x cu124 · timm</b></div>
+    <div><i>Cadre formel</i><b>docs/01-cadre-theorique.md</b></div>
+    <div><i>Règle</i><b>Aucun chiffre non mesuré</b></div>
+  </div>
+</header>
+
+<hr class="rule">
+
+<!-- S0 -->
+<section id="s0">
+  <div class="sprint"><span class="tag">S0</span><h2>Environnement CUDA</h2><span class="dur">1–2 h</span></div>
+  <p class="sub">Rien ne sert d'écrire une ligne de code tant que les trois vérifications de fin de sprint ne sont pas vertes.</p>
+
+  <h4>Pilote</h4>
+  <div class="blk sh"><div class="cap">terminal</div><pre><span class="p">$</span> nvidia-smi</pre></div>
+  <p>Attendu&nbsp;: <code>NVIDIA GeForce RTX 4070</code>, <code>12282MiB</code>, <code>CUDA Version: 12.x</code>. Si la version affichée est inférieure à 12.1, mettez à jour le pilote GeForce avant tout le reste.</p>
+
+  <h4>Python et environnement</h4>
+  <p>Python 3.11 recommandé — 3.12 fonctionne, 3.13 reste hasardeux pour certaines dépendances scientifiques.</p>
+  <div class="blk sh"><div class="cap">terminal — installation de uv puis de l'environnement</div><pre><span class="c"># Linux / WSL2 / macOS</span>
+<span class="p">$</span> curl -LsSf https://astral.sh/uv/install.sh | sh
+<span class="c"># Windows PowerShell</span>
+<span class="p">&gt;</span> powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+<span class="p">$</span> mkdir tlsc &amp;&amp; cd tlsc
+<span class="p">$</span> uv venv --python 3.11
+<span class="p">$</span> source .venv/bin/activate      <span class="c"># Windows : .venv\Scripts\activate</span></pre></div>
+
+  <h4>PyTorch et dépendances</h4>
+  <div class="blk sh"><div class="cap">terminal</div><pre><span class="p">$</span> uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+
+<span class="p">$</span> uv pip install timm numpy scipy scikit-learn pandas matplotlib seaborn \
+    hydra-core omegaconf tqdm rich pydicom umap-learn \
+    medmnist wilds fvcore \
+    pytest pytest-cov ruff mypy pre-commit tensorboard</pre></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S0</div>
+  <div class="blk sh" style="margin:0 0 10px"><div class="cap">terminal</div><pre><span class="p">$</span> python -c "import torch;print(torch.__version__);print(torch.cuda.is_available());\
+print(torch.cuda.get_device_name(0));print('bf16:',torch.cuda.is_bf16_supported())"</pre></div>
+  <p>Attendu&nbsp;: une version 2.x, <code>True</code>, <code>NVIDIA GeForce RTX 4070</code>, <code>bf16: True</code>. Un <code>False</code> sur CUDA signifie que la roue installée est la version CPU&nbsp;: désinstallez et recommencez avec l'index <code>cu124</code>.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S1 -->
+<section id="s1">
+  <div class="sprint"><span class="tag">S1</span><h2>VSCode et règles pour l'IA</h2><span class="dur">30 min</span></div>
+  <p class="sub">Le fichier de règles de la fin de ce sprint est l'investissement le plus rentable de tout le projet.</p>
+
+  <h4>Extensions</h4>
+  <div class="tw"><table>
+    <thead><tr><th>Extension</th><th>Identifiant</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td>Python</td><td><code>ms-python.python</code></td><td>Interpréteur, exécution</td></tr>
+      <tr><td>Pylance</td><td><code>ms-python.vscode-pylance</code></td><td>Types, autocomplétion</td></tr>
+      <tr><td>Ruff</td><td><code>charliermarsh.ruff</code></td><td>Lint et format, très rapide</td></tr>
+      <tr><td>Jupyter</td><td><code>ms-toolsai.jupyter</code></td><td>Exploration interactive</td></tr>
+      <tr><td>autoDocstring</td><td><code>njpwerner.autodocstring</code></td><td>Docstrings NumPy</td></tr>
+      <tr><td>Assistant IA</td><td><code>anthropic.claude-code</code> · <code>GitHub.copilot</code> · <code>Continue.continue</code></td><td>Génération de code</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="blk"><div class="cap">.vscode/settings.json</div><pre>{
+  <span class="s">"python.defaultInterpreterPath"</span>: <span class="s">"${workspaceFolder}/.venv/bin/python"</span>,
+  <span class="s">"python.testing.pytestEnabled"</span>: true,
+  <span class="s">"python.testing.pytestArgs"</span>: [<span class="s">"tests"</span>],
+  <span class="s">"python.analysis.typeCheckingMode"</span>: <span class="s">"basic"</span>,
+  <span class="s">"editor.formatOnSave"</span>: true,
+  <span class="s">"editor.rulers"</span>: [100],
+  <span class="s">"[python]"</span>: {
+    <span class="s">"editor.defaultFormatter"</span>: <span class="s">"charliermarsh.ruff"</span>,
+    <span class="s">"editor.codeActionsOnSave"</span>: { <span class="s">"source.organizeImports.ruff"</span>: <span class="s">"explicit"</span> }
+  },
+  <span class="s">"autoDocstring.docstringFormat"</span>: <span class="s">"numpy"</span>
+}</pre></div>
+  <p>Sur Windows, remplacez le chemin de l'interpréteur par <code>${workspaceFolder}\\.venv\\Scripts\\python.exe</code>.</p>
+
+  <div class="blk"><div class="cap">.vscode/launch.json</div><pre>{
+  <span class="s">"version"</span>: <span class="s">"0.2.0"</span>,
+  <span class="s">"configurations"</span>: [
+    { <span class="s">"name"</span>: <span class="s">"Python : fichier courant"</span>, <span class="s">"type"</span>: <span class="s">"debugpy"</span>, <span class="s">"request"</span>: <span class="s">"launch"</span>,
+      <span class="s">"program"</span>: <span class="s">"${file}"</span>, <span class="s">"console"</span>: <span class="s">"integratedTerminal"</span>, <span class="s">"justMyCode"</span>: false,
+      <span class="s">"env"</span>: { <span class="s">"CUDA_LAUNCH_BLOCKING"</span>: <span class="s">"1"</span>, <span class="s">"PYTHONPATH"</span>: <span class="s">"${workspaceFolder}"</span> } },
+    { <span class="s">"name"</span>: <span class="s">"Expérience : MedMNIST-C"</span>, <span class="s">"type"</span>: <span class="s">"debugpy"</span>, <span class="s">"request"</span>: <span class="s">"launch"</span>,
+      <span class="s">"module"</span>: <span class="s">"experiments.run_eval"</span>,
+      <span class="s">"args"</span>: [<span class="s">"dataset=medmnistc"</span>, <span class="s">"method=tlsc"</span>, <span class="s">"seed=0"</span>],
+      <span class="s">"console"</span>: <span class="s">"integratedTerminal"</span>, <span class="s">"justMyCode"</span>: false }
+  ]
+}</pre></div>
+  <p><code>CUDA_LAUNCH_BLOCKING=1</code> rend les erreurs CUDA lisibles mais ralentit fortement&nbsp;: à réserver au débogage, à retirer pour les runs de production.</p>
+
+  <h4>Le fichier de règles</h4>
+  <p>Créez à la racine le fichier que votre assistant lit à chaque requête&nbsp;: <code>CLAUDE.md</code> pour Claude Code, <code>.github/copilot-instructions.md</code> pour Copilot, <code>.continue/rules.md</code> pour Continue. Même contenu&nbsp;:</p>
+
+  <div class="blk"><div class="cap">CLAUDE.md — contexte permanent de l'assistant</div><pre><b># Règles de code — projet TLSC</b>
+
+<b>## Contexte</b>
+Adaptation au moment du test et sortie anticipée pour ViT en imagerie médicale.
+Formalisme de référence : docs/01-cadre-theorique.md. Toute notation en vient.
+
+<b>## Notation (ne jamais renommer)</b>
+z : embedding L2-normalisé (B, d)  |  mu : centroïdes (K, d)  |  T : température
+H : entropie de Gibbs  |  F : énergie libre = -T·logsumexp(-d²/T)  |  E : énergie moyenne
+theta_adapt : LayerNorm du BACKBONE + prompts  |  theta_frozen : tout le reste
+
+<b>## Standards</b>
+- Type hints partout, docstrings NumPy, `from __future__ import annotations`.
+- Aucune valeur numérique de performance en dur, jamais, même en commentaire.
+- Stabilité numérique : `log_softmax` et `logsumexp`, jamais `p.log()`.
+- Pas de `.item()` ni de `.cpu()` dans une boucle chaude.
+- Tout nouveau module scientifique arrive avec son test dans tests/.
+
+<b>## Pièges connus de ce projet — à ne pas reproduire</b>
+1. Les forward hooks NE PEUVENT PAS interrompre le calcul. La sortie anticipée
+   exige une boucle explicite sur `model.blocks`.
+2. Les têtes de projection contiennent des LayerNorm. Elles NE DOIVENT PAS entrer
+   dans theta_adapt : ne parcourir que `model.backbone.modules()`.
+3. Mesure de latence : échauffement + `torch.cuda.synchronize()` + `cuda.Event`.
+4. Le comptage de FLOPs inclut les passes ARRIÈRE (facteur ~2 par passe avant).
+5. theta_adapt est restauré après chaque lot. Une dérive entre patients est un bug.</pre></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S1</div><p>Le fichier de règles existe et l'assistant, interrogé sur « comment implémenter la sortie anticipée&nbsp;? », répond « boucle explicite » et non « forward hooks ». C'est le contrôle qui vérifie qu'il lit bien le fichier.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S2 -->
+<section id="s2">
+  <div class="sprint"><span class="tag">S2</span><h2>Squelette du dépôt</h2><span class="dur">1 h</span></div>
+
+  <div class="blk sh"><div class="cap">terminal</div><pre><span class="p">$</span> mkdir -p tlsc/{configs,data,models,core,adapt,exit,eval,physics} \
+           experiments tests docs paper/figures
+<span class="p">$</span> for d in tlsc tlsc/data tlsc/models tlsc/core tlsc/adapt tlsc/exit \
+           tlsc/eval tlsc/physics experiments tests; do touch $d/__init__.py; done
+<span class="p">$</span> git init
+<span class="p">$</span> printf '.venv/\n__pycache__/\ndata/raw/\noutputs/\n*.pt\n*.pth\nwandb/\n' &gt; .gitignore</pre></div>
+
+  <div class="blk"><div class="cap">pyproject.toml</div><pre><b>[project]</b>
+name = <span class="s">"tlsc"</span>
+version = <span class="s">"0.1.0"</span>
+requires-python = <span class="s">"&gt;=3.11"</span>
+
+<b>[tool.ruff]</b>
+line-length = 100
+target-version = <span class="s">"py311"</span>
+<b>[tool.ruff.lint]</b>
+select = [<span class="s">"E"</span>, <span class="s">"F"</span>, <span class="s">"I"</span>, <span class="s">"N"</span>, <span class="s">"UP"</span>, <span class="s">"B"</span>, <span class="s">"SIM"</span>]
+
+<b>[tool.pytest.ini_options]</b>
+testpaths = [<span class="s">"tests"</span>]
+addopts = <span class="s">"-q"</span>
+
+<b>[tool.setuptools.packages.find]</b>
+include = [<span class="s">"tlsc*"</span>]</pre></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S2</div><p><code>uv pip install -e .</code> puis <code>pytest</code> collecte zéro test sans erreur, <code>ruff check .</code> passe, et <code>git log</code> montre un commit initial.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S3 -->
+<section id="s3">
+  <div class="sprint"><span class="tag">S3</span><h2>Le noyau formel — observables de Gibbs</h2><span class="dur">2 h</span></div>
+  <p class="sub">Le fichier le plus important du dépôt. Recopiez-le intégralement&nbsp;: c'est le seul endroit où une erreur ne provoque aucun plantage mais fausse silencieusement chaque résultat du papier.</p>
+
+  <div class="blk"><div class="cap">tlsc/core/gibbs.py</div><pre><span class="s">"""Observables thermodynamiques de l'espace latent.
+
+Convention : embeddings et centroïdes L2-normalisés, donc
+E_k(z) = ||z - mu_k||^2 = 2 - 2&lt;z, mu_k&gt; ∈ [0, 4].
+Toutes les fonctions sont différentiables et opèrent par lots.
+"""</span>
+<span class="k">from</span> __future__ <span class="k">import</span> annotations
+
+<span class="k">import</span> torch
+<span class="k">from</span> torch <span class="k">import</span> Tensor
+
+
+<span class="k">def</span> <span class="f">squared_distances</span>(z: Tensor, mu: Tensor, normalized: bool = True) -&gt; Tensor:
+    <span class="s">"""Distances euclidiennes au carré entre embeddings et centroïdes.
+
+    Parameters
+    ----------
+    z : Tensor, shape (B, d)
+    mu : Tensor, shape (K, d)
+    normalized : bool
+        Si True, utilise l'identité sphérique — exacte et moins coûteuse.
+
+    Returns
+    -------
+    Tensor, shape (B, K)
+    """</span>
+    <span class="k">if</span> normalized:
+        <span class="k">return</span> (2.0 - 2.0 * (z @ mu.t())).clamp_min(0.0)
+    <span class="k">return</span> torch.cdist(z, mu, p=2).pow(2)
+
+
+<span class="k">def</span> <span class="f">gibbs</span>(z: Tensor, mu: Tensor, T: float,
+          normalized: bool = True) -&gt; tuple[Tensor, Tensor]:
+    <span class="s">"""Log-postérieur de Gibbs et énergies de configuration."""</span>
+    d2 = squared_distances(z, mu, normalized)
+    <span class="k">return</span> torch.log_softmax(-d2 / T, dim=-1), d2
+
+
+<span class="k">def</span> <span class="f">entropy</span>(log_p: Tensor) -&gt; Tensor:
+    <span class="s">"""Entropie de Gibbs, en nats. Shape (B,)."""</span>
+    <span class="k">return</span> -(log_p.exp() * log_p).sum(-1)
+
+
+<span class="k">def</span> <span class="f">free_energy</span>(d2: Tensor, T: float) -&gt; Tensor:
+    <span class="s">"""Énergie libre F = -T ln Z. Shape (B,)."""</span>
+    <span class="k">return</span> -T * torch.logsumexp(-d2 / T, dim=-1)
+
+
+<span class="k">def</span> <span class="f">mean_energy</span>(log_p: Tensor, d2: Tensor) -&gt; Tensor:
+    <span class="s">"""Énergie moyenne &lt;E&gt;. Shape (B,)."""</span>
+    <span class="k">return</span> (log_p.exp() * d2).sum(-1)
+
+
+<span class="k">def</span> <span class="f">observables</span>(z: Tensor, mu: Tensor, T: float,
+                normalized: bool = True) -&gt; dict[str, Tensor]:
+    <span class="s">"""Les trois observables et le postérieur, en une passe."""</span>
+    log_p, d2 = gibbs(z, mu, T, normalized)
+    <span class="k">return</span> {
+        <span class="s">"log_p"</span>: log_p,
+        <span class="s">"p"</span>: log_p.exp(),
+        <span class="s">"H"</span>: entropy(log_p),
+        <span class="s">"F"</span>: free_energy(d2, T),
+        <span class="s">"E"</span>: mean_energy(log_p, d2),
+    }</pre></div>
+
+  <div class="blk"><div class="cap">tests/test_gibbs.py</div><pre><span class="k">import</span> math
+<span class="k">import</span> torch
+<span class="k">from</span> tlsc.core.gibbs <span class="k">import</span> entropy, free_energy, observables
+
+
+<span class="k">def</span> <span class="f">test_uniforme_donne_ln_K</span>():
+    <span class="s">"""Un point équidistant de tous les centroïdes a l'entropie maximale."""</span>
+    K, d = 4, 8
+    mu = torch.eye(K, d)
+    z = mu.mean(0, keepdim=True)
+    z = z / z.norm()
+    obs = observables(z, mu, T=1.0)
+    <span class="k">assert</span> torch.allclose(obs[<span class="s">"H"</span>], torch.tensor([math.log(K)]), atol=1e-5)
+
+
+<span class="k">def</span> <span class="f">test_degenere_donne_zero</span>():
+    <span class="s">"""Une température très basse rend l'assignation déterministe."""</span>
+    mu = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+    z = torch.tensor([[1.0, 0.0]])
+    <span class="k">assert</span> observables(z, mu, T=1e-3)[<span class="s">"H"</span>].item() &lt; 1e-6
+
+
+<span class="k">def</span> <span class="f">test_identite_thermodynamique</span>():
+    <span class="s">"""Lemme 1 : F = &lt;E&gt; - T·H, à la précision machine."""</span>
+    torch.manual_seed(0)
+    z = torch.nn.functional.normalize(torch.randn(64, 16), dim=-1)
+    mu = torch.nn.functional.normalize(torch.randn(3, 16), dim=-1)
+    <span class="k">for</span> T <span class="k">in</span> (0.05, 0.2, 1.0, 5.0):
+        o = observables(z, mu, T)
+        <span class="k">assert</span> torch.allclose(o[<span class="s">"F"</span>], o[<span class="s">"E"</span>] - T * o[<span class="s">"H"</span>], atol=1e-5)
+
+
+<span class="k">def</span> <span class="f">test_invariance_de_H_covariance_de_F</span>():
+    <span class="s">"""Proposition 2 : translater toutes les énergies laisse H inchangée
+    et décale F d'exactement c. C'est le fondement du découplage."""</span>
+    torch.manual_seed(0)
+    d2 = torch.rand(32, 5) * 4
+    T, c = 0.3, 1.7
+    H1 = entropy(torch.log_softmax(-d2 / T, -1))
+    H2 = entropy(torch.log_softmax(-(d2 + c) / T, -1))
+    <span class="k">assert</span> torch.allclose(H1, H2, atol=1e-5)
+    <span class="k">assert</span> torch.allclose(free_energy(d2 + c, T), free_energy(d2, T) + c, atol=1e-4)</pre></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S3</div><p><code>pytest tests/test_gibbs.py</code> — quatre tests verts. Le quatrième est la vérification expérimentale de la Proposition&nbsp;2, c'est-à-dire du fondement même du découplage entre adaptation et sortie.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S4 -->
+<section id="s4">
+  <div class="sprint"><span class="tag">S4</span><h2>Backbone instrumenté</h2><span class="dur">3 h</span></div>
+
+  <div class="trap"><div class="k">Piège n°1 — le plus coûteux</div>
+  <p>Les <em>forward hooks</em> observent le calcul mais ne l'interrompent pas. Une sortie anticipée implémentée par hooks exécute quand même les douze couches et n'économise strictement rien — tout en produisant des courbes parfaitement plausibles. La boucle explicite sur <code>backbone.blocks</code> est obligatoire.</p>
+  <p>Les documents initiaux du projet prescrivaient les hooks. C'est corrigé ici.</p></div>
+
+  <div class="blk"><div class="cap">tlsc/models/backbone.py</div><pre><span class="k">from</span> __future__ <span class="k">import</span> annotations
+
+<span class="k">import</span> timm
+<span class="k">import</span> torch
+<span class="k">import</span> torch.nn.functional <span class="k">as</span> F
+<span class="k">from</span> torch <span class="k">import</span> Tensor, nn
+
+
+<span class="k">class</span> <span class="f">ProjectionHead</span>(nn.Module):
+    <span class="s">"""g_n : R^D -&gt; S^{d-1}."""</span>
+
+    <span class="k">def</span> <span class="f">__init__</span>(self, width: int, d: int) -&gt; None:
+        super().__init__()
+        self.norm = nn.LayerNorm(width)
+        self.proj = nn.Linear(width, d)
+
+    <span class="k">def</span> <span class="f">forward</span>(self, x: Tensor) -&gt; Tensor:
+        <span class="k">return</span> F.normalize(self.proj(self.norm(x)), dim=-1)
+
+
+<span class="k">class</span> <span class="f">CrystallizationViT</span>(nn.Module):
+    <span class="s">"""ViT instrumenté : lecture par couche, prompts visuels, centroïdes ancrés."""</span>
+
+    <span class="k">def</span> <span class="f">__init__</span>(self, backbone: str = <span class="s">"vit_small_patch16_224"</span>,
+                 d: int = 256, n_classes: int = 2,
+                 n_prompts: int = 10, prompt_layer: int = 3,
+                 pretrained: bool = True) -&gt; None:
+        super().__init__()
+        self.backbone = timm.create_model(backbone, pretrained=pretrained, num_classes=0)
+        width = self.backbone.embed_dim
+        self.n_layers = len(self.backbone.blocks)
+        self.heads = nn.ModuleList(
+            [ProjectionHead(width, d) <span class="k">for</span> _ <span class="k">in</span> range(self.n_layers)]
+        )
+        self.prompt_layer = prompt_layer
+        self.prompts = (
+            nn.Parameter(torch.zeros(n_prompts, width)) <span class="k">if</span> n_prompts &gt; 0 <span class="k">else</span> None
+        )
+        <span class="k">if</span> self.prompts <span class="k">is not</span> None:
+            nn.init.trunc_normal_(self.prompts, std=0.02)
+        self.register_buffer(<span class="s">"centroids"</span>, torch.zeros(self.n_layers, n_classes, d))
+
+    <span class="k">def</span> <span class="f">_embed</span>(self, x: Tensor) -&gt; Tensor:
+        b = self.backbone
+        h = b.patch_embed(x)
+        h = b._pos_embed(h)
+        <span class="k">return</span> b.norm_pre(h)
+
+    <span class="k">def</span> <span class="f">forward_layers</span>(self, x: Tensor, max_layer: int | None = None) -&gt; list[Tensor]:
+        <span class="s">"""Embeddings z^(n) pour n = 1..max_layer.
+
+        Le calcul s'arrête RÉELLEMENT à max_layer : c'est ce qui rend
+        l'économie de FLOPs mesurable plutôt que fictive.
+        """</span>
+        h = self._embed(x)
+        out: list[Tensor] = []
+        <span class="k">for</span> n, blk <span class="k">in</span> enumerate(self.backbone.blocks, start=1):
+            <span class="k">if</span> self.prompts <span class="k">is not</span> None <span class="k">and</span> n == self.prompt_layer:
+                p = self.prompts.unsqueeze(0).expand(h.size(0), -1, -1)
+                h = torch.cat([h, p], dim=1)
+            h = blk(h)
+            out.append(self.heads[n - 1](h[:, 0]))
+            <span class="k">if</span> max_layer <span class="k">is not</span> None <span class="k">and</span> n &gt;= max_layer:
+                <span class="k">break</span>
+        <span class="k">return</span> out</pre></div>
+
+  <div class="prompt"><div class="k">Prompt à coller — S4</div>
+  <p>« Dans <code>tlsc/models/backbone.py</code>, ajoute une méthode <code>count_parameters(self) -&gt; dict[str, int]</code> qui retourne le nombre de paramètres totaux, gelés et adaptables (<code>requires_grad=True</code>), ainsi que la fraction adaptable. Type hints, docstring NumPy. N'écris aucune valeur numérique attendue, ni dans le code ni dans les commentaires. »</p></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S4</div>
+  <p>Un script instancie le modèle, appelle <code>forward_layers(x, max_layer=5)</code> et vérifie que la liste retournée compte cinq éléments de forme <code>(B, d)</code> et de norme&nbsp;1.</p>
+  <p>Puis il affiche <code>count_parameters()</code>. <strong>C'est la mesure qui remplace le « 0,75&nbsp;% » des documents initiaux</strong> — le comptage exact donne 0,044&nbsp;% pour ViT-B/16 avec les LayerNorm seuls, 0,053&nbsp;% avec dix prompts. La valeur annoncée était surestimée d'un facteur&nbsp;15, et la correction joue en faveur du projet.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S5 -->
+<section id="s5">
+  <div class="sprint"><span class="tag">S5</span><h2>Gel et restauration</h2><span class="dur">1 h</span></div>
+
+  <div class="trap"><div class="k">Piège n°2 — silencieux et dévastateur</div>
+  <p><code>ProjectionHead</code> contient un <code>nn.LayerNorm</code>. Un parcours naïf de <code>model.modules()</code> l'inclurait dans <span class="m">θ<sub>adapt</sub></span>, ce qui adapterait les têtes au moment du test et invaliderait tout l'ancrage des centroïdes. Les résultats seraient meilleurs, et faux. Ne parcourir que <code>model.backbone.modules()</code>.</p></div>
+
+  <div class="blk"><div class="cap">tlsc/adapt/state.py</div><pre><span class="k">from</span> __future__ <span class="k">import</span> annotations
+
+<span class="k">import</span> torch
+<span class="k">from</span> torch <span class="k">import</span> Tensor, nn
+
+
+<span class="k">def</span> <span class="f">collect_adapt_params</span>(model: nn.Module, use_ln: bool = True,
+                         use_prompts: bool = True) -&gt; list[nn.Parameter]:
+    <span class="s">"""Gèle tout, puis ré-active exclusivement theta_adapt."""</span>
+    <span class="k">for</span> p <span class="k">in</span> model.parameters():
+        p.requires_grad_(False)
+
+    params: list[nn.Parameter] = []
+    <span class="k">if</span> use_ln:
+        <span class="c"># ATTENTION : model.backbone, surtout pas model — les têtes de</span>
+        <span class="c"># projection contiennent des LayerNorm qui doivent rester gelées.</span>
+        <span class="k">for</span> m <span class="k">in</span> model.backbone.modules():
+            <span class="k">if</span> isinstance(m, nn.LayerNorm):
+                <span class="k">for</span> p <span class="k">in</span> (m.weight, m.bias):
+                    <span class="k">if</span> p <span class="k">is not</span> None:
+                        p.requires_grad_(True)
+                        params.append(p)
+    <span class="k">if</span> use_prompts <span class="k">and</span> getattr(model, <span class="s">"prompts"</span>, None) <span class="k">is not</span> None:
+        model.prompts.requires_grad_(True)
+        params.append(model.prompts)
+    <span class="k">return</span> params
+
+
+<span class="k">def</span> <span class="f">snapshot</span>(params: list[nn.Parameter]) -&gt; list[Tensor]:
+    <span class="k">return</span> [p.detach().clone() <span class="k">for</span> p <span class="k">in</span> params]
+
+
+<span class="f">@torch.no_grad</span>()
+<span class="k">def</span> <span class="f">restore</span>(params: list[nn.Parameter], snap: list[Tensor]) -&gt; None:
+    <span class="k">for</span> p, s <span class="k">in</span> zip(params, snap, strict=True):
+        p.copy_(s)</pre></div>
+
+  <div class="blk"><div class="cap">tests/test_freeze.py — les deux tests non négociables</div><pre><span class="k">import</span> torch
+<span class="k">from</span> tlsc.adapt.state <span class="k">import</span> collect_adapt_params, restore, snapshot
+<span class="k">from</span> tlsc.models.backbone <span class="k">import</span> CrystallizationViT
+
+
+<span class="k">def</span> <span class="f">_model</span>():
+    <span class="k">return</span> CrystallizationViT(pretrained=False, n_prompts=4)
+
+
+<span class="k">def</span> <span class="f">test_backbone_intouche_apres_tta</span>():
+    <span class="s">"""Après une étape d'adaptation, seul theta_adapt a bougé.
+    C'est la vérification de la revendication centrale du papier."""</span>
+    m = _model()
+    params = collect_adapt_params(m)
+    frozen = {n: p.detach().clone() <span class="k">for</span> n, p <span class="k">in</span> m.named_parameters()
+              <span class="k">if not</span> p.requires_grad}
+
+    opt = torch.optim.SGD(params, lr=1e-2)
+    z = m.forward_layers(torch.randn(2, 3, 224, 224), max_layer=4)[-1]
+    z.pow(2).sum().backward()
+    opt.step()
+
+    <span class="k">for</span> n, p <span class="k">in</span> m.named_parameters():
+        <span class="k">if</span> n <span class="k">in</span> frozen:
+            <span class="k">assert</span> torch.equal(p, frozen[n]), f<span class="s">"paramètre gelé modifié : {n}"</span>
+            <span class="k">assert</span> p.grad <span class="k">is</span> None <span class="k">or</span> torch.count_nonzero(p.grad) == 0
+
+
+<span class="k">def</span> <span class="f">test_pas_de_derive_entre_echantillons</span>():
+    <span class="s">"""Deux inférences sur la même image donnent le même résultat après restore.
+    C'est l'argument technique de la section conformité RGPD / HIPAA."""</span>
+    m = _model().eval()
+    params = collect_adapt_params(m)
+    snap = snapshot(params)
+    x = torch.randn(1, 3, 224, 224)
+
+    <span class="k">with</span> torch.no_grad():
+        z1 = m.forward_layers(x)[-1].clone()
+    <span class="k">with</span> torch.enable_grad():
+        m.forward_layers(x)[-1].pow(2).sum().backward()
+        torch.optim.SGD(params, lr=1e-1).step()
+    restore(params, snap)
+    <span class="k">with</span> torch.no_grad():
+        z2 = m.forward_layers(x)[-1]
+
+    <span class="k">assert</span> torch.allclose(z1, z2, atol=1e-6), <span class="s">"dérive de theta_adapt"</span></pre></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S5</div><p>Ces deux tests verts. Ils resteront verts pour <em>chaque</em> méthode d'adaptation ajoutée par la suite&nbsp;: paramétrez-les avec <code>pytest.mark.parametrize</code> dès le sprint S7.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S6 -->
+<section id="s6">
+  <div class="sprint"><span class="tag">S6</span><h2>Phase 1 — ancrage hors ligne</h2><span class="dur">1 jour</span></div>
+  <p class="sub">Entraîner les douze têtes par perte contrastive supervisée, backbone gelé, puis figer un jeu de centroïdes par couche.</p>
+
+  <div class="prompt"><div class="k">Prompt à coller — S6</div>
+  <p>« Écris <code>tlsc/core/centroids.py</code> avec&nbsp;:</p>
+  <p><strong>(1)</strong> <code>supcon_loss(z: Tensor, labels: Tensor, tau: float = 0.1) -&gt; Tensor</code>, la perte contrastive supervisée de Khosla et al. 2020, numériquement stable (<code>log_softmax</code>, masquage de la diagonale)&nbsp;;</p>
+  <p><strong>(2)</strong> <code>train_heads(model, loader, epochs, lr, device) -&gt; dict[str, list[float]]</code> qui gèle le backbone, entraîne les douze <code>ProjectionHead</code> en sommant la SupCon sur chaque couche, sous <code>torch.autocast('cuda', dtype=torch.bfloat16)</code>, et retourne l'historique des pertes par couche&nbsp;;</p>
+  <p><strong>(3)</strong> <code>anchor_centroids(model, loader, device) -&gt; Tensor</code> de forme <code>(L, K, d)</code>&nbsp;: moyenne de classe des embeddings puis renormalisation L2, écrite dans le buffer <code>model.centroids</code>.</p>
+  <p>Type hints, docstrings NumPy, aucune valeur numérique en dur. Ajoute <code>tests/test_centroids.py</code> vérifiant que la SupCon d'un lot parfaitement séparé est inférieure à celle d'un lot aléatoire, et que les centroïdes retournés sont de norme&nbsp;1. »</p></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S6 — le premier résultat scientifique du projet</div>
+  <p>Sur MedMNIST-C (<code>pneumoniamnist</code> ou <code>pathmnist</code>), après entraînement, tracez <span class="m">ℋ<sub>n</sub></span> en fonction de <span class="m">n</span> sur le split de validation <em>dans le domaine</em>. Sauvegardez <code>outputs/phase1/centroids.pt</code>.</p>
+  <p>Cette courbe teste la conjecture C2 du cadre théorique. <strong>Si <span class="m">ℋ<sub>n</sub></span> ne décroît pas avec la profondeur, ce n'est pas un bug&nbsp;: c'est une réfutation</strong>, à consigner telle quelle. Le projet reste viable, mais la narration change — et vous l'aurez appris en un jour plutôt qu'en trois mois.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S7 -->
+<section id="s7">
+  <div class="sprint"><span class="tag">S7</span><h2>Baselines TTA</h2><span class="dur">1 jour</span></div>
+
+  <div class="prompt"><div class="k">Prompt à coller — S7</div>
+  <p>« Écris <code>tlsc/adapt/baselines.py</code> avec une interface commune <code>class TTAMethod(Protocol): def adapt(self, model, x) -&gt; None</code> et les implémentations&nbsp;: <code>SourceOnly</code> (sans effet)&nbsp;; <code>LNStats</code> (remet les LayerNorm en mode entraînement pour recalculer les statistiques, sans gradient)&nbsp;; <code>Tent</code> (minimisation d'entropie sur les LayerNorm, Wang et al. ICLR 2021)&nbsp;; <code>EATA</code> (filtrage par seuil d'entropie et pondération)&nbsp;; <code>SAR</code> (minimisation avec perturbation de netteté).</p>
+  <p>Contraintes&nbsp;: utiliser <code>tlsc.adapt.state.collect_adapt_params</code>, <code>snapshot</code>, <code>restore</code>&nbsp;; ne jamais modifier <code>theta_frozen</code>&nbsp;; <code>torch.autocast('cuda', dtype=torch.bfloat16)</code>&nbsp;; un <code>snapshot</code> au début et un <code>restore</code> à la fin de chaque lot. Type hints et docstrings NumPy. »</p></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S7</div><p><code>test_backbone_intouche_apres_tta</code> passe pour <em>chaque</em> méthode, via <code>pytest.mark.parametrize</code> sur la liste des classes.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S8 -->
+<section id="s8">
+  <div class="sprint"><span class="tag">S8</span><h2>Énergie en ligne et méthode proposée</h2><span class="dur">2 jours</span></div>
+  <p class="sub">Le terme répulsif, rendu opérant par les prototypes souples, et le diagnostic d'effondrement qui l'accompagne obligatoirement.</p>
+
+  <div class="blk"><div class="cap">tlsc/core/energy.py</div><pre><span class="k">from</span> __future__ <span class="k">import</span> annotations
+
+<span class="k">import</span> torch
+<span class="k">from</span> torch <span class="k">import</span> Tensor
+
+<span class="k">from</span> tlsc.core.gibbs <span class="k">import</span> observables
+
+
+<span class="k">def</span> <span class="f">soft_prototypes</span>(z: Tensor, p: Tensor, eps: float = 1e-6) -&gt; Tensor:
+    <span class="s">"""Prototypes souples différentiables. z (B,d), p (B,K) -&gt; (K,d).
+
+    C'est cette différentiabilité qui donne au terme répulsif un gradient
+    non nul — la formulation à centroïdes figés le rendait inerte.
+    """</span>
+    w = p.t()                              <span class="c"># (K, B)</span>
+    num = w @ z                            <span class="c"># (K, d)</span>
+    den = w.sum(-1, keepdim=True).clamp_min(eps)
+    <span class="k">return</span> num / den
+
+
+<span class="k">def</span> <span class="f">online_energy</span>(z: Tensor, mu_anchor: Tensor, T: float, lam: float,
+                  beta: float) -&gt; tuple[Tensor, dict[str, Tensor]]:
+    <span class="s">"""Énergie en ligne : condensation - répulsion + ancrage (Définition 4)."""</span>
+    obs = observables(z, mu_anchor, T)
+    mu_hat = soft_prototypes(z, obs[<span class="s">"p"</span>])
+
+    condensation = obs[<span class="s">"H"</span>].mean()
+    repulsion = torch.cdist(mu_hat, mu_hat).pow(2).max()
+    anchoring = (mu_hat - mu_anchor).pow(2).sum(-1).mean()
+
+    loss = condensation - lam * repulsion + beta * anchoring
+
+    p_bar = obs[<span class="s">"p"</span>].mean(0)
+    logs = {
+        <span class="s">"condensation"</span>: condensation.detach(),
+        <span class="s">"repulsion"</span>: repulsion.detach(),
+        <span class="s">"anchoring"</span>: anchoring.detach(),
+        <span class="c"># DIAGNOSTIC D'EFFONDREMENT — une chute invalide le run</span>
+        <span class="s">"marginal_entropy"</span>: -(p_bar * p_bar.clamp_min(1e-12).log()).sum().detach(),
+    }
+    <span class="k">return</span> loss, logs</pre></div>
+
+  <div class="prompt"><div class="k">Prompt à coller — S8</div>
+  <p>« Écris <code>tlsc/adapt/tlsc.py</code>, classe <code>CrystallizationTTA</code> conforme au protocole <code>TTAMethod</code>, implémentant l'adaptation sélective de l'Algorithme&nbsp;1 de <code>docs/01-cadre-theorique.md</code>&nbsp;:</p>
+  <p><strong>(a)</strong> passe avant tronquée jusqu'à <code>n_probe</code>&nbsp;; <strong>(b)</strong> calcul de <code>F</code> via <code>tlsc.core.gibbs</code>&nbsp;; <strong>(c)</strong> si <code>F.mean() &lt;= tau_ood</code>, retour immédiat <em>sans aucune adaptation</em> et incrément d'un compteur <code>n_skipped</code>&nbsp;; <strong>(d)</strong> sinon <code>S</code> itérations sur <code>online_energy</code> avec un tampon glissant <code>deque(maxlen=buffer_size)</code>&nbsp;; <strong>(e)</strong> <code>snapshot</code>/<code>restore</code> à chaque lot&nbsp;; <strong>(f)</strong> propriété <code>rho</code> = fraction de lots effectivement adaptés.</p>
+  <p>Journalise à chaque itération les quatre entrées de <code>logs</code>. Type hints, docstrings NumPy. »</p></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S8 — la vérification de la Proposition 1</div>
+  <p>Sur un lot synthétique à deux nuages gaussiens bien séparés&nbsp;: <code>condensation</code> décroît et <code>marginal_entropy</code> <strong>ne</strong> s'effondre <strong>pas</strong>.</p>
+  <p>Puis, avec <code>lam=0</code> sur un lot difficile&nbsp;: <code>marginal_entropy</code> <strong>s'effondre</strong>. Ce second test est la vérification expérimentale de l'énoncé central du papier — sans terme répulsif, la cristallisation dégénère en effondrement.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S9 -->
+<section id="s9">
+  <div class="sprint"><span class="tag">S9</span><h2>Sortie anticipée et calibration conforme</h2><span class="dur">1 jour</span></div>
+
+  <div class="blk"><div class="cap">tlsc/exit/conformal.py</div><pre><span class="k">from</span> __future__ <span class="k">import</span> annotations
+
+<span class="k">import</span> math
+<span class="k">import</span> numpy <span class="k">as</span> np
+
+
+<span class="k">def</span> <span class="f">hoeffding_ucb</span>(risk_emp: float, m: int, delta: float) -&gt; float:
+    <span class="s">"""Borne supérieure de confiance de Hoeffding sur le risque."""</span>
+    <span class="k">return</span> risk_emp + math.sqrt(math.log(1.0 / delta) / (2.0 * m))
+
+
+<span class="k">def</span> <span class="f">learn_then_test</span>(scores: np.ndarray, correct: np.ndarray,
+                    offsets: np.ndarray, grid: np.ndarray,
+                    alpha: float, delta: float) -&gt; float | None:
+    <span class="s">"""Sélectionne le seuil le plus agressif dont le risque reste contrôlé.
+
+    Parameters
+    ----------
+    scores : (m, L)   critère de sortie Phi_n, par échantillon et par couche
+    correct : (m, L)  la prédiction de la couche n est-elle correcte
+    offsets : (L,)    normalisation par couche (médiane de Phi_n en domaine source)
+    grid : (G,)       candidats eps0, du plus conservateur au plus agressif
+    alpha, delta : niveau de risque et confiance
+
+    Returns
+    -------
+    Le eps0 retenu, ou None si aucun candidat ne contrôle le risque.
+    """</span>
+    m = scores.shape[0]
+    retained: float | None = None
+    <span class="k">for</span> eps0 <span class="k">in</span> grid:                        <span class="c"># test par séquence fixe</span>
+        thr = offsets + eps0                   <span class="c"># (L,)</span>
+        exits = scores &lt; thr[None, :]
+        first = np.where(exits.any(1), exits.argmax(1), scores.shape[1] - 1)
+        risk_emp = 1.0 - correct[np.arange(m), first].mean()
+        <span class="k">if</span> hoeffding_ucb(risk_emp, m, delta) &lt;= alpha:
+            retained = float(eps0)             <span class="c"># valide, on tente plus agressif</span>
+        <span class="k">else</span>:
+            <span class="k">break</span>                              <span class="c"># premier échec : on s'arrête</span>
+    <span class="k">return</span> retained</pre></div>
+
+  <div class="trap"><div class="k">Réserve d'honnêteté à écrire dans le papier</div>
+  <p>La garantie conforme suppose l'échangeabilité entre calibration et test — hypothèse <strong>violée par construction sous décalage de distribution</strong>. Rapportez séparément trois régimes&nbsp;: source→source (garantie valide), source→cible (garantie approchée, à valider empiriquement), cible tenue à l'écart→cible (valide).</p>
+  <p>Ne pas énoncer cette réserve est la faille la plus facilement exploitable par un relecteur. L'énoncer vous-même est, à l'inverse, un signal de sérieux.</p></div>
+
+  <div class="prompt"><div class="k">Prompt à coller — S9</div>
+  <p>« Écris <code>tlsc/exit/controller.py</code>, classe <code>EarlyExitController</code>&nbsp;: parcourt les couches de façon <em>incrémentale</em> — sans jamais recalculer les couches déjà traversées — évalue <code>Phi_n</code>, sort dès que <code>Phi_n &lt; eps_n</code>, et retourne <code>(pred, N_star, crystallized: bool)</code>. Ajoute un test vérifiant que les logits obtenus par sortie à la couche <code>n</code> sont <strong>strictement égaux</strong> à ceux d'une passe complète tronquée à <code>n</code>. »</p></div>
+
+  <div class="acc"><div class="k">Test d'acceptation S9</div><p>Test de cohérence de la sortie anticipée vert (égalité stricte), et <code>learn_then_test</code> retournant un seuil non nul sur données synthétiques.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S10 -->
+<section id="s10">
+  <div class="sprint"><span class="tag">S10</span><h2>Évaluation — là où se joue la crédibilité</h2><span class="dur">1 jour</span></div>
+
+  <div class="blk"><div class="cap">tlsc/eval/budget.py</div><pre><span class="k">def</span> <span class="f">total_flops</span>(fwd_probe: float, fwd_exit: float, n_steps: int,
+                rho: float, kappa: float = 2.0) -&gt; float:
+    <span class="s">"""FLOPs par image, passes ARRIÈRE incluses (§7 du cadre théorique).
+
+    kappa : coût de la passe arrière relativement à la passe avant.
+        La valeur 2.0 est une convention. Elle DOIT être validée
+        empiriquement pour ce modèle et ce matériel, puis rapportée.
+    """</span>
+    <span class="k">return</span> rho * n_steps * (1.0 + kappa) * fwd_probe + fwd_exit</pre></div>
+
+  <p>Mesure de <span class="m">κ</span>&nbsp;: chronométrez une passe avant seule, puis avant + arrière, sur le même lot&nbsp;; le rapport moins un donne <span class="m">κ</span>. Rapportez la valeur mesurée plutôt que la convention.</p>
+
+  <div class="blk"><div class="cap">tlsc/eval/latency.py</div><pre><span class="k">def</span> <span class="f">measure_latency</span>(fn, warmup: int = 20, iters: int = 100) -&gt; tuple[float, float]:
+    <span class="s">"""Latence p50 / p95 en millisecondes.
+
+    L'échauffement et la synchronisation sont indispensables : sans eux,
+    on mesure la vitesse d'enfilement des kernels, pas leur exécution.
+    """</span>
+    <span class="k">import</span> numpy <span class="k">as</span> np
+    <span class="k">import</span> torch
+
+    <span class="k">for</span> _ <span class="k">in</span> range(warmup):
+        fn()
+    torch.cuda.synchronize()
+
+    ts = []
+    <span class="k">for</span> _ <span class="k">in</span> range(iters):
+        s, e = torch.cuda.Event(True), torch.cuda.Event(True)
+        s.record(); fn(); e.record()
+        torch.cuda.synchronize()
+        ts.append(s.elapsed_time(e))
+    <span class="k">return</span> float(np.percentile(ts, 50)), float(np.percentile(ts, 95))</pre></div>
+
+  <div class="prompt"><div class="k">Prompt à coller — S10</div>
+  <p>« Écris <code>tlsc/eval/metrics.py</code>&nbsp;: AUROC, accuracy équilibrée, F1 macro, sensibilité à spécificité 0,95, ECE à 15 bacs, score de Brier, et <code>risk_coverage_curve(scores, correct) -&gt; (coverage, risk, aurc)</code>. Ajoute <code>paired_bootstrap_ci(a, b, n=10000)</code> et <code>delong_test(y, p1, p2)</code>. Type hints, docstrings NumPy, tests contre <code>sklearn</code> là où une référence existe. »</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- S11 -->
+<section id="s11">
+  <div class="sprint"><span class="tag">S11</span><h2>Données</h2><span class="dur">0,5 jour</span></div>
+
+  <div class="blk sh"><div class="cap">terminal</div><pre><span class="c"># P0 — MedMNIST-C (~1 Go) : itération rapide, sévérité continue</span>
+<span class="p">$</span> uv pip install git+https://github.com/francescodisalvo05/medmnistc-api
+<span class="p">$</span> python -c "import medmnist; medmnist.PathMNIST(split='train', download=True, root='data/raw')"
+
+<span class="c"># P1 — Camelyon17-WILDS (~10 Go, ~30 min) : décalage réel inter-hôpitaux</span>
+<span class="p">$</span> python -c "from wilds import get_dataset; \
+    get_dataset('camelyon17', download=True, root_dir='data/raw/wilds')"
+
+<span class="c"># P2 — RSNA Pneumonia (compte Kaggle requis)</span>
+<span class="p">$</span> uv pip install kaggle          <span class="c"># puis placer kaggle.json dans ~/.kaggle/</span>
+<span class="p">$</span> kaggle competitions download -c rsna-pneumonia-detection-challenge -p data/raw/rsna</pre></div>
+
+  <p>Prévoyez environ 60&nbsp;Go de disque pour P0 à P2. <code>data/raw/</code> ne doit jamais être versionné. Camelyon16 est écarté&nbsp;: lames gigapixel, prétraitement de plusieurs semaines sur ce matériel, sans bénéfice sur Camelyon17-WILDS qui capture le même phénomène biologique avec une partition inter-hôpitaux officielle.</p>
+</section>
+
+<hr class="rule">
+
+<!-- S12 -->
+<section id="s12">
+  <div class="sprint"><span class="tag">S12</span><h2>Les campagnes — jalons J1 à J4</h2><span class="dur">2–4 semaines</span></div>
+
+  <h3>J1 · Mécanique (P0, quelques heures)</h3>
+  <p>Sur MedMNIST-C&nbsp;: Phase&nbsp;1, puis A0 / A2 / A8 à sévérité 1–5.</p>
+  <div class="acc"><div class="k">Passage</div><p>Aucun NaN, <span class="m">ℋ<sub>n</sub></span> décroissante en domaine source, <code>marginal_entropy</code> stable, tous les tests verts.</p></div>
+
+  <h3>J2 · Le contrôle décisif (P1, 3–5 jours de calcul)</h3>
+  <p>Camelyon17-WILDS, split OOD officiel, 5 graines. Ordre d'exécution&nbsp;: <span class="num">A0 → A2 → A4 → <strong>A5</strong> → A8</span>, puis A6, A7, A1, A3.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Réf</th><th>Configuration</th><th>Ce que la ligne établit</th></tr></thead>
+    <tbody>
+      <tr><td class="num">A0</td><td>Source-only statique</td><td>Plancher de référence</td></tr>
+      <tr><td class="num">A2</td><td>TENT</td><td>Référence historique du TTA</td></tr>
+      <tr><td class="num">A4</td><td>Sortie calibrée seule</td><td>Efficience sans adaptation</td></tr>
+      <tr><td class="num">A5</td><td><strong>TENT + sortie calibrée</strong></td><td><strong>Contrôle décisif</strong></td></tr>
+      <tr><td class="num">A6</td><td>Nôtre, λ = 0</td><td>Apport du terme répulsif</td></tr>
+      <tr><td class="num">A7</td><td>Nôtre, sortie sur ℋ</td><td>Effet de circularité</td></tr>
+      <tr><td class="num">A8</td><td>Nôtre, complet</td><td>Méthode proposée</td></tr>
+    </tbody>
+  </table></div>
+  <div class="acc"><div class="k">Passage</div><p>A8 &gt; A5 en AUROC de façon significative (bootstrap apparié + DeLong), à budget de calcul égal ou inférieur.</p>
+  <p><strong>En cas d'échec</strong>&nbsp;: pivot vers « sortie anticipée à risque contrôlé en imagerie médicale », sans TTA. Reste publiable en MICCAI ou MIDL. C'est pour cela que A5 s'exécute au début, pas à la fin.</p></div>
+
+  <h3>J3 · Budget honnête</h3>
+  <p>Mesurer <span class="m">κ</span>, <span class="m">ρ</span>, <span class="m">N̄*</span>, la latence p50/p95, puis appliquer la condition de gain net&nbsp;:</p>
+  <div class="blk"><div class="cap">condition de gain net (§7 du cadre théorique)</div><pre>ρ · S · (1 + κ) · C(n_probe)  +  C(N*)   &lt;   C(L)
+
+avec S = 1, κ = 2, n_probe = 6, N* ≈ 6  ⟹  ρ &lt; 1/3
+
+⟹ le gain net existe si et seulement si moins d'un tiers
+   des images sont effectivement adaptées.</pre></div>
+  <div class="acc"><div class="k">Passage</div><p>Coût total net inférieur à l'inférence statique.</p>
+  <p><strong>En cas d'échec</strong>&nbsp;: repositionner en méthode de robustesse et publier le comptage honnête — c'est une contribution utile à un domaine qui masque régulièrement ce coût.</p></div>
+
+  <h3>J4 · La transition de phase</h3>
+  <p>Balayage de la sévérité <span class="m">s</span> sur P0, pour <span class="m">d</span>&nbsp;∈&nbsp;{128, 256, 512}&nbsp;: tracer <span class="m">χ</span>(<span class="m">s</span>), la susceptibilité ∂<span class="m">χ</span>/∂<span class="m">s</span>, et vérifier l'affinement du pic avec <span class="m">d</span>.</p>
+  <div class="trap"><div class="k">Critère pré-enregistré</div><p>Sans pic de susceptibilité, le vocabulaire thermodynamique est abandonné au profit de « <em>energy-based test-time adaptation with risk-controlled early exit</em> ». <strong>Cette décision se prend avant de regarder les courbes</strong> — c'est ce qui la rend crédible.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- Annexe A -->
+<section id="ia">
+  <div class="sprint"><span class="tag">A</span><h2>Travailler avec l'IA sur ce projet</h2></div>
+
+  <h4>Quatre habitudes</h4>
+  <ul>
+    <li><strong>Écrire le test d'abord, faire écrire le code ensuite.</strong> Seule défense fiable contre du code numériquement plausible mais faux. Formulation type&nbsp;: <em>« Voici le test <code>tests/test_x.py</code>. Écris <code>tlsc/…/x.py</code> qui le fait passer, sans modifier le test. »</em></li>
+    <li><strong>Donner la signature et la docstring, demander le corps.</strong> Vous gardez le contrôle de l'interface.</li>
+    <li><strong>Demander la justification numérique.</strong> <em>« Explique pourquoi cette implémentation est stable quand T tend vers 0. »</em> Une réponse floue signale du code à réécrire.</li>
+    <li><strong>Relancer une session propre</strong> dès que l'assistant réintroduit un motif déjà corrigé — c'est le signe d'un contexte saturé.</li>
+  </ul>
+
+  <h4>Ne jamais déléguer</h4>
+  <p><code>core/gibbs.py</code>, <code>adapt/state.py</code>, la boucle de sortie anticipée, le comptage de FLOPs. Ce sont les quatre endroits où une erreur ne provoque pas de plantage mais fausse silencieusement tous les résultats.</p>
+
+  <h4>Les huit bugs que l'IA introduira</h4>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>Bug</th><th>Symptôme</th><th>Parade</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>Hooks pour la sortie anticipée</td><td>Aucune économie de FLOPs mesurée</td><td>Boucle explicite sur <code>blocks</code></td></tr>
+      <tr><td class="num">2</td><td>LayerNorm des têtes dans θ<sub>adapt</sub></td><td>Ancrage qui dérive, résultats trop beaux</td><td><code>model.backbone.modules()</code></td></tr>
+      <tr><td class="num">3</td><td><code>p.log()</code> au lieu de <code>log_softmax</code></td><td>NaN après quelques itérations</td><td><code>torch.log_softmax</code> partout</td></tr>
+      <tr><td class="num">4</td><td>Latence sans <code>synchronize()</code></td><td>Latences absurdement faibles</td><td><code>cuda.Event</code> + échauffement</td></tr>
+      <tr><td class="num">5</td><td>FLOPs en avant seulement</td><td>Efficience surestimée d'un facteur ~3</td><td><code>total_flops</code></td></tr>
+      <tr><td class="num">6</td><td><code>restore</code> oublié</td><td>Accuracy qui monte au fil du run</td><td><code>test_pas_de_derive</code></td></tr>
+      <tr><td class="num">7</td><td>Seuils réglés sur le test</td><td>Fuite d'information, irreproductible</td><td>Split de calibration dédié</td></tr>
+      <tr><td class="num">8</td><td>Valeurs de performance en dur</td><td>Retour au problème initial du projet</td><td>Règle explicite dans <code>CLAUDE.md</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<hr class="rule">
+
+<!-- Récap -->
+<section id="recap">
+  <div class="sprint"><span class="tag">B</span><h2>Récapitulatif</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>Sprint</th><th>Livrable</th><th>Durée</th><th>Test d'acceptation</th></tr></thead>
+    <tbody>
+      <tr><td class="num">S0</td><td>Environnement CUDA</td><td class="num">1–2 h</td><td>CUDA et bf16 disponibles</td></tr>
+      <tr><td class="num">S1</td><td>VSCode + règles IA</td><td class="num">30 min</td><td>L'assistant répond « boucle explicite »</td></tr>
+      <tr><td class="num">S2</td><td>Dépôt</td><td class="num">1 h</td><td><code>pytest</code> et <code>ruff</code> verts</td></tr>
+      <tr><td class="num">S3</td><td><code>core/gibbs.py</code></td><td class="num">2 h</td><td>4 tests, dont Lemme 1 et Prop. 2</td></tr>
+      <tr><td class="num">S4</td><td>Backbone instrumenté</td><td class="num">3 h</td><td>Boucle explicite, fraction mesurée</td></tr>
+      <tr><td class="num">S5</td><td>Gel / restauration</td><td class="num">1 h</td><td>2 tests non négociables</td></tr>
+      <tr><td class="num">S6</td><td>Phase 1 hors ligne</td><td class="num">1 j</td><td>Courbe ℋ<sub>n</sub>(n) — conjecture C2</td></tr>
+      <tr><td class="num">S7</td><td>Baselines TTA</td><td class="num">1 j</td><td>Gel vérifié pour chaque méthode</td></tr>
+      <tr><td class="num">S8</td><td>Énergie en ligne + TLSC</td><td class="num">2 j</td><td>Effondrement à λ=0 — Prop. 1</td></tr>
+      <tr><td class="num">S9</td><td>Sortie + conformal</td><td class="num">1 j</td><td>Cohérence de sortie exacte</td></tr>
+      <tr><td class="num">S10</td><td>Évaluation</td><td class="num">1 j</td><td>Métriques validées contre sklearn</td></tr>
+      <tr><td class="num">S11</td><td>Données</td><td class="num">0,5 j</td><td>~60 Go téléchargés</td></tr>
+      <tr><td class="num">S12</td><td>Campagnes J1 → J4</td><td class="num">2–4 sem.</td><td>Critères de passage des jalons</td></tr>
+    </tbody>
+  </table></div>
+  <p>Environ deux semaines de travail jusqu'au premier résultat scientifique réel (la courbe du sprint S6), et six à huit semaines jusqu'au verdict du jalon&nbsp;J2 — celui qui dit si le projet a une contribution.</p>
+</section>
+
+<footer>
+  Guide d'implémentation, 30 août 2026. Formalisme de référence&nbsp;: <em>claude/01-cadre-theorique.md</em>. Protocole&nbsp;: <em>claude/02-protocole-experimental.md</em>. Diagnostic initial&nbsp;: <em>claude/audit-et-plan-action.md</em>. Aucune valeur de performance n'apparaît dans ce document&nbsp;; les seules valeurs numériques citées sont des comptages de paramètres, vérifiables par le code du sprint S4.
+</footer>
+
+</main>
+</div></div>
+</body>
+</html>
