@@ -10,9 +10,9 @@ from scipy.stats import norm, rankdata
 from sklearn.metrics import balanced_accuracy_score, f1_score, roc_auc_score, roc_curve
 
 __all__ = [
-    "bootstrap_auroc_delta", "brier_score", "delong_test", "diagnostic_metrics",
-    "expected_calibration_error", "paired_bootstrap_ci", "sensitivity_at_specificity",
-    "shift_detection_auroc", "two_sided_shift_score",
+    "bivariate_shift_score", "bootstrap_auroc_delta", "brier_score", "delong_test",
+    "diagnostic_metrics", "expected_calibration_error", "paired_bootstrap_ci",
+    "sensitivity_at_specificity", "shift_detection_auroc", "two_sided_shift_score",
 ]
 
 
@@ -110,6 +110,43 @@ def two_sided_shift_score(score_source: np.ndarray,
         raise ValueError("score_source et score_target doivent être des vecteurs non vides")
     center = float(np.median(src))
     return np.abs(src - center), np.abs(tgt - center)
+
+
+def bivariate_shift_score(f_source: np.ndarray, h_source: np.ndarray,
+                          f_target: np.ndarray, h_target: np.ndarray,
+                          ) -> tuple[np.ndarray, np.ndarray]:
+    """Score de décalage bivarié : distance de Mahalanobis au nuage SOURCE (F, H).
+
+    Généralise le détecteur bilatéral : le décalage est mesuré comme un départ
+    du couple (F, H) hors de la distribution source, dans n'importe quelle
+    direction du plan. La moyenne et la covariance sont estimées sur la source
+    seule : aucune information cible n'entre dans la calibration.
+
+    Returns
+    -------
+    (scores_source, scores_target) prêts pour :func:`shift_detection_auroc`.
+    """
+    fs, hs = np.asarray(f_source, np.float64), np.asarray(h_source, np.float64)
+    ft, ht = np.asarray(f_target, np.float64), np.asarray(h_target, np.float64)
+    if any(a.ndim != 1 or len(a) == 0 for a in (fs, hs, ft, ht)):
+        raise ValueError("les quatre scores doivent être des vecteurs non vides")
+    if len(fs) != len(hs) or len(ft) != len(ht):
+        raise ValueError("F et H doivent être appariés au sein de chaque domaine")
+    if len(fs) < 3:
+        raise ValueError("au moins 3 exemples source sont requis pour la covariance")
+    src = np.stack([fs, hs], axis=1)
+    tgt = np.stack([ft, ht], axis=1)
+    mu = src.mean(axis=0)
+    cov = np.cov(src, rowvar=False)
+    # régularisation ridge : F et H sont corrélés via F = <E> - T·H
+    cov += 1e-9 * max(float(np.trace(cov)), 1e-12) * np.eye(2)
+    inv = np.linalg.inv(cov)
+
+    def dist(m: np.ndarray) -> np.ndarray:
+        c = m - mu
+        return np.sqrt(np.einsum("ij,jk,ik->i", c, inv, c))
+
+    return dist(src), dist(tgt)
 
 
 def paired_bootstrap_ci(a: np.ndarray, b: np.ndarray, n: int = 10_000,

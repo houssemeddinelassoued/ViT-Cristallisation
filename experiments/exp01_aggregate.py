@@ -2,7 +2,8 @@
 
 Parcourt ``outputs/``, retient les runs réels complets, recalcule depuis les
 ``scores.npz`` l'AUROC du détecteur bilatéral ``|F - médiane_source(F)|``
-(et son homologue pour H), puis écrit dans ``outputs/aggregate/`` :
+(et son homologue pour H) ainsi que du détecteur bivarié Mahalanobis (F, H),
+puis écrit dans ``outputs/aggregate/`` :
 
 - ``summary.json``   : une entrée par (dataset, corruption, seed, template)
 - ``summary.csv``    : le même contenu, aplati par sévérité
@@ -24,7 +25,11 @@ from pathlib import Path
 
 import numpy as np
 
-from tlsc.eval.metrics import shift_detection_auroc, two_sided_shift_score
+from tlsc.eval.metrics import (
+    bivariate_shift_score,
+    shift_detection_auroc,
+    two_sided_shift_score,
+)
 
 
 def collect_run(run_dir: Path) -> dict | None:
@@ -50,6 +55,9 @@ def collect_run(run_dir: Path) -> dict | None:
         h2_src, h2_tgt = two_sided_shift_score(scores[f"H_{s0}"], scores[f"H_{s}"])
         entry["auroc_F_two_sided"] = shift_detection_auroc(f2_src, f2_tgt)
         entry["auroc_H_two_sided"] = shift_detection_auroc(h2_src, h2_tgt)
+        fh_src, fh_tgt = bivariate_shift_score(
+            scores[f"F_{s0}"], scores[f"H_{s0}"], scores[f"F_{s}"], scores[f"H_{s}"])
+        entry["auroc_FH_bivariate"] = shift_detection_auroc(fh_src, fh_tgt)
         detection[str(s)] = entry
 
     analysis_path = run_dir / "analysis.json"
@@ -88,7 +96,7 @@ def is_canonical(run: dict) -> bool:
 def write_csv(runs: list[dict], path: Path) -> None:
     fields = ["run_id", "dataset", "corruption", "seed", "template_index",
               "prompt_ensemble", "severity", "auroc_F", "auroc_H",
-              "auroc_F_two_sided", "auroc_H_two_sided",
+              "auroc_F_two_sided", "auroc_H_two_sided", "auroc_FH_bivariate",
               "delta_auroc", "delta_ci_low", "delta_ci_high", "delong_p"]
     with path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=fields)
@@ -104,6 +112,7 @@ def write_csv(runs: list[dict], path: Path) -> None:
                     "auroc_F": det.get("auroc_F"), "auroc_H": det.get("auroc_H"),
                     "auroc_F_two_sided": det.get("auroc_F_two_sided"),
                     "auroc_H_two_sided": det.get("auroc_H_two_sided"),
+                    "auroc_FH_bivariate": det.get("auroc_FH_bivariate"),
                     "delta_auroc": ana.get("delta_auroc"),
                     "delta_ci_low": ana.get("delta_ci_low"),
                     "delta_ci_high": ana.get("delta_ci_high"),
@@ -155,18 +164,20 @@ def make_figures(runs: list[dict], outdir: Path) -> None:
                     bbox_inches="tight")
         plt.close(fig)
 
-    # 2 — unilatéral vs bilatéral à sévérité maximale
-    fig, ax = plt.subplots(figsize=(7.2, 4.0))
-    labels, one_sided, two_sided = [], [], []
+    # 2 — unilatéral vs bilatéral vs bivarié à sévérité maximale
+    fig, ax = plt.subplots(figsize=(8.4, 4.0))
+    labels, one_sided, two_sided, bivariate = [], [], [], []
     for run in sorted(canonical, key=lambda r: (r["dataset"], r["corruption"])):
         smax = str(max(int(s) for s in run["detection"]))
         det = run["detection"][smax]
         labels.append(f"{run['dataset'][:6]}·{run['corruption']}")
         one_sided.append(det["auroc_F"])
         two_sided.append(det["auroc_F_two_sided"])
+        bivariate.append(det["auroc_FH_bivariate"])
     x = np.arange(len(labels))
-    ax.bar(x - 0.2, one_sided, 0.4, color=ink, label="F unilatéral")
-    ax.bar(x + 0.2, two_sided, 0.4, color=cold, label="|F − méd. source|")
+    ax.bar(x - 0.27, one_sided, 0.27, color=ink, label="F unilatéral")
+    ax.bar(x, two_sided, 0.27, color=cold, label="|F − méd. source|")
+    ax.bar(x + 0.27, bivariate, 0.27, color=hot, label="Mahalanobis (F, H)")
     ax.axhline(0.5, color="#999999", lw=1, ls=":")
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
@@ -208,7 +219,8 @@ def main() -> None:
         det = run["detection"][smax]
         print(f"  {run['dataset']:15s} {run['corruption']:18s} sév.{smax} : "
               f"F={det['auroc_F']:.3f} H={det['auroc_H']:.3f} "
-              f"F2s={det['auroc_F_two_sided']:.3f} · {run['run_id']}")
+              f"F2s={det['auroc_F_two_sided']:.3f} "
+              f"FH={det['auroc_FH_bivariate']:.3f} · {run['run_id']}")
     print(f"\nécrit dans {outdir}")
 
 

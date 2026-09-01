@@ -57,3 +57,26 @@ d'invites sauf mention. Détail chiffré : `docs/rapport-exp01.md` §7 et
 - Papier rédigé et compilé : `paper/main.tex` (10 pages, pdflatex/MiKTeX propre).
 - Décision : prochaine étape scientifique = score bivarié (F, H) et cohorte P1
   (BUSI → UDIAT → BUS-UCLM) ; contrôle BiomedCLIP sur la configuration finale.
+
+## 2026-09-01 · score bivarié (F, H) — Mahalanobis au nuage source
+
+- Ajout de `bivariate_shift_score` à `tlsc/eval/metrics.py` (distance de
+  Mahalanobis au nuage source (F, H), calibration source seule, régularisation
+  ridge pour la quasi-colinéarité F = ⟨E⟩ − T·H). 4 tests ajoutés, suite verte
+  (41 tests). Recalcul intégré à `experiments/exp01_aggregate.py`
+  (`auroc_FH_bivariate` dans summary.json/csv, 3e barre sur `fig_two_sided.png`).
+- AUROC à sévérité 5 sur les 11 configurations canoniques, bivarié vs bilatéral :
+  meilleur sur 5 (speckle 0,774 vs 0,742 ; pneumonia gaussian_noise 0,837 vs
+  0,803 ; pneumonia contrast_down 0,645 vs 0,584 ; pneumonia brightness_down
+  0,617 vs 0,593), équivalent sur 3 (pixelate, jpeg, motion_blur), moins bon
+  sur 3 (breast contrast_down 0,580 vs 0,630 ; breast brightness_down 0,578 vs
+  0,606 ; gaussian_blur 0,943 vs 0,962).
+- **brightness_up reste le cas d'échec** (0,473, sous le hasard même en bivarié) :
+  le couple (F, H) cible se rapproche du centre source — aucune statistique de
+  distance calibrée source ne peut le voir ; il faudra une statistique de forme
+  (densité, non pas distance).
+- Lecture : gain incrémental, pas transformateur. Le bivarié domine surtout là où
+  H porte un signal complémentaire (photométrique pneumonia) ; il reste sous le
+  bilatéral univarié F sur les photométriques breast où H est peu informatif.
+- Décision : conserver le bivarié comme variante rapportée, pas comme détecteur
+  principal ; passer à la cohorte P1.

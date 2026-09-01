@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from tlsc.eval.metrics import (
+    bivariate_shift_score,
     bootstrap_auroc_delta,
     brier_score,
     delong_test,
@@ -96,3 +97,43 @@ def test_two_sided_rattrape_un_decalage_descendant() -> None:
 def test_two_sided_valide_les_entrees() -> None:
     with pytest.raises(ValueError):
         two_sided_shift_score(np.empty(0), np.arange(3.0))
+
+
+def test_bivarie_rattrape_un_decalage_descendant_de_F() -> None:
+    # F baisse, H ne bouge pas : l'unilatéral F s'inverse, le bivarié détecte.
+    rng = np.random.default_rng(7)
+    f_src, h_src = rng.normal(0.0, 1.0, 300), rng.normal(0.0, 1.0, 300)
+    f_tgt, h_tgt = rng.normal(-3.0, 1.0, 300), rng.normal(0.0, 1.0, 300)
+    assert shift_detection_auroc(f_src, f_tgt) < 0.2
+    s, t = bivariate_shift_score(f_src, h_src, f_tgt, h_tgt)
+    assert shift_detection_auroc(s, t) > 0.9
+
+
+def test_bivarie_capte_un_decalage_porte_par_H_seul() -> None:
+    # signal uniquement dans H : le bivarié doit le voir malgré un F muet.
+    rng = np.random.default_rng(8)
+    f_src, h_src = rng.normal(0.0, 1.0, 300), rng.normal(0.0, 1.0, 300)
+    f_tgt, h_tgt = rng.normal(0.0, 1.0, 300), rng.normal(3.0, 1.0, 300)
+    s, t = bivariate_shift_score(f_src, h_src, f_tgt, h_tgt)
+    assert shift_detection_auroc(s, t) > 0.9
+
+
+def test_bivarie_tolere_des_scores_fortement_correles() -> None:
+    # F et H quasi colinéaires (F = <E> - T·H) : la régularisation doit tenir.
+    rng = np.random.default_rng(9)
+    h_src = rng.normal(0.0, 1.0, 300)
+    f_src = -0.02 * h_src + rng.normal(0.0, 1e-6, 300)
+    h_tgt = rng.normal(3.0, 1.0, 300)
+    f_tgt = -0.02 * h_tgt + rng.normal(0.0, 1e-6, 300)
+    s, t = bivariate_shift_score(f_src, h_src, f_tgt, h_tgt)
+    assert np.isfinite(s).all() and np.isfinite(t).all()
+    assert shift_detection_auroc(s, t) > 0.9
+
+
+def test_bivarie_valide_les_entrees() -> None:
+    with pytest.raises(ValueError):
+        bivariate_shift_score(np.arange(3.0), np.arange(4.0),
+                              np.arange(3.0), np.arange(3.0))
+    with pytest.raises(ValueError):
+        bivariate_shift_score(np.arange(2.0), np.arange(2.0),
+                              np.arange(3.0), np.arange(3.0))
