@@ -235,7 +235,7 @@ BreastMNIST-C et de 4 corruptions PneumoniaMNIST-C :
 > détecteur **signé** — il passe sous le hasard sur les corruptions photométriques
 > (contrast_down 0,299 ; brightness_down 0,359 ; radiographie 0,127–0,209) — et la
 > variante bilatérale $|F - \mathrm{med}_{\mathrm{source}}(F)|$ récupère 5 des
-> 6 inversions sans toucher au bloc structurel. Papier : `tlsc-repo/paper/main.tex`.
+> 6 inversions sans toucher au bloc structurel. Papier : `papers/contribution/main.tex`.
 
 ### 8.2 Résultat principal (P1 — BUSI → UDIAT → BUS-UCLM)
 

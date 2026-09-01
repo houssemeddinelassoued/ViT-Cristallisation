@@ -4,16 +4,16 @@
 __pycache__/
 *.pyc
 
-# Artefacts de compilation LaTeX (review-paper/) — seuls .tex, .bib, .pdf final sont versionnés
-review-paper/*.aux
-review-paper/*.bbl
-review-paper/*.blg
-review-paper/*.fdb_latexmk
-review-paper/*.fls
-review-paper/*.log
-review-paper/*.out
-review-paper/*.spl
-review-paper/*.synctex.gz
+# Artefacts de compilation LaTeX (papers/) — seuls .tex, .bib, .pdf final et figures/ sont versionnés
+papers/*/*.aux
+papers/*/*.bbl
+papers/*/*.blg
+papers/*/*.fdb_latexmk
+papers/*/*.fls
+papers/*/*.log
+papers/*/*.out
+papers/*/*.spl
+papers/*/*.synctex.gz
 
 # Fichiers temporaires d'édition
 *.téléchargement

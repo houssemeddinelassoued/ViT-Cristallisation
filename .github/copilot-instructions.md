@@ -12,9 +12,9 @@ thermodynamiques (énergie libre F vs entropie H) sur encodeurs vision-langage *
 | `tlsc-repo/experiments/` | Scripts d'expérience versionnés (`exp01_*`) | Seule source légitime de chiffres |
 | `tlsc-repo/outputs/<run_id>/` | Résultats mesurés (`metrics.json`, `scores.npz`, `analysis.json`, figures) | Jamais modifiés à la main ; `outputs/aggregate/` = synthèse régénérable |
 | `tlsc-repo/docs/` | Notes internes : `JOURNAL.md`, `rapport-exp01.md`, `STATUT.md`, `cadre-theorique.md` | Une entrée JOURNAL par lot de runs |
-| `tlsc-repo/paper/` | Papier LaTeX (contribution) | Compiler avec `latexmk -pdf main.tex` (MiKTeX) |
+| `papers/contribution/` | Papier LaTeX (contribution) | Compiler avec `latexmk -pdf main.tex` (MiKTeX) |
 | `docs/` (racine) | **Site public GitHub Pages** : `index.html`, `results.html`, `plateforme-explicative.html` (copie unique), `assets/figures/` | Déployé depuis `main` — voir checklist de cohérence |
-| `review-paper/` | Revue de littérature LaTeX | Indépendante du papier de contribution |
+| `papers/review/` | Revue de littérature LaTeX | Indépendante du papier de contribution |
 | `archive/` | Documents de cadrage historiques (feuilles de route, plans, guides, notes) | Lecture seule ; jamais autoritatifs |
 | Racine | `README.md` + `02protocoleexperimentalv3.md` (protocole autoritatif, référencé par `tlsc-repo/docs/`) | Ne pas créer de nouveaux fichiers en racine ; les nouveaux docs vont dans `tlsc-repo/docs/`, `docs/` ou `archive/` |
 
@@ -65,14 +65,14 @@ emplacements concernés avant de committer :
    `tlsc-repo/docs/JOURNAL.md` (format : date · run_id · testé · observé · décision) ;
    section dans `tlsc-repo/docs/rapport-exp01.md` si le résultat est substantiel.
 2. **Figures** — trois copies à synchroniser depuis `tlsc-repo/outputs/aggregate/` :
-   `tlsc-repo/paper/figures/` et `docs/assets/figures/`. Ne jamais éditer une copie seule.
+   `papers/contribution/figures/` et `docs/assets/figures/`. Ne jamais éditer une copie seule.
 3. **Site public** (`docs/`) :
    - `docs/results.html` : tableau des runs canoniques (AUROC, IC, p, run_id) et figures
      à jour avec `outputs/aggregate/summary.csv` ;
    - `docs/index.html` : cartes et liens cohérents avec les pages existantes ;
    - `docs/plateforme-explicative.html` : **copie unique** (la copie racine a été retirée
      le 2026-09-01) ; support pédagogique — aucun chiffre ne doit y être présenté comme mesure.
-4. **Papier** (`tlsc-repo/paper/main.tex`) : si un chiffre cité change, mettre à jour le
+4. **Papier** (`papers/contribution/main.tex`) : si un chiffre cité change, mettre à jour le
    tableau + l'abstract, recompiler (`latexmk -pdf`), vérifier zéro référence indéfinie
    dans `main.log`.
 5. **READMEs** : `README.md` racine (structure, règles, liens) et `tlsc-repo/README.md`
