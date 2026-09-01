@@ -2,7 +2,7 @@ name: Deploy GitHub Pages
 
 on:
   push:
-    branches: [exp/exp04-arret-anticipe]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
