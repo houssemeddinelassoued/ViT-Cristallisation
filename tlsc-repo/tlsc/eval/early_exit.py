@@ -36,8 +36,34 @@ def exit_layers(scores: np.ndarray, epsilon: float) -> np.ndarray:
     return first
 
 
+def balanced_accuracy_at_exit(hit: np.ndarray, y: np.ndarray) -> float:
+    """Exactitude équilibrée à partir des corrections par échantillon.
+
+    Sur une cohorte déséquilibrée, l'exactitude brute récompense le prédicteur
+    dégénéré qui répond toujours la classe majoritaire : calibrer une règle
+    d'arrêt sur ce critère revient à valider cet effondrement. La moyenne des
+    taux de bonne réponse PAR CLASSE le sanctionne (0,5 en binaire).
+
+    Parameters
+    ----------
+    hit : ndarray, shape (n,), booléen
+        Prédiction exacte ou non, à la couche de sortie de chaque échantillon.
+    y : ndarray, shape (n,)
+        Étiquettes entières ; chaque classe présente doit être non vide.
+
+    Returns
+    -------
+    float — moyenne non pondérée des exactitudes par classe.
+    """
+    if hit.shape != y.shape:
+        raise ValueError("hit et y doivent avoir la même forme")
+    classes = np.unique(y)
+    return float(np.mean([hit[y == c].mean() for c in classes]))
+
+
 def simulate_early_exit(scores: np.ndarray, correct: np.ndarray,
-                        epsilon: float) -> dict[str, float]:
+                        epsilon: float,
+                        y: np.ndarray | None = None) -> dict[str, float]:
     """Profondeur moyenne et exactitude sous la règle d'arrêt.
 
     Parameters
@@ -47,52 +73,81 @@ def simulate_early_exit(scores: np.ndarray, correct: np.ndarray,
         ``correct[l, i]`` : la prédiction de l'échantillon i à la couche l
         est-elle exacte ?
     epsilon : float
+    y : ndarray | None, shape (n,)
+        Étiquettes. Si fournies, ``balanced_accuracy`` est ajoutée au résultat.
 
     Returns
     -------
-    dict : ``mean_depth`` (1-based), ``accuracy``, ``epsilon``.
+    dict : ``mean_depth`` (1-based), ``accuracy``, ``epsilon``, et
+    ``balanced_accuracy`` si ``y`` est fourni.
     """
     if scores.shape != correct.shape:
         raise ValueError("scores et correct doivent avoir la même forme")
     exits = exit_layers(scores, epsilon)
     idx = np.arange(scores.shape[1])
-    return {
+    hit = correct[exits, idx]
+    out = {
         "mean_depth": float(exits.mean() + 1.0),
-        "accuracy": float(correct[exits, idx].mean()),
+        "accuracy": float(hit.mean()),
         "epsilon": float(epsilon),
     }
+    if y is not None:
+        out["balanced_accuracy"] = balanced_accuracy_at_exit(hit, y)
+    return out
 
 
 def calibrate_epsilon(scores: np.ndarray, correct: np.ndarray,
                       tolerance: float = 0.01,
-                      quantiles: np.ndarray | None = None) -> dict[str, float]:
+                      quantiles: np.ndarray | None = None,
+                      y: np.ndarray | None = None) -> dict[str, float]:
     """Choisit le seuil de profondeur moyenne minimale à exactitude préservée.
 
     Sur le split de CALIBRATION source : parmi une grille de seuils (quantiles
     des scores calibrés), retient celui qui minimise la profondeur moyenne sous
-    la contrainte ``accuracy >= accuracy_pleine_profondeur - tolerance``.
+    la contrainte ``critère >= critère_pleine_profondeur - tolerance``.
     Repli : si aucun seuil ne satisfait la contrainte, retourne un seuil
     inatteignable (sortie systématique à la dernière couche).
 
+    Le critère est l'exactitude brute par défaut. Si ``y`` est fourni, c'est
+    l'exactitude ÉQUILIBRÉE — indispensable sur cohorte déséquilibrée, où le
+    critère brut est maximisé par le prédicteur majoritaire dégénéré, et
+    validerait donc une sortie en couche 1 sans contenu diagnostique.
+
+    Parameters
+    ----------
+    scores : ndarray, shape (n_layers, n)
+    correct : ndarray, shape (n_layers, n), booléen
+    tolerance : float — perte de critère admise.
+    quantiles : ndarray | None — grille de seuils testés.
+    y : ndarray | None, shape (n,) — étiquettes ; bascule le critère.
+
     Returns
     -------
-    dict : ``epsilon``, ``mean_depth``, ``accuracy``, ``accuracy_full``.
+    dict : ``epsilon``, ``mean_depth``, ``accuracy``, ``accuracy_full``, le
+    ``criterion`` retenu, et si ``y`` est fourni ``balanced_accuracy`` et
+    ``balanced_accuracy_full``.
     """
     if not 0.0 <= tolerance < 1.0:
         raise ValueError("tolerance doit appartenir à [0, 1[")
     if quantiles is None:
         quantiles = np.arange(0.05, 1.0, 0.05)
-    acc_full = float(correct[-1].mean())
+    key = "accuracy" if y is None else "balanced_accuracy"
+    # seuil jamais atteint => aucune sortie anticipee => reference pleine profondeur
+    full = simulate_early_exit(scores, correct, float(scores.min()) - 1.0, y)
+    reference = full[key]
     grid = np.quantile(scores, quantiles)
     best: dict[str, float] | None = None
     for eps in np.unique(grid):
-        out = simulate_early_exit(scores, correct, float(eps))
-        if out["accuracy"] >= acc_full - tolerance and (
+        out = simulate_early_exit(scores, correct, float(eps), y)
+        if out[key] >= reference - tolerance and (
                 best is None or out["mean_depth"] < best["mean_depth"]):
             best = out
     if best is None:
-        best = simulate_early_exit(scores, correct, float(scores.min()) - 1.0)
-    best["accuracy_full"] = acc_full
+        best = simulate_early_exit(scores, correct, float(scores.min()) - 1.0, y)
+    best["accuracy_full"] = float(correct[-1].mean())
+    best["criterion"] = key
+    if y is not None:
+        best["balanced_accuracy_full"] = reference
     return best
 
 

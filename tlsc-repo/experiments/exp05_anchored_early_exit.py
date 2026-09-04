@@ -59,7 +59,12 @@ from experiments.exp01_zero_training import (
 from experiments.exp02_layer_trajectories import encode_cohort_layers
 from experiments.exp04_early_exit import layer_scores_and_correct, stratified_split
 from tlsc.data.medmnistc import build
-from tlsc.eval.early_exit import calibrate_epsilon, exit_depth_auroc, simulate_early_exit
+from tlsc.eval.early_exit import (
+    balanced_accuracy_at_exit,
+    calibrate_epsilon,
+    exit_depth_auroc,
+    simulate_early_exit,
+)
 from tlsc.models.data_anchors import anchor_quality, class_centroids
 
 REGIMES = ("R1_texte", "R2_fewshot", "R3_centroides")
@@ -247,20 +252,30 @@ def run(args: argparse.Namespace) -> dict:
     n_layers = per_sev[0][REGIMES[0]]["H"].shape[0]
     per_regime: dict[str, dict] = {}
 
+    y_calib, y_eval = y_ref[calib_idx], y_ref[eval_idx]
+
+    def bal_par_couche(correct: np.ndarray, idx: np.ndarray,
+                       y: np.ndarray) -> np.ndarray:
+        """Exactitude équilibrée de chaque couche sur un sous-ensemble d'indices."""
+        return np.array([balanced_accuracy_at_exit(correct[n, idx], y)
+                         for n in range(correct.shape[0])])
+
     for name in REGIMES:
         src = per_sev[0][name]
         calibration: dict[str, dict] = {}
         for rule in RULES:
             calibration[rule] = calibrate_epsilon(
                 src[rule][:, calib_idx], src["correct"][:, calib_idx],
-                tolerance=args.tolerance)
-        acc_calib = src["correct"][:, calib_idx].mean(axis=1)
-        fixed_layer = int(acc_calib.argmax())
+                tolerance=args.tolerance, y=y_calib)
+        bal_calib = bal_par_couche(src["correct"], calib_idx, y_calib)
+        fixed_layer = int(bal_calib.argmax())
         calibration["fixed_layer"] = {
             "layer": fixed_layer + 1,
-            "accuracy_calib": float(acc_calib[fixed_layer]),
+            "balanced_accuracy_calib": float(bal_calib[fixed_layer]),
+            "accuracy_calib": float(src["correct"][fixed_layer, calib_idx].mean()),
         }
-        calibration["accuracy_par_couche_calib"] = [float(v) for v in acc_calib]
+        calibration["balanced_accuracy_par_couche_calib"] = [
+            float(v) for v in bal_calib]
 
         # -- barriere 3 : evaluation, indices d'evaluation seulement --------
         per_severity: dict[str, dict] = {}
@@ -270,17 +285,22 @@ def run(args: argparse.Namespace) -> dict:
             for rule in RULES:
                 block[f"{rule}_stop"] = simulate_early_exit(
                     arrays[rule][:, eval_idx], arrays["correct"][:, eval_idx],
-                    calibration[rule]["epsilon"])
+                    calibration[rule]["epsilon"], y_eval)
+            bal_layers = bal_par_couche(arrays["correct"], eval_idx, y_eval)
             block["full_depth"] = {
                 "accuracy": float(arrays["correct"][-1, eval_idx].mean()),
+                "balanced_accuracy": float(bal_layers[-1]),
                 "mean_depth": float(n_layers)}
             block["fixed_layer"] = {
                 "layer": fixed_layer + 1,
                 "accuracy": float(arrays["correct"][fixed_layer, eval_idx].mean()),
+                "balanced_accuracy": float(bal_layers[fixed_layer]),
                 "mean_depth": float(fixed_layer + 1)}
             block["accuracy_par_couche"] = [
                 float(v) for v in arrays["correct"][:, eval_idx].mean(axis=1)]
+            block["balanced_accuracy_par_couche"] = [float(v) for v in bal_layers]
             block["oracle_layer"] = int(np.argmax(block["accuracy_par_couche"])) + 1
+            block["oracle_layer_balanced"] = int(bal_layers.argmax()) + 1
             per_severity[str(s)] = block
 
         # -- Q2 : la profondeur de sortie comme detecteur de decalage -------
@@ -302,11 +322,19 @@ def run(args: argparse.Namespace) -> dict:
             "depth_detection": depth_detection,
         }
         smax = str(args.severities[-1])
-        blk, det = per_severity[smax], depth_detection[smax]
-        print(f"  {name:14s} : couche fixe={fixed_layer + 1} | oracle(sev0)="
-              f"{per_severity['0']['oracle_layer']} | sev{smax} F-stop "
-              f"acc={blk['F_stop']['accuracy']:.3f}@{blk['F_stop']['mean_depth']:.2f} "
-              f"| AUROC(N*|F)={det['F']['auroc']:.3f}")
+        blk, det, s0b = per_severity[smax], depth_detection[smax], per_severity["0"]
+        print(f"  {name:14s} : couche fixe={fixed_layer + 1} "
+              f"| oracle equilibre(sev0)={s0b['oracle_layer_balanced']} "
+              f"(bal={max(s0b['balanced_accuracy_par_couche']):.3f} vs "
+              f"couche 12 {s0b['balanced_accuracy_par_couche'][-1]:.3f})")
+        print(f"  {'':14s}   sev{smax} : H-stop bal="
+              f"{blk['H_stop']['balanced_accuracy']:.3f}@"
+              f"{blk['H_stop']['mean_depth']:.2f} | F-stop bal="
+              f"{blk['F_stop']['balanced_accuracy']:.3f}@"
+              f"{blk['F_stop']['mean_depth']:.2f} | pleine prof. bal="
+              f"{blk['full_depth']['balanced_accuracy']:.3f} "
+              f"| AUROC(N*|H)={det['H']['auroc']:.3f} "
+              f"AUROC(N*|F)={det['F']['auroc']:.3f}")
 
     results = {
         "run_id": run_id, "config": cfg, "environment": env,
@@ -316,13 +344,20 @@ def run(args: argparse.Namespace) -> dict:
                   "stratifie": True, "seed": args.seed},
         "elapsed_seconds": time.perf_counter() - started,
         "regimes": per_regime,
+        "critere_calibration": "balanced_accuracy",
         "note": ("Experience exploratoire : aucun seuil de verdict pre-enregistre. "
                  "Ancres R2/R3 recalculees couche par couche sur le split TRAIN "
                  "source a severite 0 ; seuils epsilon et couche fixe calibres sur "
                  "la moitie CALIBRATION du split test source ; toutes les "
                  "evaluations portent sur la moitie EVALUATION. Les couches "
                  "intermediaires n'ont jamais ete alignees a l'espace texte : la "
-                 "lecture R1 en profondeur intermediaire reste un logit lens."),
+                 "lecture R1 en profondeur intermediaire reste un logit lens. "
+                 "Calibration et choix de couche fixe sur l'exactitude EQUILIBREE "
+                 "et non brute : sur cette cohorte desequilibree (classe majoritaire "
+                 "0,731 sur breastmnist) le critere brut est maximise par le "
+                 "predicteur majoritaire degenere, ce qui validerait une sortie en "
+                 "couche 1 sans contenu diagnostique. L'exp04 utilisait le critere "
+                 "brut : ses profondeurs ne sont donc pas directement comparables."),
     }
     (outdir / "metrics.json").write_text(
         json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -347,35 +382,40 @@ def make_figures(per_regime: dict, args, figdir: Path) -> None:
     sevs = sorted(int(s) for s in per_regime[REGIMES[0]]["per_severity"])
     tgt = sevs[1:]
 
-    fig, axes = plt.subplots(1, 4, figsize=(17, 3.9))
+    fig, axes = plt.subplots(1, 5, figsize=(21, 3.9))
     for name, block in per_regime.items():
         color, style = styles[name]
         ps = block["per_severity"]
-        axes[0].plot(sevs, [ps[str(s)]["F_stop"]["accuracy"] for s in sevs],
+        axes[0].plot(sevs, [ps[str(s)]["H_stop"]["balanced_accuracy"] for s in sevs],
                      style, color=color, label=name)
-        axes[0].plot(sevs, [ps[str(s)]["full_depth"]["accuracy"] for s in sevs],
+        axes[0].plot(sevs, [ps[str(s)]["full_depth"]["balanced_accuracy"] for s in sevs],
                      ":", color=color, alpha=0.5, lw=1.2)
-        axes[1].plot(sevs, [ps[str(s)]["F_stop"]["mean_depth"] for s in sevs],
+        axes[1].plot(sevs, [ps[str(s)]["H_stop"]["mean_depth"] for s in sevs],
                      style, color=color, label=name)
-        axes[2].plot(tgt, [block["depth_detection"][str(s)]["F"]["auroc"] for s in tgt],
+        axes[2].plot(tgt, [block["depth_detection"][str(s)]["H"]["auroc"] for s in tgt],
                      style, color=color, label=name)
-        layers = range(1, len(ps["0"]["accuracy_par_couche"]) + 1)
-        axes[3].plot(layers, ps["0"]["accuracy_par_couche"], style, color=color,
-                     label=name)
+        axes[3].plot(tgt, [block["depth_detection"][str(s)]["F"]["auroc"] for s in tgt],
+                     style, color=color, label=name)
+        bal0 = ps["0"]["balanced_accuracy_par_couche"]
+        axes[4].plot(range(1, len(bal0) + 1), bal0, style, color=color, label=name)
 
-    axes[0].set_title("Exactitude : F-stop (trait) vs pleine profondeur (pointille)")
+    axes[0].set_title("Exact. equilibree : H-stop (trait) vs pleine prof. (pointille)")
     axes[0].set_xlabel("severite")
     axes[0].set_ylim(0.0, 1.0)
-    axes[1].set_title("Profondeur moyenne de sortie N*")
+    axes[0].axhline(0.5, color="#999999", lw=1, ls=":")
+    axes[1].set_title("Profondeur moyenne de sortie N* (H-stop)")
     axes[1].set_xlabel("severite")
     axes[1].set_ylim(0.0, 12.5)
-    axes[2].set_title("AUROC de N* comme detecteur de decalage")
-    axes[2].set_xlabel("severite")
-    axes[2].set_ylim(0.0, 1.03)
-    axes[2].axhline(0.5, color="#999999", lw=1, ls=":")
-    axes[3].set_title("Exactitude par couche (source, split evaluation)")
-    axes[3].set_xlabel("couche")
-    axes[3].set_ylim(0.0, 1.0)
+    axes[2].set_title("AUROC de N* (H-stop) comme detecteur")
+    axes[3].set_title("AUROC de N* (F-stop) comme detecteur")
+    for ax in (axes[2], axes[3]):
+        ax.set_xlabel("severite")
+        ax.set_ylim(0.0, 1.03)
+        ax.axhline(0.5, color="#999999", lw=1, ls=":")
+    axes[4].set_title("Exact. equilibree par couche (source, split evaluation)")
+    axes[4].set_xlabel("couche")
+    axes[4].set_ylim(0.0, 1.0)
+    axes[4].axhline(0.5, color="#999999", lw=1, ls=":")
     for ax in axes:
         ax.grid(alpha=0.25)
         ax.spines["top"].set_visible(False)
