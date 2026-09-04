@@ -35,11 +35,16 @@ d'ancrage R1/R2/R3 (`tlsc/models/data_anchors.py` +
 `experiments/exp03_anchor_regimes.py`, centroïdes source et D_inter,
 exploratoire déclarée) et l'arrêt anticipé calibré (`tlsc/eval/early_exit.py`
 + `experiments/exp04_early_exit.py`, règle H < epsilon du croquis fondateur,
-split calibration/évaluation stratifié, exploratoire déclarée). Les cohortes P0
-couvertes sont BreastMNIST-C (7 corruptions officielles) et PneumoniaMNIST-C
-(4 corruptions). Le croisement ancres R2 × arrêt calibré, N* comme détecteur,
-TPT, C-TPT, l'adaptation visuelle, les cohortes P1/P2 et la calibration conforme
-restent à implémenter et à valider avant toute revendication correspondante.
+split calibration/évaluation stratifié, exploratoire déclarée). Le croisement
+ancres × arrêt est implémenté (`experiments/exp05_anchored_early_exit.py`,
+exploratoire déclarée) : arrêt calibré rejoué sous les trois régimes d'ancrage
+avec centroïdes recalculés couche par couche, profondeur de sortie N* quantifiée
+en détecteur (`exit_depth_auroc`), et critère de qualité d'ancrage
+(`tlsc/models/data_anchors.py` : `anchor_cloud_distance`, `anchor_quality`).
+Les cohortes P0 couvertes sont BreastMNIST-C (7 corruptions officielles) et
+PneumoniaMNIST-C (4 corruptions). TPT, C-TPT, l'adaptation visuelle, les cohortes
+P1/P2 et la calibration conforme restent à implémenter et à valider avant toute
+revendication correspondante.
 
 Le papier issu de l'expérience 1 se trouve dans `../../papers/contribution/` (main.tex + refs.bib) ;
 chaque valeur y est rattachée à un run de `outputs/`.

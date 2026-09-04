@@ -16,9 +16,9 @@ thermodynamiques (énergie libre F vs entropie H) sur encodeurs vision-langage *
 | Chemin | Rôle | Règle |
 |---|---|---|
 | `tlsc-repo/tlsc/` | Bibliothèque scientifique (noyau Gibbs, ancres CLIP, métriques) | Tout module arrive avec son test dans `tlsc-repo/tests/` |
-| `tlsc-repo/experiments/` | Scripts d'expérience versionnés (`exp01_*`) | Seule source légitime de chiffres |
+| `tlsc-repo/experiments/` | Scripts d'expérience versionnés (`exp01_*` à `exp05_*`) | Seule source légitime de chiffres |
 | `tlsc-repo/outputs/<run_id>/` | Résultats mesurés (`metrics.json`, `scores.npz`, `analysis.json`, figures) | Jamais modifiés à la main ; `outputs/aggregate/` = synthèse régénérable |
-| `tlsc-repo/docs/` | Notes internes : `JOURNAL.md`, `rapport-exp01.md`, `STATUT.md`, `cadre-theorique.md` | Une entrée JOURNAL par lot de runs |
+| `tlsc-repo/docs/` | Notes internes : `JOURNAL.md`, `rapport-exp0N.md`, `STATUT.md`, `cadre-theorique.md` | Une entrée JOURNAL par lot de runs, un rapport par expérience |
 | `papers/contribution/` | Papier LaTeX (contribution) | Compiler avec `latexmk -pdf main.tex` (MiKTeX) |
 | `docs/` (racine) | **Site public GitHub Pages** : `index.html`, `results.html`, `research_works.html` (copie unique), `assets/figures/` | Déployé depuis `main` — voir checklist de cohérence |
 | `papers/review/` | Revue de littérature LaTeX | Indépendante du papier de contribution |
@@ -57,7 +57,14 @@ Set-Location tlsc-repo
 .venv\Scripts\python.exe -m experiments.exp01_zero_training --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5 --batch-size 32
 .venv\Scripts\python.exe -m experiments.exp01_analysis outputs    # DeLong + bootstrap → analysis.json
 .venv\Scripts\python.exe -m experiments.exp01_aggregate outputs   # summary.{json,csv} + figures → outputs/aggregate/
+.venv\Scripts\python.exe -m experiments.exp05_anchored_early_exit --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5
 ```
+
+Expériences disponibles : `exp01_zero_training` (détection F vs H), `exp02_layer_trajectories` (profondeur N comme variable), `exp03_anchor_regimes`
+(ancres R1/R2/R3), `exp04_early_exit` (arrêt calibré sous R1) et
+`exp05_anchored_early_exit` (croisement ancres × arrêt, détecteur N*, qualité
+d'ancrage). Les expériences par couche encodent aussi le split TRAIN source :
+compter ce surcoût — `--train-limit` le borne.
 
 Coût : ~0,2 s/image CPU (BreastMNIST n=156 ≈ 3 min/corruption ; PneumoniaMNIST n=624 ≈ 13 min).
 Encodage fichiers : toujours `encoding="utf-8"` explicite (Windows/cp1252 a déjà cassé
