@@ -4,7 +4,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tlsc.eval.early_exit import calibrate_epsilon, exit_layers, simulate_early_exit
+from tlsc.eval.early_exit import (
+    calibrate_epsilon,
+    exit_depth_auroc,
+    exit_layers,
+    simulate_early_exit,
+)
 
 
 def test_exit_layers_premiere_couche_sous_le_seuil() -> None:
@@ -56,3 +61,30 @@ def test_validations() -> None:
         simulate_early_exit(np.zeros((2, 3)), np.zeros((3, 2), dtype=bool), 0.5)
     with pytest.raises(ValueError):
         calibrate_epsilon(np.zeros((2, 3)), np.zeros((2, 3), dtype=bool), tolerance=1.0)
+
+
+def test_profondeur_de_sortie_separe_les_domaines() -> None:
+    # source : passe sous le seuil dès la couche 1 ; cible : seulement en couche 3
+    source = np.array([[0.1, 0.1], [0.1, 0.1], [0.1, 0.1]])
+    target = np.array([[0.9, 0.9], [0.9, 0.9], [0.1, 0.1]])
+    out = exit_depth_auroc(source, target, 0.5)
+    assert out["auroc"] == 1.0
+    assert out["mean_depth_source"] == pytest.approx(1.0)
+    assert out["mean_depth_target"] == pytest.approx(3.0)
+    assert out["delta_depth"] == pytest.approx(2.0)
+    assert out["n_source"] == 2 and out["n_target"] == 2
+
+
+def test_regle_degeneree_donne_un_auroc_de_hasard() -> None:
+    # toutes les images sortent à la même couche : le compteur n'informe pas
+    scores = np.full((4, 20), 0.1)
+    out = exit_depth_auroc(scores, scores.copy(), 0.5)
+    assert out["auroc"] == pytest.approx(0.5)
+    assert out["delta_depth"] == pytest.approx(0.0)
+
+
+def test_exit_depth_auroc_validations() -> None:
+    with pytest.raises(ValueError):
+        exit_depth_auroc(np.zeros(4), np.zeros((4, 2)), 0.5)
+    with pytest.raises(ValueError):
+        exit_depth_auroc(np.zeros((4, 2)), np.zeros((3, 2)), 0.5)

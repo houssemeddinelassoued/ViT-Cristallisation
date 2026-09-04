@@ -94,3 +94,52 @@ def calibrate_epsilon(scores: np.ndarray, correct: np.ndarray,
         best = simulate_early_exit(scores, correct, float(scores.min()) - 1.0)
     best["accuracy_full"] = acc_full
     return best
+
+
+def exit_depth_auroc(scores_source: np.ndarray, scores_target: np.ndarray,
+                     epsilon: float) -> dict[str, float]:
+    """AUROC de la profondeur de sortie comme détecteur de décalage.
+
+    Constat d'exp04 : sous un seuil calibré sur la source, les images corrompues
+    « retardent » leur cristallisation — la profondeur de sortie croît avec la
+    sévérité. Cette fonction quantifie ce constat en détecteur : les profondeurs
+    N* du domaine source et du domaine cible sont-elles séparables ?
+
+    Le compteur de couches est disponible gratuitement en production (aucun
+    calcul supplémentaire : la règle d'arrêt le produit déjà), ce qui en ferait
+    un moniteur de dérive sans surcoût.
+
+    Convention : une profondeur PLUS ÉLEVÉE indique la cible, conformément à
+    :func:`tlsc.eval.metrics.shift_detection_auroc`. Les profondeurs étant des
+    entiers fortement ex aequo, l'AUROC est calculée avec la gestion standard
+    des ex aequo (crédit 1/2). Une règle dégénérée qui fait sortir toutes les
+    images à la même couche donne exactement 0,5.
+
+    Parameters
+    ----------
+    scores_source, scores_target : ndarray, shape (n_layers, n)
+        Observable par couche, domaine source et domaine cible.
+    epsilon : float
+        Seuil d'arrêt calibré sur la source.
+
+    Returns
+    -------
+    dict : ``auroc``, ``mean_depth_source``, ``mean_depth_target``,
+    ``delta_depth``, ``n_source``, ``n_target``.
+    """
+    from tlsc.eval.metrics import shift_detection_auroc
+
+    if scores_source.ndim != 2 or scores_target.ndim != 2:
+        raise ValueError("scores_source et scores_target doivent être (n_layers, n)")
+    if scores_source.shape[0] != scores_target.shape[0]:
+        raise ValueError("les deux domaines doivent avoir le même nombre de couches")
+    src = exit_layers(scores_source, epsilon).astype(np.float64) + 1.0
+    tgt = exit_layers(scores_target, epsilon).astype(np.float64) + 1.0
+    return {
+        "auroc": shift_detection_auroc(src, tgt),
+        "mean_depth_source": float(src.mean()),
+        "mean_depth_target": float(tgt.mean()),
+        "delta_depth": float(tgt.mean() - src.mean()),
+        "n_source": int(src.size),
+        "n_target": int(tgt.size),
+    }
