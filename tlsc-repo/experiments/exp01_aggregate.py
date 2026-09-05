@@ -32,18 +32,41 @@ from tlsc.eval.metrics import (
 )
 
 
-def collect_run(run_dir: Path) -> dict | None:
-    """Charge un run réel complet ; None sinon."""
-    metrics_path, scores_path = run_dir / "metrics.json", run_dir / "scores.npz"
-    if not metrics_path.is_file() or not scores_path.is_file():
-        return None
+def raison_rejet(run_dir: Path) -> str | None:
+    """Motif de non-citabilité d'un run, ou None s'il est agrégeable.
+
+    Applique la règle du dépôt : un run n'est citable que s'il est **complet**
+    (``metrics.json`` et ``scores.npz``), **réel** (``config.dry_run`` faux) et
+    **propre** (``environment.git_dirty`` faux). Sans le contrôle de propreté,
+    l'agrégation admettait des runs non citables et pouvait en retenir comme
+    canoniques — un chiffre non traçable pouvait alors atteindre le site ou le
+    papier sans que rien ne le signale.
+    """
+    if not (run_dir / "metrics.json").is_file() or not (run_dir / "scores.npz").is_file():
+        return "incomplet"
+    metrics = lire_metrics(run_dir / "metrics.json")
+    if metrics.get("config", {}).get("dry_run"):
+        return "dry_run"
+    if metrics.get("environment", {}).get("git_dirty"):
+        return "git_dirty"
+    return None
+
+
+def lire_metrics(chemin: Path) -> dict:
+    """Lit un ``metrics.json``, avec repli cp1252 pour les runs anciens."""
     try:
-        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+        return json.loads(chemin.read_text(encoding="utf-8"))
     except UnicodeDecodeError:
         # runs antérieurs au passage systématique en UTF-8 (Windows, cp1252)
-        metrics = json.loads(metrics_path.read_text(encoding="cp1252"))
-    if metrics.get("config", {}).get("dry_run"):
+        return json.loads(chemin.read_text(encoding="cp1252"))
+
+
+def collect_run(run_dir: Path) -> dict | None:
+    """Charge un run citable ; None si le run doit être écarté."""
+    metrics_path, scores_path = run_dir / "metrics.json", run_dir / "scores.npz"
+    if raison_rejet(run_dir) is not None:
         return None
+    metrics = lire_metrics(metrics_path)
 
     scores = np.load(scores_path)
     severities = metrics["config"]["severities"]
@@ -199,10 +222,22 @@ def main() -> None:
     args = p.parse_args()
 
     root = Path(args.path).resolve()
-    runs = [r for d in sorted(root.iterdir()) if d.is_dir() and d.name != "aggregate"
-            for r in [collect_run(d)] if r is not None]
+    dossiers = [d for d in sorted(root.iterdir())
+                if d.is_dir() and d.name != "aggregate"]
+    ecartes: dict[str, list[str]] = {}
+    for d in dossiers:
+        motif = raison_rejet(d)
+        if motif is not None:
+            ecartes.setdefault(motif, []).append(d.name)
+    runs = [r for d in dossiers for r in [collect_run(d)] if r is not None]
     if not runs:
         raise SystemExit("aucun run réel agrégeable trouvé")
+
+    # rien ne disparait en silence : tout run ecarte est nomme avec son motif
+    for motif, noms in sorted(ecartes.items()):
+        print(f"ecartes ({motif}) : {len(noms)}")
+        for n in noms:
+            print(f"    {n}")
 
     outdir = root / "aggregate"
     outdir.mkdir(exist_ok=True)
