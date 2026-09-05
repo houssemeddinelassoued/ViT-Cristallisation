@@ -32,6 +32,8 @@ Format : date · run_id · ce qui était testé · ce qui a été observé · d�
 
 - Le run `20260901T000843Z_breastmnist_4aecb603` (figures sans `metrics.json`) est
   incomplet et ne doit pas être cité.
+  **Corrigé le 2026-09-05** : ce constat était erroné. Le run est complet, propre et
+  réel, et il est agrégé dans `summary.csv` (seed 1, speckle_noise).
 
 ## 2026-09-01 · balayage systématique P0 (commit a82b42d, arbre propre)
 
@@ -262,11 +264,10 @@ agrégés par `experiments/exp05_aggregate.py` (9 tests) vers
 dans `exit_depth_auroc` (2 tests) : la profondeur de sortie hérite du caractère
 signé de son observable, la transformation bilatérale lui est donc applicable.
 
-- **Ce qui survit.** Les ancres textuelles sont au hasard (équilibrée 0,500–0,509 à
-  toute couche, deux cohortes, cinq graines). Une couche intermédiaire bat la couche
-  de sortie sous ancres de données dans les **quatre** configurations, de +0,045 à
-  +0,134, écart supérieur à la dispersion inter-graines. La règle d'arrêt par
-  échantillon reste battue par une profondeur fixe calibrée.
+- **Ce qui survit.** Les ancres textuelles sont au hasard (équilibrée dans
+  [0,474 ; 0,521] quelle que soit la couche, deux cohortes, cinq graines). Une couche
+  intermédiaire bat la couche de sortie sous ancres de données dans les **quatre**
+  configurations, de +0,045 à +0,134, écart supérieur à la dispersion inter-graines.
 - **Ce qui ne survit pas, et que l'entrée précédente affirmait.** La couche optimale
   n'est pas localisée : écart-type de 2,7 à 3,4 couches sur une plage de 12 (seule
   exception, R3 sur PneumoniaMNIST à 8,4 ± 1,3). La « couche 9 » était un tirage.
@@ -287,6 +288,12 @@ signé de son observable, la transformation bilatérale lui est donc applicable.
   diffèrent de 0,15 ; sur PneumoniaMNIST R2 et R3 ne sont pas séparables
   (0,396 ± 0,102 contre 0,355 ± 0,009). Critère utile pour **rejeter**, pas pour
   départager.
+- **Règle par échantillon contre couche fixe : aucune ne domine.** Sur 40
+  comparaisons, partage exact de 20 à 20. Structurel : la couche fixe l'emporte 15 fois
+  sur 20 (écart moyen +0,046). Photométrique : la règle par échantillon l'emporte 15
+  fois sur 20 (−0,053). Même dichotomie que pour le gain. Une première rédaction de
+  cette entrée affirmait la supériorité de la couche fixe sans condition — corrigé
+  après audit du superviseur.
 - **Correction de cohérence** : l'exp04, calibrée sur l'exactitude brute, annonçait
   encore une économie de calcul « à exactitude préservée ». Avertissement ajouté au
   site et à `rapport-exp04.md` : cette préservation était celle du taux de la classe

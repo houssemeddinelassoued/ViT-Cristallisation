@@ -123,8 +123,8 @@ seuils H/F et couche fixe calibrés sur une moitié stratifiée du split test so
 évaluation sur l'autre moitié, sévérités 0–5. Exploratoire déclarée.
 
 **État (2026-09-01, invalidé le 2026-09-05)** : cette expérience calibre sur
-l'exactitude *brute*. L'exp05 a montré que celle-ci vaut 0,731 à toutes les couches sous
-ancres R1, soit la proportion de la classe majoritaire : l'« exactitude préservée » et
+l'exactitude *brute*. L'exp05 a montré que celle-ci vaut 0,731 à onze couches sur douze
+sous ancres R1 et 0,718 à la douzième, soit le taux de la classe majoritaire ou moins : l'« exactitude préservée » et
 les ≈ 92 % de calcul économisé ne mesurent donc rien de diagnostique. Les conclusions
 d'efficience sont reprises sur critère **équilibré** dans l'exp05. Détails et
 avertissement : `docs/rapport-exp04.md`.
@@ -150,13 +150,14 @@ moitié seulement. `--train-limit` borne le coût d'encodage du split train.
 
 **État (consolidé sur 5 graines le 2026-09-05)** : la dégénérescence N* = 1 de l'exp04
 est levée, et elle avait deux causes — des ancres textuelles au hasard (exactitude
-équilibrée 0,500 à toute couche) *et* un critère de calibration brut que le prédicteur
-majoritaire maximise. Ce qui **survit à cinq graines** : une couche intermédiaire bat la
-couche de sortie sous ancres de données, dans les quatre configurations (+0,045 à +0,134) ;
-la règle par échantillon est battue par une profondeur fixe calibrée. Ce qui **ne survit
-pas** : la localisation de la couche optimale (±3 couches), et le gain sous décalage, dont
-le signe dépend du type de corruption — positif sur le flou (+0,151 ± 0,111), négatif sur
-les corruptions photométriques (−0,038 ± 0,042). Agrégation multi-graines :
+équilibrée dans [0,474 ; 0,521] quelle que soit la couche) *et* un critère de calibration
+brut que le prédicteur majoritaire maximise. Ce qui **survit à cinq graines** : une couche
+intermédiaire bat la couche de sortie sous ancres de données, dans les quatre
+configurations (+0,045 à +0,134). Ce qui **ne survit pas** : la localisation de la couche
+optimale (±3 couches) ; le gain sous décalage, dont le signe dépend du type de corruption,
+positif sur le flou (+0,151 ± 0,111) et négatif sur les photométriques (−0,038 ± 0,042) ;
+et la supériorité de la profondeur fixe sur la règle par échantillon, qui suit la même
+dichotomie (20 comparaisons gagnées sur 40). Agrégation multi-graines :
 `python -m experiments.exp05_aggregate outputs`. Détails : `docs/rapport-exp05.md`.
 
 ## Voir les images — aperçu visuel des cohortes

@@ -4,6 +4,12 @@ Projet de recherche (thèse) : détection de décalage d'acquisition par observa
 thermodynamiques (énergie libre F vs entropie H) sur encodeurs vision-langage **gelés**
 (CLIP), imagerie médicale. Langue de travail : **français** (code commenté, docs, commits).
 
+> **Fichier jumeau.** Ce document est la version Copilot de `CLAUDE.md` (racine) :
+> même contenu, deux assistants. Toute règle ajoutée ici doit être reportée dans
+> `CLAUDE.md`, et réciproquement. Les règles de code du sous-dépôt restent dans
+> `tlsc-repo/CLAUDE.md` (notation figée, pièges connus) ; ce fichier-ci porte
+> l'architecture du dépôt, la checklist de cohérence et les commandes.
+
 ## Architecture du dépôt — où va chaque chose
 
 | Chemin | Rôle | Règle |

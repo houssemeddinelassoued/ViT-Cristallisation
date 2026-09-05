@@ -20,9 +20,9 @@ source ; (3) toutes les valeurs rapportées, source comme cible, sur la moitié 
 > survit pas. C'est l'objet même d'une consolidation multi-graines.
 
 > **Changement de critère par rapport à l'exp04.** L'exp04 calibrait sur l'exactitude
-> *brute*. Le premier run de l'exp05 a montré que cette exactitude vaut 0,731 à chacune
-> des douze couches sous ancres textuelles, soit exactement la proportion de la classe
-> majoritaire de BreastMNIST : le critère était maximisé par le prédicteur dégénéré qui
+> *brute*. Le premier run de l'exp05 a montré que cette exactitude vaut 0,731 à onze
+> couches sur douze sous ancres textuelles, et 0,718 à la douzième, soit le taux de la
+> classe majoritaire de BreastMNIST ou moins : le critère était maximisé par le prédicteur dégénéré qui
 > répond toujours la même classe. L'exp05 calibre sur l'exactitude **équilibrée**
 > (`calibrate_epsilon(..., y=...)`, deux tests dédiés). Les profondeurs des deux
 > expériences ne sont pas comparables, et les conclusions d'efficience de l'exp04 sont
@@ -67,8 +67,8 @@ cinq graines.
 | PneumoniaMNIST | R3 centroïdes | 8,4 ± 1,3 | 0,835 ± 0,023 | 0,730 ± 0,014 | +0,105 |
 
 1. **Les ancres textuelles sont au hasard, pas seulement faibles.** L'exactitude
-   équilibrée vaut 0,500 à 0,509 quelle que soit la couche, sur les deux cohortes et
-   les cinq graines. La « préservation d'exactitude » de l'exp04 était la préservation
+   équilibrée moyenne va de 0,500 à 0,509 selon la couche ; l'ensemble des valeurs, sur
+   les deux cohortes et les cinq graines, reste dans [0,474 ; 0,521]. La « préservation d'exactitude » de l'exp04 était la préservation
    du taux de la classe majoritaire. La dégénérescence N* = 1 avait donc **deux causes
    cumulées** : des ancres aveugles et un critère de calibration que le prédicteur
    majoritaire maximise.
@@ -111,10 +111,17 @@ C'est la même dichotomie structurel/photométrique que l'exp01 avait trouvée p
 l'énergie libre comme détecteur. Elle réapparaît ici sur une grandeur toute autre, la
 profondeur utile — piste à creuser, pas conclusion.
 
-**La règle par échantillon du croquis fondateur reste battue par la couche fixe.**
-Les règles calibrées H-stop et F-stop sortent en couche ≈ 1,1 et n'atteignent pas le
-niveau de la couche fixe. Ce qui survit du croquis est « toutes les couches ne se valent
-pas », pas « chaque image doit choisir la sienne ».
+**Règle par échantillon contre couche fixe : aucune ne domine en général.** Sur les 40
+comparaisons (5 graines × 2 corruptions × 2 régimes), le partage est exactement de 20 à
+20. Sur les corruptions structurelles la couche fixe l'emporte 15 fois sur 20, écart
+moyen +0,046 ; sur les photométriques la règle par échantillon l'emporte 15 fois sur 20,
+écart moyen −0,053. La même dichotomie, donc, que pour le gain.
+
+Les profondeurs de sortie elles-mêmes varient beaucoup selon la cohorte : la règle H-stop
+sort en couche 1,1 à 1,5 partout, tandis que la règle F-stop sort en couche 1,9 sur
+PneumoniaMNIST mais parcourt tout le réseau sur BreastMNIST (11,6 à 12,0). Une version
+antérieure de ce rapport donnait « ≈ 1,1 » pour les deux règles : c'était la valeur d'une
+cohorte, généralisée à tort.
 
 ## 4. Q2 — la profondeur de sortie comme détecteur de décalage
 
@@ -154,10 +161,10 @@ R1 et R3 ne dépendent pas de la graine ; R2 en dépend par son tirage few-shot.
 
 | Cohorte | Régime | Q_gap | Équil. mesurée (couche 12) |
 |---|---|---|---|
-| BreastMNIST | R1 texte | 0,0799 ± 0,0000 | 0,509 |
+| BreastMNIST | R1 texte | 0,0799 ± 0,0000 | 0,503 |
 | BreastMNIST | R2 few-shot | 0,1637 ± 0,0440 | 0,614 |
 | BreastMNIST | R3 centroïdes | 0,0799 ± 0,0000 | 0,658 |
-| PneumoniaMNIST | R1 texte | 0,0892 ± 0,0000 | 0,500 |
+| PneumoniaMNIST | R1 texte | 0,0892 ± 0,0000 | 0,495 |
 | PneumoniaMNIST | R2 few-shot | 0,3960 ± 0,1023 | 0,728 |
 | PneumoniaMNIST | R3 centroïdes | 0,3546 ± 0,0094 | 0,730 |
 
@@ -168,7 +175,7 @@ R1 et R3 ne dépendent pas de la graine ; R2 en dépend par son tirage few-shot.
    textuelles sur PneumoniaMNIST, et R2 devant R1 sur BreastMNIST : l'inversion due au
    gap de modalité est corrigée.
 3. **Échec confirmé sur le classement fin.** Sur BreastMNIST, Q_gap égalise R1 et R3
-   (0,0799 tous deux) alors que leurs exactitudes diffèrent de 0,15, et place R2 devant
+   (0,0799 tous deux) alors que leurs exactitudes diffèrent de 0,155, et place R2 devant
    R3 à rebours de la mesure. Sur PneumoniaMNIST l'écart entre R2 et R3 (0,396 ± 0,102
    contre 0,355 ± 0,009) n'est pas séparable compte tenu de la dispersion. Le critère
    sert donc à **rejeter** des ancres détachées du nuage, pas à départager deux jeux
@@ -178,13 +185,14 @@ R1 et R3 ne dépendent pas de la graine ; R2 en dépend par son tirage few-shot.
 
 - **Ce qui survit à cinq graines** : les ancres textuelles sont au hasard sur ce
   substrat ; une couche intermédiaire bat la couche de sortie sous ancres de données,
-  dans les quatre configurations ; la règle d'arrêt par échantillon est battue par une
-  profondeur fixe calibrée ; le critère de qualité d'ancrage rejette les ancres
+  dans les quatre configurations ; le critère de qualité d'ancrage rejette les ancres
   détachées du nuage mais ne départage pas les autres.
 - **Ce qui ne survit pas** : la localisation de la couche optimale, instable de ±3
   couches ; le gain sous décalage, dont le signe dépend du type de corruption et qui
-  est négatif sur les corruptions photométriques ; l'AUROC de 1,000 du détecteur N*,
-  qui vaut 0,900 ± 0,224.
+  est négatif sur les corruptions photométriques ; la supériorité de la profondeur fixe
+  calibrée sur la règle par échantillon, qui s'inverse elle aussi selon le type de
+  corruption (20 comparaisons gagnées sur 40) ; l'AUROC de 1,000 du détecteur N*, qui
+  vaut 0,900 ± 0,224.
 - **Ce qui reste à faire avant toute revendication** : un traitement statistique
   apparié (le protocole demande bootstrap apparié et correction de Holm-Bonferroni) ;
   la couche oracle est de plus sélectionnée sur le split d'évaluation, donc optimiste.
@@ -195,8 +203,8 @@ R1 et R3 ne dépendent pas de la graine ; R2 en dépend par son tirage few-shot.
 ## 7. Décision
 
 - Traiter séparément, dans la matrice d'ablation, « couche fixe calibrée » et « règle
-  par échantillon » : sur P0 la première domine, et confondre les deux attribuerait à
-  l'adaptativité un gain qui vient du choix de profondeur.
+  par échantillon » : sur P0 aucune ne domine indépendamment du type de corruption, et
+  confondre les deux masquerait cette dépendance.
 - Ne pas revendiquer de gain d'efficience sous décalage sans distinguer corruptions
   structurelles et photométriques : le signe s'inverse entre les deux.
 - Appliquer le traitement statistique apparié aux quatre configurations avant de porter

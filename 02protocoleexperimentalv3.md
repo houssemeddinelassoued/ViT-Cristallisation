@@ -128,12 +128,16 @@ La méthode proposée adapte **V + Vp** par défaut, et laisse les ancres textue
 | C1 | Arrêt sur confiance, seuils calibrés, sans adaptation | Efficience sans adaptation |
 
 > **Remarque ajoutée le 2026-09-05, a posteriori — non pré-enregistrée.** L'expérience
-> exploratoire `exp05_anchored_early_exit` (P0, `tlsc-repo/docs/rapport-exp05.md`) mesure
-> qu'une **profondeur fixe calibrée sur la source** domine nettement la règle d'arrêt par
-> échantillon sur ce substrat, et dépasse aussi la pleine profondeur sous décalage. La
-> ligne C1 devrait donc être dédoublée lors de l'exécution sur P1 : arrêt par échantillon
-> d'une part, profondeur fixe calibrée d'autre part. Sans cette distinction, un gain
-> attribué à l'adaptativité pourrait n'être que l'effet du choix d'une bonne profondeur.
+> exploratoire `exp05_anchored_early_exit` (P0, `tlsc-repo/docs/rapport-exp05.md`),
+> consolidée sur cinq graines, mesure que **profondeur fixe calibrée et règle d'arrêt par
+> échantillon ne se départagent pas indépendamment du type de corruption** : sur 40
+> comparaisons le partage est de 20 à 20, la profondeur fixe l'emportant sur les
+> corruptions structurelles et la règle par échantillon sur les photométriques. Le même
+> renversement affecte le gain sur la pleine profondeur. La ligne C1 devrait donc être
+> dédoublée lors de l'exécution sur P1 : arrêt par échantillon d'une part, profondeur
+> fixe calibrée d'autre part, et les résultats rapportés par type de corruption. Sans
+> cette distinction, un gain attribué à l'adaptativité pourrait n'être que l'effet du
+> choix d'une bonne profondeur, ou l'inverse.
 > Cette remarque ne modifie aucun critère pré-enregistré ; elle enregistre une observation
 > et sa conséquence pour la conduite de la matrice.
 

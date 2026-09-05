@@ -16,8 +16,8 @@ source ; toutes les mesures rapportées portent sur la moitié ÉVALUATION.
 
 > **Avertissement ajouté le 2026-09-05 — lire avant les chiffres d'efficience.**
 > Ce rapport calibre sur l'exactitude *brute*. L'exp05 a établi que cette exactitude vaut
-> 0,731 à chacune des douze couches sous ancres textuelles, soit exactement la proportion
-> de la classe majoritaire de BreastMNIST : le critère est maximisé par le prédicteur
+> 0,731 à onze couches sur douze sous ancres textuelles, et 0,718 à la douzième, soit le
+> taux de la classe majoritaire de BreastMNIST ou moins : le critère est maximisé par le prédicteur
 > dégénéré, et l'« exactitude préservée » de la section 4 est la préservation de ce taux,
 > non d'un pouvoir diagnostique. En exactitude **équilibrée**, ces ancres valent 0,500,
 > le hasard. Les mesures ci-dessous sont conservées comme trace du chantier ; les

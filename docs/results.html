@@ -74,18 +74,18 @@ if (localStorage.getItem('tlsc-theme') !== 'dark') document.documentElement.clas
 <p>BreastMNIST (échographie, 7 corruptions) et PneumoniaMNIST (radiographie, 4 corruptions),
 sévérités 0–5, ensemble d'invites, seed 0. Analyse appariée par DeLong + bootstrap stratifié 10&nbsp;000.</p>
 <table>
-<tr><th>Dataset</th><th>Corruption</th><th>AUROC(F)</th><th>AUROC(H)</th><th>ΔAUROC [IC 95&nbsp;%]</th><th>p (DeLong)</th></tr>
-<tr><td>breast</td><td>pixelate</td><td>1,000</td><td>0,888</td><td>+0,112 [+0,078, +0,150]</td><td>1,9e−9</td></tr>
-<tr><td>breast</td><td>jpeg_compression</td><td>0,920</td><td>0,711</td><td>+0,208 [+0,143, +0,274]</td><td>7,7e−10</td></tr>
-<tr><td>breast</td><td>motion_blur</td><td>0,885</td><td>0,760</td><td>+0,125 [+0,060, +0,190]</td><td>1,7e−4</td></tr>
-<tr><td>breast</td><td>speckle_noise</td><td>0,814</td><td>0,734</td><td>+0,080 [+0,006, +0,154]</td><td>0,032</td></tr>
-<tr><td>pneumonia</td><td>gaussian_blur</td><td>0,970</td><td>0,798</td><td>+0,172 [+0,148, +0,198]</td><td>4,1e−41</td></tr>
-<tr><td>breast</td><td>brightness_up</td><td>0,594</td><td>0,677</td><td>−0,083 [−0,176, +0,012]</td><td>0,083</td></tr>
-<tr><td>breast</td><td>brightness_down</td><td>0,359</td><td>0,563</td><td>−0,204 [−0,297, −0,112]</td><td>1,3e−5</td></tr>
-<tr><td>breast</td><td>contrast_down</td><td>0,299</td><td>0,498</td><td>−0,199 [−0,287, −0,112]</td><td>7,4e−6</td></tr>
-<tr><td>pneumonia</td><td>gaussian_noise</td><td>0,127</td><td>0,462</td><td>−0,335 [−0,368, −0,300]</td><td>1,7e−86</td></tr>
-<tr><td>pneumonia</td><td>brightness_down</td><td>0,200</td><td>0,644</td><td>−0,445 [−0,482, −0,406]</td><td>8,0e−118</td></tr>
-<tr><td>pneumonia</td><td>contrast_down</td><td>0,209</td><td>0,698</td><td>−0,490 [−0,526, −0,452]</td><td>1,7e−148</td></tr>
+<tr><th>Dataset</th><th>Corruption</th><th>AUROC(F)</th><th>AUROC(H)</th><th>ΔAUROC [IC 95&nbsp;%]</th><th>p (DeLong)</th><th>run_id</th></tr>
+<tr><td>breast</td><td>pixelate</td><td>1,000</td><td>0,888</td><td>+0,112 [+0,078, +0,150]</td><td>1,9e−9</td><td><code>3e02269f</code></td></tr>
+<tr><td>breast</td><td>jpeg_compression</td><td>0,920</td><td>0,711</td><td>+0,208 [+0,143, +0,274]</td><td>7,7e−10</td><td><code>98d42003</code></td></tr>
+<tr><td>breast</td><td>motion_blur</td><td>0,885</td><td>0,760</td><td>+0,125 [+0,060, +0,190]</td><td>1,7e−4</td><td><code>2308a744</code></td></tr>
+<tr><td>breast</td><td>speckle_noise</td><td>0,814</td><td>0,734</td><td>+0,080 [+0,006, +0,154]</td><td>0,032</td><td><code>de6dba0c</code></td></tr>
+<tr><td>pneumonia</td><td>gaussian_blur</td><td>0,970</td><td>0,798</td><td>+0,172 [+0,148, +0,198]</td><td>4,1e−41</td><td><code>2bc1d5f9</code></td></tr>
+<tr><td>breast</td><td>brightness_up</td><td>0,594</td><td>0,677</td><td>−0,083 [−0,176, +0,012]</td><td>0,083</td><td><code>41fa7739</code></td></tr>
+<tr><td>breast</td><td>brightness_down</td><td>0,359</td><td>0,563</td><td>−0,204 [−0,297, −0,112]</td><td>1,3e−5</td><td><code>c1697982</code></td></tr>
+<tr><td>breast</td><td>contrast_down</td><td>0,299</td><td>0,498</td><td>−0,199 [−0,287, −0,112]</td><td>7,4e−6</td><td><code>4ae2e534</code></td></tr>
+<tr><td>pneumonia</td><td>gaussian_noise</td><td>0,127</td><td>0,462</td><td>−0,335 [−0,368, −0,300]</td><td>1,7e−86</td><td><code>a0dfe1a7</code></td></tr>
+<tr><td>pneumonia</td><td>brightness_down</td><td>0,200</td><td>0,644</td><td>−0,445 [−0,482, −0,406]</td><td>8,0e−118</td><td><code>2de86cbd</code></td></tr>
+<tr><td>pneumonia</td><td>contrast_down</td><td>0,209</td><td>0,698</td><td>−0,490 [−0,526, −0,452]</td><td>1,7e−148</td><td><code>2764835a</code></td></tr>
 </table>
 
 <div class="callout danger">
@@ -247,8 +247,8 @@ les cinq graines.</p>
 <p style="border-left:3px solid var(--muted);padding-left:.9rem;font-size:.92rem">
 <strong>Changement de critère, à lire avant toute comparaison avec l'expérience 4.</strong>
 L'expérience 4 calibrait sur l'exactitude <em>brute</em>. Le premier run de l'expérience 5 a montré
-que cette exactitude vaut 0,731 aux douze couches sous ancres textuelles, soit exactement la
-proportion de la classe majoritaire de BreastMNIST : le critère était maximisé par le prédicteur
+que cette exactitude vaut 0,731 à onze couches sur douze et 0,718 à la douzième, soit le taux de
+la classe majoritaire de BreastMNIST ou moins : le critère était maximisé par le prédicteur
 dégénéré qui répond toujours la même classe. L'expérience 5 calibre sur l'exactitude
 <strong>équilibrée</strong>. Les profondeurs des deux expériences ne sont pas comparables.</p>
 
@@ -268,7 +268,8 @@ split d'évaluation lui-même : c'est une borne supérieure optimiste, pas une p
 
 <ul>
   <li><strong>Les ancres textuelles sont au hasard, pas seulement faibles.</strong> L'exactitude
-  équilibrée vaut 0,500 à 0,509 quelle que soit la couche, sur les deux cohortes et les cinq graines.
+  équilibrée moyenne va de 0,500 à 0,509 selon la couche, et l'ensemble des valeurs sur les deux
+  cohortes et les cinq graines reste dans l'intervalle [0,474 ; 0,521].
   La « préservation d'exactitude » de l'expérience 4 était la préservation du taux de la classe
   majoritaire. La dégénérescence avait donc deux causes cumulées : des ancres aveugles, et un critère
   de calibration que le prédicteur majoritaire maximise.</li>
@@ -296,9 +297,13 @@ sous R3. Sur les corruptions photométriques elle <em>perd</em> : sous R3 sur Pn
 graines sont négatives. C'est la même dichotomie structurel/photométrique que l'expérience 1 avait
 trouvée pour l'énergie libre comme détecteur, réapparue ici sur une grandeur toute autre. Une version
 antérieure de cette page annonçait un gain de +0,241 sur une seule graine ; il vaut +0,134 ± 0,153.</p>
-<p>La règle d'arrêt <em>par échantillon</em> du croquis fondateur reste, elle, battue par la couche
-fixe calibrée. Ce qui survit du croquis est que toutes les couches ne se valent pas, non que chaque
-image doive choisir la sienne.</p>
+<p>La comparaison entre la règle d'arrêt <em>par échantillon</em> et la couche fixe calibrée suit
+la même dichotomie, et aucune des deux ne domine l'autre en général. Sur 40 comparaisons (5 graines ×
+2 corruptions × 2 régimes), le partage est exactement de 20 à 20. Sur les corruptions structurelles la
+couche fixe l'emporte 15 fois sur 20, avec un écart moyen de +0,046 ; sur les photométriques c'est la
+règle par échantillon qui l'emporte 15 fois sur 20, avec un écart moyen de −0,053. Une version
+antérieure de cette page annonçait que la règle par échantillon était battue : c'est vrai sur le
+substrat structurel seulement.</p>
 
 <h3 style="font-size:1rem;margin-top:1.4rem">La profondeur de sortie N* comme détecteur de décalage</h3>
 <table>
@@ -323,10 +328,10 @@ constantes et n'offrent aucune dispersion sur laquelle opérer.</p>
 <h3 style="font-size:1rem;margin-top:1.4rem">Un critère de qualité d'ancrage</h3>
 <table>
 <tr><th>Cohorte</th><th>Régime</th><th>Q<sub>gap</sub></th><th>Équilibrée mesurée (couche 12)</th></tr>
-<tr><td>BreastMNIST</td><td>R1 — textuelles</td><td>0,0799 ± 0,0000</td><td>0,509</td></tr>
+<tr><td>BreastMNIST</td><td>R1 — textuelles</td><td>0,0799 ± 0,0000</td><td>0,503</td></tr>
 <tr><td>BreastMNIST</td><td>R2 — few-shot</td><td>0,1637 ± 0,0440</td><td>0,614</td></tr>
 <tr><td>BreastMNIST</td><td>R3 — centroïdes</td><td>0,0799 ± 0,0000</td><td>0,658</td></tr>
-<tr><td>PneumoniaMNIST</td><td>R1 — textuelles</td><td>0,0892 ± 0,0000</td><td>0,500</td></tr>
+<tr><td>PneumoniaMNIST</td><td>R1 — textuelles</td><td>0,0892 ± 0,0000</td><td>0,495</td></tr>
 <tr><td>PneumoniaMNIST</td><td>R2 — few-shot</td><td>0,3960 ± 0,1023</td><td>0,728</td></tr>
 <tr><td>PneumoniaMNIST</td><td>R3 — centroïdes</td><td>0,3546 ± 0,0094</td><td>0,730</td></tr>
 </table>
@@ -336,7 +341,7 @@ R2 en dépend par son tirage few-shot.</p>
 <p>Le critère réussit à moitié. Il corrige l'inversion due au gap de modalité — la distance ancres-nuage
 vaut ≈ 1,28 pour les invites textuelles contre ≈ 0,04 à 0,09 pour les ancres de données — là où
 D<sub>inter</sub> seule affirmait le contraire. Mais il échoue sur le classement fin : sur BreastMNIST il
-égalise R1 et R3 dont les exactitudes diffèrent de 0,15, et sur PneumoniaMNIST l'écart entre R2 et R3
+égalise R1 et R3 dont les exactitudes diffèrent de 0,155, et sur PneumoniaMNIST l'écart entre R2 et R3
 n'est pas séparable compte tenu de la dispersion. Il sert donc à <em>rejeter</em> des ancres détachées
 du nuage, pas à départager deux jeux d'ancres tous deux ancrés dans les données.</p>
 
@@ -367,18 +372,21 @@ du nuage, pas à départager deux jeux d'ancres tous deux ancrés dans les donn�
   <li>Les couches intermédiaires sont lues par « logit lens » (projection finale appliquée à des
   représentations jamais alignées à l'espace texte par l'entraînement) : leur pouvoir de détection
   est une observation empirique, pas une garantie théorique.</li>
-  <li>Aucun intervalle de confiance n'accompagne les chiffres de l'expérience 5 : une seule graine,
-  deux corruptions par cohorte, et le traitement statistique apparié du protocole (§6) reste à
-  appliquer avant toute revendication. Le régime R3 est approché sur PneumoniaMNIST, dont le split
-  train est sous-échantillonné à 1200 images pour borner le coût d'encodage par couche.</li>
+  <li>Les chiffres de l'expérience 5 portent leur dispersion sur cinq graines, mais aucun
+  <strong>test apparié</strong> : le traitement statistique du protocole (§6), bootstrap apparié et
+  correction de Holm-Bonferroni, reste à appliquer avant toute revendication. Deux corruptions
+  seulement par cohorte. Le régime R3 est approché sur PneumoniaMNIST, dont le split train est
+  sous-échantillonné à 1200 images pour borner le coût d'encodage par couche. La couche oracle des
+  tableaux est de plus choisie sur le split d'évaluation lui-même : c'est une borne optimiste.</li>
   <li>Les régimes d'ancrage R2 et R3 sont déclarés exploratoires : le protocole conserve R1, les
   invites textuelles pures, comme régime principal. Les résultats obtenus sous ancres de données ne
   peuvent donc pas être présentés comme la voie par défaut de la méthode.</li>
-  <li>Prochaines étapes : appliquer la transformation bilatérale aux profondeurs de sortie, pour
-  vérifier si elle récupère les détecteurs inversés ; distinguer « couche fixe calibrée » et « règle
-  par échantillon » comme deux lignes de la matrice d'ablation, la première dominant la seconde sur
-  P0 ; puis la cohorte P1 (BUSI → UDIAT → BUS-UCLM), avec contrôle BiomedCLIP sur la configuration
-  finale.</li>
+  <li>Prochaines étapes : appliquer le traitement statistique apparié aux quatre configurations de
+  l'expérience 5 ; distinguer « couche fixe calibrée » et « règle par échantillon » comme deux lignes
+  de la matrice d'ablation, aucune des deux ne dominant l'autre indépendamment du type de corruption ;
+  puis la cohorte P1 (BUSI → UDIAT → BUS-UCLM), avec contrôle BiomedCLIP sur la configuration finale.
+  La priorité y est un test de viabilité du substrat, car les invites textuelles classent au hasard
+  sur les deux cohortes P0.</li>
 </ul>
 
 <footer>

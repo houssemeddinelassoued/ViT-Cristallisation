@@ -32,7 +32,7 @@ La prédiction est confirmée seulement si les trois tiennent.
 | 20260831T233917Z_…_6243078d | speckle_noise | 0 | limit=32, non versionné (smoke test) | ⚠️ non |
 | 20260831T235358Z_…_da17e51e | speckle_noise | 0 | complet mais non versionné (git dirty) | ⚠️ non |
 | 20260901T000620Z_…_c2a0cdaf | speckle_noise | 0 | complet, git 101ab28 propre | ✅ |
-| 20260901T000843Z_…_4aecb603 | — | — | interrompu, pas de metrics.json | ❌ |
+| 20260901T000843Z_…_4aecb603 | speckle_noise | 1 | complet, git 101ab28 propre | ✅ |
 | 20260901T001121Z_…_7d2ca324 | speckle_noise | 2 | complet, git 101ab28 propre | ✅ |
 | 20260901T001336Z_…_0a27403c | speckle_noise | 3 | complet, git 101ab28 propre | ✅ |
 | 20260905T164506Z_…_0253fd15 | speckle_noise | 4 | complet, git 3e51dc3 propre, carte | ✅ |
@@ -42,7 +42,12 @@ La prédiction est confirmée seulement si les trois tiennent.
 
 Note : le seed n'affecte que le générateur de corruption ; à sévérité 0 les images
 sont identiques d'un seed à l'autre, d'où des métriques sévérité-0 strictement égales.
-Aucun run avec seed 1 n'a abouti (exécution interrompue).
+
+> **Correction du 2026-09-05.** Ce tableau déclarait `4aecb603` « interrompu, pas de
+> metrics.json » et concluait qu'aucun run de seed 1 n'avait abouti. C'est faux : le
+> run est complet, propre et réel (`metrics.json`, `scores.npz`, `analysis.json`,
+> `git_dirty: false`), et il figure dans `outputs/aggregate/summary.csv`. Un second
+> run de seed 1 (`0f58bbbd`) a également abouti lors du balayage du §7.
 Corruptions MedMNIST-C valides pour breastmnist : `pixelate`, `jpeg_compression`,
 `speckle_noise`, `motion_blur`, `brightness_up`, `brightness_down`, `contrast_down`.
 

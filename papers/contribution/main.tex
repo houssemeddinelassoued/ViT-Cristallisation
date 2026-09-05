@@ -28,7 +28,7 @@ A Pre-Registered Falsification Study on Medical Image Corruptions}
 \small University Research Laboratory, Tunis, Tunisia\\
 \small \texttt{houssem.lassoued@example.edu}}
 
-\date{September 1, 2026}
+\date{September 1, 2026 (revised September 5, 2026)}
 
 \begin{document}
 \maketitle
@@ -238,7 +238,11 @@ modality-specific corruptions at five severities for MedMNIST~v2
 
 Encoder: CLIP ViT-B/16 (OpenAI weights, QuickGELU variant) via
 \texttt{open\_clip} \citep{ilharco2021openclip}, entirely frozen, run in
-float32 on CPU (PyTorch 2.4.1, Python 3.11, Windows). Temperature fixed at
+float32 (PyTorch 2.4.1, Python 3.11, Windows). Most runs were executed on CPU;
+the three PneumoniaMNIST runs were re-executed on an RTX 4060 (CUDA 12.4 build
+of the same PyTorch version) after a repository-hygiene fix. Embeddings agree
+across the two devices to a cosine similarity above $0.999998$ and the reported
+AUROCs to $3\times10^{-4}$; each run records its own device. Temperature fixed at
 $T = 2\tau \approx 0.0200$ per \eqref{eq:temp}. Anchors are the
 $\ell_2$-normalized means of the per-class prompt-template embeddings
 (prompt ensembling), renormalized after averaging.
@@ -293,7 +297,8 @@ calibration.
 
 (i) Prompts frozen before target evaluation; (ii) $T=2\tau$, never tuned;
 (iii) no threshold is fit on target data (the two-sided center uses source
-only); (iv) every number below carries a run identifier; each run stores its
+only); (iv) every number below is traceable to a run identifier listed in the
+caption of Table~\ref{tab:main}; each run stores its
 configuration, git commit, code hash, environment, per-severity metrics and
 raw per-sample scores. A caveat we cannot close: CLIP's web-scale pre-training
 corpus is not auditable, so memorization of the public source images cannot be
@@ -322,7 +327,11 @@ distances, which entropy sees.
 (prompt ensemble, seed 0, severities 0--5). $\Delta$ = AUROC($F$) $-$
 AUROC($\Hent$) with stratified paired bootstrap 95\% CI and paired DeLong
 $p$-value. $|F|_2$ = two-sided variant $|F-\mathrm{med}_{\mathrm{src}}(F)|$.
-Structural corruptions above the rule, photometric below.}
+Structural corruptions above the rule, photometric below. Run identifiers, in
+table order: \texttt{3e02269f}, \texttt{98d42003}, \texttt{2308a744},
+\texttt{de6dba0c}, \texttt{2bc1d5f9}, \texttt{41fa7739}, \texttt{c1697982},
+\texttt{4ae2e534}, \texttt{a0dfe1a7}, \texttt{2de86cbd}, \texttt{2764835a};
+each is the short hash of a \texttt{metrics.json} released with the code.}
 \label{tab:main}
 \begin{tabular}{llccccc}
 \toprule
@@ -425,8 +434,9 @@ brightness\_down & 0.351 & 0.419 & 0.307 & 0.359 & 0.580 & 0.464 & 0.609 & 0.563
 \end{tabular}
 \end{center}
 
-The dispersion of $F$ across templates (s.d.\ $0.032$ on speckle, $0.046$ on
-brightness\_down) is roughly half that of $\Hent$ ($0.076$ and $0.064$): the
+The dispersion of $F$ across templates (population s.d.\ over the three
+isolated templates: $0.032$ on speckle, $0.046$ on brightness\_down) is roughly
+half that of $\Hent$ ($0.076$ and $0.062$): the
 partition function aggregates the anchor geometry and is less exposed to a
 particular wording than the posterior shape. The sign inversion on
 brightness\_down persists under \emph{every} template --- it is not a prompt
@@ -447,7 +457,7 @@ The chest X-ray cohort replicates the dichotomy on an independent modality,
 anatomy and corruption implementation, with $4\times$ larger test sets
 ($n=624$). Gaussian blur (structural) behaves like the ultrasound structural
 block: $F$ rises monotonically ($1.264\!\to\!1.320$) and dominates $\Hent$
-($0.970$ vs.\ $0.798$, $\Delta=+0.172$, $p=3.9\times10^{-41}$). All three
+($0.970$ vs.\ $0.798$, $\Delta=+0.172$, $p=4.1\times10^{-41}$). All three
 photometric corruptions invert the sign of $F$ --- Gaussian noise, brightness
 and contrast compression each move X-ray embeddings \emph{closer} to the text
 anchors ($F$ AUROC $0.127$--$0.209$), with effect sizes far beyond sampling
@@ -502,8 +512,9 @@ form of our pre-registered prediction --- entropy at chance --- is refuted and
 reported as such. Every number in this paper is traceable to a versioned run;
 code, metrics and raw scores are released with the paper.
 
-\paragraph{Reproducibility.} All experiments: single CPU, no training;
-$\sim$3 minutes per corruption sweep (156 images $\times$ 6 severities).
+\paragraph{Reproducibility.} No training anywhere; $\sim$3 minutes per
+corruption sweep on CPU (156 images $\times$ 6 severities), $\sim$5 seconds on
+the GPU. Each \texttt{metrics.json} records the device it ran on.
 Code, per-run \texttt{metrics.json}, raw scores and analysis scripts are
 available in the project repository.
 
