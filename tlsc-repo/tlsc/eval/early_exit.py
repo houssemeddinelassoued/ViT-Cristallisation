@@ -177,12 +177,20 @@ def exit_depth_auroc(scores_source: np.ndarray, scores_target: np.ndarray,
     epsilon : float
         Seuil d'arrêt calibré sur la source.
 
+    Variante bilatérale. L'exp05 a mesuré des détecteurs fortement *inversés*
+    (AUROC 0,059 sous ancres R3) : les images corrompues cristallisent plus tôt,
+    pas plus tard. C'est la signature déjà rencontrée pour F à l'exp01.
+    ``auroc_two_sided`` applique donc à la profondeur la même transformation
+    ``|N* - médiane_source(N*)|`` que :func:`tlsc.eval.metrics.two_sided_shift_score`,
+    qui détecte les départs dans les deux directions. La médiane est calculée sur
+    la source seule : aucune information cible n'entre dans la calibration.
+
     Returns
     -------
-    dict : ``auroc``, ``mean_depth_source``, ``mean_depth_target``,
-    ``delta_depth``, ``n_source``, ``n_target``.
+    dict : ``auroc``, ``auroc_two_sided``, ``mean_depth_source``,
+    ``mean_depth_target``, ``delta_depth``, ``n_source``, ``n_target``.
     """
-    from tlsc.eval.metrics import shift_detection_auroc
+    from tlsc.eval.metrics import shift_detection_auroc, two_sided_shift_score
 
     if scores_source.ndim != 2 or scores_target.ndim != 2:
         raise ValueError("scores_source et scores_target doivent être (n_layers, n)")
@@ -190,8 +198,10 @@ def exit_depth_auroc(scores_source: np.ndarray, scores_target: np.ndarray,
         raise ValueError("les deux domaines doivent avoir le même nombre de couches")
     src = exit_layers(scores_source, epsilon).astype(np.float64) + 1.0
     tgt = exit_layers(scores_target, epsilon).astype(np.float64) + 1.0
+    src_2s, tgt_2s = two_sided_shift_score(src, tgt)
     return {
         "auroc": shift_detection_auroc(src, tgt),
+        "auroc_two_sided": shift_detection_auroc(src_2s, tgt_2s),
         "mean_depth_source": float(src.mean()),
         "mean_depth_target": float(tgt.mean()),
         "delta_depth": float(tgt.mean() - src.mean()),

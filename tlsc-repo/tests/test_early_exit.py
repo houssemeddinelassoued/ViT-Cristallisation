@@ -146,3 +146,27 @@ def test_simulate_ajoute_l_equilibree_si_etiquettes() -> None:
     assert "balanced_accuracy" not in sans
     assert avec["balanced_accuracy"] == pytest.approx(0.5)
     assert avec["accuracy"] == sans["accuracy"]
+
+
+def test_bilateral_recupere_un_detecteur_inverse() -> None:
+    """Cible sortant plus TOT : l'unilateral s'effondre, le bilateral recupere.
+
+    Configuration rencontree a l'exp05 sous ancres R3 (AUROC 0,059) : les images
+    corrompues cristallisent plus tot, ce que le detecteur unilateral lit comme
+    l'inverse d'un decalage.
+    """
+    # source : sortie en couche 3 ; cible : sortie en couche 1
+    source = np.array([[0.9] * 10, [0.9] * 10, [0.1] * 10])
+    target = np.array([[0.1] * 10, [0.1] * 10, [0.1] * 10])
+    out = exit_depth_auroc(source, target, 0.5)
+    assert out["mean_depth_source"] == pytest.approx(3.0)
+    assert out["mean_depth_target"] == pytest.approx(1.0)
+    assert out["auroc"] == pytest.approx(0.0)            # unilateral : totalement inverse
+    assert out["auroc_two_sided"] == pytest.approx(1.0)  # bilateral : recupere
+
+
+def test_bilateral_neutre_quand_les_domaines_coincident() -> None:
+    scores = np.array([[0.9] * 8, [0.1] * 8, [0.1] * 8])
+    out = exit_depth_auroc(scores, scores.copy(), 0.5)
+    assert out["auroc"] == pytest.approx(0.5)
+    assert out["auroc_two_sided"] == pytest.approx(0.5)
