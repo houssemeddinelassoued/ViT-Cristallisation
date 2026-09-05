@@ -124,5 +124,16 @@ Anti-fuite en trois barrières : centroïdes sur le train source à sévérité 
 et couche fixe sur la moitié calibration du test source ; évaluations sur l'autre
 moitié seulement. `--train-limit` borne le coût d'encodage du split train.
 
+**État (2026-09-05)** : la dégénérescence N* = 1 de l'exp04 est levée, et elle avait deux
+causes — des ancres textuelles au hasard (exactitude équilibrée 0,500 à onze couches sur
+douze) *et* un critère de calibration brut que le prédicteur majoritaire maximise. Sous
+ancres de données, l'optimum est intérieur : couches 2–3 sur BreastMNIST, 6–9 sur
+PneumoniaMNIST. Résultat principal, non visé : les dernières couches dégradent le
+diagnostic sous décalage — couche fixe 9 à 0,780 contre 0,539 en pleine profondeur à
+sévérité 5 (PneumoniaMNIST, gaussian_blur, R2). En revanche la règle par échantillon du
+croquis fondateur est **battue** par cette couche fixe calibrée. N* est un détecteur de
+décalage réel (AUROC 1,000 sous R2 sur BreastMNIST) mais ni universel ni de signe
+constant. Détails : `docs/rapport-exp05.md`.
+
 Le cadre et les seuils pré-enregistrés sont définis dans `docs/cadre-theorique.md`.
 `docs/STATUT.md` indique quels documents du workspace sont autoritatifs.

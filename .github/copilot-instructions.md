@@ -71,8 +71,10 @@ emplacements concernés avant de committer :
 1. **Nouveaux runs** → relancer `exp01_analysis` puis `exp01_aggregate` ; entrée dans
    `tlsc-repo/docs/JOURNAL.md` (format : date · run_id · testé · observé · décision) ;
    section dans `tlsc-repo/docs/rapport-exp01.md` si le résultat est substantiel.
-2. **Figures** — trois copies à synchroniser depuis `tlsc-repo/outputs/aggregate/` :
-   `papers/contribution/figures/` et `docs/assets/figures/`. Ne jamais éditer une copie seule.
+2. **Figures** — sources de vérité : `tlsc-repo/outputs/aggregate/` (figures exp01) et
+   `tlsc-repo/outputs/<run_id>/figures/` (figures exp02 à exp05). Copies à synchroniser :
+   `papers/contribution/figures/` et `docs/assets/figures/`. Ne jamais éditer une copie
+   seule ; toute figure du site issue d'un run doit citer son `run_id` sur la page.
 3. **Site public** (`docs/`) :
    - `docs/results.html` : tableau des runs canoniques (AUROC, IC, p, run_id) et figures
      à jour avec `outputs/aggregate/summary.csv` ;

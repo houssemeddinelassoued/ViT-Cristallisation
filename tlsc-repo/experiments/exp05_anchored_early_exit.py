@@ -399,20 +399,20 @@ def make_figures(per_regime: dict, args, figdir: Path) -> None:
         bal0 = ps["0"]["balanced_accuracy_par_couche"]
         axes[4].plot(range(1, len(bal0) + 1), bal0, style, color=color, label=name)
 
-    axes[0].set_title("Exact. equilibree : H-stop (trait) vs pleine prof. (pointille)")
+    axes[0].set_title("Equilibree : H-stop vs pleine prof.", fontsize=10)
     axes[0].set_xlabel("severite")
     axes[0].set_ylim(0.0, 1.0)
     axes[0].axhline(0.5, color="#999999", lw=1, ls=":")
-    axes[1].set_title("Profondeur moyenne de sortie N* (H-stop)")
+    axes[1].set_title("Profondeur de sortie N* (H-stop)", fontsize=10)
     axes[1].set_xlabel("severite")
     axes[1].set_ylim(0.0, 12.5)
-    axes[2].set_title("AUROC de N* (H-stop) comme detecteur")
-    axes[3].set_title("AUROC de N* (F-stop) comme detecteur")
+    axes[2].set_title("AUROC de N* (H-stop)", fontsize=10)
+    axes[3].set_title("AUROC de N* (F-stop)", fontsize=10)
     for ax in (axes[2], axes[3]):
         ax.set_xlabel("severite")
         ax.set_ylim(0.0, 1.03)
         ax.axhline(0.5, color="#999999", lw=1, ls=":")
-    axes[4].set_title("Exact. equilibree par couche (source, split evaluation)")
+    axes[4].set_title("Equilibree par couche (source)", fontsize=10)
     axes[4].set_xlabel("couche")
     axes[4].set_ylim(0.0, 1.0)
     axes[4].axhline(0.5, color="#999999", lw=1, ls=":")
@@ -421,7 +421,9 @@ def make_figures(per_regime: dict, args, figdir: Path) -> None:
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         ax.legend(frameon=False, fontsize=8)
-    fig.suptitle(f"Ancres x arret calibre — {args.dataset} · {args.corruption}", y=1.05)
+    fig.suptitle(f"Ancres x arret calibre — {args.dataset} · {args.corruption}"
+                 "   (trait plein : regle calibree ; pointille : pleine profondeur)",
+                 y=1.05)
     fig.tight_layout()
     fig.savefig(figdir / "01_ancres_x_arret.png", dpi=150, bbox_inches="tight")
     plt.close(fig)

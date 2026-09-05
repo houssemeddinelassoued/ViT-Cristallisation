@@ -155,3 +155,54 @@ l'autre moitié (79), sévérités 0–5. **Exploratoire déclaré.** Runs
 - Décision : test non trivial de la règle = croisement ancres R2 (exp03) ×
   arrêt calibré (exp04) ; quantifier N̄* en AUROC comme détecteur.
 - Détail : `docs/rapport-exp04.md`.
+
+## 2026-09-05 · exp05 — croisement ancres × arrêt calibré, N* détecteur, qualité d'ancrage
+
+Chantier décidé en fin d'exp03 et d'exp04 : rejouer l'arrêt calibré sous les trois
+régimes d'ancrage, où l'exactitude varie réellement avec la profondeur
+(`experiments/exp05_anchored_early_exit.py`, centroïdes recalculés couche par couche ;
+`exit_depth_auroc` et `anchor_quality` ajoutés, 10 tests). **Exploratoire déclaré.**
+Runs (git 973b931, arbre propre) : 7d1b0ed1 et 6f91783e (BreastMNIST, speckle_noise et
+brightness_down), 9b5f183e et 6044eb14 (PneumoniaMNIST, gaussian_blur et
+brightness_down).
+
+- **Correction de méthode, préalable à toute lecture.** Le premier run a montré que
+  l'exactitude *brute* vaut 0,731 aux douze couches sous ancres R1 — exactement la
+  proportion de la classe majoritaire de BreastMNIST. Le critère de calibration de
+  l'exp04 était donc maximisé par le prédicteur dégénéré, et validait une sortie en
+  couche 1 sans contenu diagnostique. L'exp05 calibre sur l'exactitude **équilibrée**
+  (`calibrate_epsilon(..., y=...)`, comportement par défaut inchangé pour l'exp04).
+  Les profondeurs des deux expériences ne sont pas comparables.
+- **Q1 — la dégénérescence N* = 1 est levée, et elle avait deux causes.** Sous R1
+  l'équilibrée vaut 0,500 à onze couches sur douze : les ancres textuelles sont au
+  hasard, pas seulement faibles. Sous ancres de données un optimum intérieur apparaît,
+  jamais en couche 1 ni en couche 12 : couches 2 et 3 sur BreastMNIST (0,719 et 0,684),
+  couches 9 et 6 sur PneumoniaMNIST (0,841 et 0,825).
+- **Résultat le plus exploitable, non visé.** Les dernières couches dégradent le
+  diagnostic sous décalage : PneumoniaMNIST gaussian_blur sous R2, la couche fixe 9
+  tient 0,780 à sévérité 5 quand la pleine profondeur tombe à 0,539, pour 75 % du calcul.
+  L'écart croît avec la sévérité (+0,136 à sév. 0, +0,241 à sév. 5).
+- **Mais la règle par échantillon du croquis fondateur perd contre la couche fixe.**
+  H-stop et F-stop sortent en couche ≈ 1,1 et plafonnent à 0,622 et 0,652 à sévérité 5,
+  loin des 0,780 de la couche fixe calibrée. Consigné tel quel : ce qui survit du
+  croquis est « toutes les couches ne se valent pas », pas « chaque image choisit la
+  sienne ».
+- **Q2 — N* est un détecteur réel mais ni universel ni de signe constant.** AUROC 1,000
+  (règle F, R2) sur les deux corruptions BreastMNIST, 0,835 et 0,825 sur PneumoniaMNIST
+  brightness_down, mais 0,503 sur gaussian_blur. Sous R3 sur BreastMNIST la règle H donne
+  0,059 et 0,167 : détecteur fortement **inversé**, les images corrompues sortant plus
+  tôt — même signature signée que F à l'exp01.
+- **Q3 — critère de qualité d'ancrage : succès partiel.** Q_gap et Q_fisher corrigent
+  l'inversion due au gap de modalité (distance ancres-nuage ≈ 1,28 pour le texte contre
+  ≈ 0,04–0,09 pour les données) et placent partout les ancres de données devant les
+  ancres textuelles. Mais ils classent R2 devant R3, alors que l'exactitude mesurée place
+  R3 devant : les centroïdes complets se rapprochent de la moyenne globale et écrasent
+  D_inter. Critère utilisable pour *rejeter*, pas pour départager.
+- Corrigé au passage : `exp01_aggregate` référençait `os` sans l'importer et plantait au
+  lancement (bug présent sur `main`) ; agrégation rejouée, valeurs du journal reproduites
+  à l'identique.
+- Décision : appliquer la transformation bilatérale aux profondeurs de sortie ; traiter
+  « couche fixe calibrée » et « règle par échantillon » comme deux lignes distinctes de la
+  matrice d'ablation ; refaire le croisement à plusieurs graines avec traitement
+  statistique apparié avant toute revendication. Priorité inchangée : cohorte P1.
+- Détail : `docs/rapport-exp05.md`.

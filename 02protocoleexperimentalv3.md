@@ -127,6 +127,16 @@ La méthode proposée adapte **V + Vp** par défaut, et laisse les ancres textue
 |---|---|---|
 | C1 | Arrêt sur confiance, seuils calibrés, sans adaptation | Efficience sans adaptation |
 
+> **Remarque ajoutée le 2026-09-05, a posteriori — non pré-enregistrée.** L'expérience
+> exploratoire `exp05_anchored_early_exit` (P0, `tlsc-repo/docs/rapport-exp05.md`) mesure
+> qu'une **profondeur fixe calibrée sur la source** domine nettement la règle d'arrêt par
+> échantillon sur ce substrat, et dépasse aussi la pleine profondeur sous décalage. La
+> ligne C1 devrait donc être dédoublée lors de l'exécution sur P1 : arrêt par échantillon
+> d'une part, profondeur fixe calibrée d'autre part. Sans cette distinction, un gain
+> attribué à l'adaptativité pourrait n'être que l'effet du choix d'une bonne profondeur.
+> Cette remarque ne modifie aucun critère pré-enregistré ; elle enregistre une observation
+> et sa conséquence pour la conduite de la matrice.
+
 ### Groupe D — combinaisons
 
 | Réf | Configuration | Ce que la ligne établit |
