@@ -687,7 +687,54 @@ flowchart LR
       <td><span class="badge todo">repli déclaré</span> — permet de tourner sans dépendance</td></tr>
   </table>
 
-  <h3>6.2 Les corruptions locales — physiquement motivées par l'échographie</h3>
+  <h3>6.2 À quoi ressemblent les images — et ce que la corruption leur fait</h3>
+
+  <div class="explain">
+    <div class="ct">🎓 Comment lire ces planches</div>
+    <p><strong>Une ligne = une corruption, une colonne = une sévérité</strong>, appliquées à une seule
+    et même image. La colonne « sév. 0 » est l'original : 224 × 224 pixels, niveaux de gris répliqués
+    en RVB. C'est l'image exacte qui entre ensuite dans le prétraitement standard de CLIP — rien
+    n'est retouché entre cette case et l'encodeur gelé.</p>
+    <p><strong>Deux familles se distinguent à l'œil nu.</strong> Les corruptions
+    <em>structurelles</em> — pixelisation, compression, bruit, flou — détruisent de l'information :
+    les contours se délitent, la texture s'efface. Les corruptions <em>photométriques</em> —
+    luminosité, contraste — ne détruisent rien : elles déplacent l'échelle des gris, l'anatomie reste
+    entièrement lisible. Le protocole les traite pourtant à égalité, comme deux « décalages
+    d'acquisition » gradués de 1 à 5.</p>
+    <p>Gardez cette distinction en tête en lisant la page <a href="results.html">Résultats</a> : elle
+    n'était pas prévue par la prédiction pré-enregistrée, et c'est pourtant elle qui départage le
+    comportement de F. Aucun chiffre n'est avancé ici — toute valeur mesurée se lit sur la page
+    Résultats, où chaque nombre cite son <code>run_id</code>.</p>
+  </div>
+
+  <div class="mermaid-box">
+    <img src="assets/apercu/apercu_corruptions_breastmnist.png" loading="lazy"
+      alt="BreastMNIST : sept corruptions MedMNIST-C appliquées à une même échographie mammaire, sévérités 0 à 5."
+      style="width:100%; height:auto; display:block">
+    <div class="fig-cap">Fig. 6 — BreastMNIST (échographie mammaire, cas malin, image n° 120 du split
+    test) : les sept corruptions officielles MedMNIST-C, de la sévérité 0 (originale) à 5. Les quatre
+    premières lignes dégradent la structure ; les trois dernières ne touchent que l'intensité.</div>
+  </div>
+
+  <div class="mermaid-box">
+    <img src="assets/apercu/apercu_corruptions_pneumoniamnist.png" loading="lazy"
+      alt="PneumoniaMNIST : quatre corruptions MedMNIST-C appliquées à une même radiographie pulmonaire, sévérités 0 à 5."
+      style="width:100%; height:auto; display:block">
+    <div class="fig-cap">Fig. 7 — PneumoniaMNIST (radiographie pulmonaire, cas normal, image n° 236 du
+    split test) : les quatre corruptions effectivement passées en machine sur cette cohorte. Même
+    dichotomie — le flou et le bruit effacent la trame, la luminosité et le contraste la préservent.</div>
+  </div>
+
+  <div class="callout">
+    <div class="ct">🔁 Ces planches sont régénérées, jamais retouchées</div>
+    Elles sortent des mêmes fonctions que les expériences (<code>tlsc.data.medmnistc</code>) : une case
+    « sév. 3 » est, au pixel près, l'image encodée à la sévérité 3. Une commande suffit à les refaire —
+    <code>python -m tools.apercu_images --dataset breastmnist --all-corruptions --grid --transparent</code>
+    — et un manifeste <code>.json</code> déposé à côté du PNG en consigne la provenance. Ce sont des
+    <strong>illustrations</strong> : elles ne portent aucune mesure et ne se citent pas comme résultat.
+  </div>
+
+  <h3>6.3 Les corruptions locales — physiquement motivées par l'échographie</h3>
   <div class="cards">
     <div class="card"><div class="t">Speckle</div><div class="d">Bruit <strong>multiplicatif</strong>
       $a \cdot (1+\mathcal{N}(0,\sigma_s))$ — l'artefact caractéristique de l'échographie,
@@ -700,7 +747,7 @@ flowchart LR
       $255\,(a/255)^{\gamma}$, γ de 1,2 à 2,5 — préréglage constructeur.</div></div>
   </div>
 
-  <h3>6.3 Les invites — les ancres sont littéralement des phrases</h3>
+  <h3>6.4 Les invites — les ancres sont littéralement des phrases</h3>
   <table>
     <tr><th>Jeu</th><th>Classes (K)</th><th>Exemple de formulation</th></tr>
     <tr><td><code>breastmnist</code></td><td>malin / bénin (2)</td>
@@ -926,7 +973,7 @@ flowchart TB
   style SRC stroke:#4ade80
   style TGT stroke:#f87171
   </pre>
-  <div class="fig-cap">Fig. 6 — Le mur source/cible : toute décision est prise côté source, la cible ne sert qu'à mesurer.</div>
+  <div class="fig-cap">Fig. 8 — Le mur source/cible : toute décision est prise côté source, la cible ne sert qu'à mesurer.</div>
   </div>
 
   <table>
@@ -984,7 +1031,7 @@ flowchart LR
   style C fill:#1e2a4a,stroke:#818cf8,stroke-width:2px,color:#dbe2f0
   style E stroke-dasharray: 5 5
   </pre>
-  <div class="fig-cap">Fig. 7 — Trajectoire du projet, de la mécanique validée au terrain clinique.</div>
+  <div class="fig-cap">Fig. 9 — Trajectoire du projet, de la mécanique validée au terrain clinique.</div>
   </div>
 
   <h3>Hiérarchie des sources du workspace</h3>

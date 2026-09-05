@@ -1,0 +1,27 @@
+{
+  "avertissement": "Illustration pedagogique — aucune mesure. Les valeurs publiables viennent de outputs/<run_id>/metrics.json.",
+  "figure": "apercu_corruptions_pneumoniamnist.png",
+  "dataset": "pneumoniamnist",
+  "split": "test",
+  "source": "medmnistc",
+  "corruptions": [
+    "gaussian_blur",
+    "gaussian_noise",
+    "brightness_down",
+    "contrast_down"
+  ],
+  "severites": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "index_image": 236,
+  "classe": "normal",
+  "image_size": 224,
+  "seed": 0,
+  "genere_utc": "2026-09-05T13:00:12.093805+00:00",
+  "commande": "python -m tools.apercu_images --dataset pneumoniamnist --split test --source medmnistc --grid --grid-index 236 --corruption gaussian_blur gaussian_noise brightness_down contrast_down --severities 0 1 2 3 4 5"
+}

@@ -1,8 +1,11 @@
 .venv/
+.venv-cuda/
+*.egg-info/
 .tools/
 __pycache__/
 *.pyc
 data/raw/
+data/apercu/
 outputs/*/
 !outputs/.gitkeep
 *.pt

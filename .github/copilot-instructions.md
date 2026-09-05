@@ -10,6 +10,7 @@ thermodynamiques (énergie libre F vs entropie H) sur encodeurs vision-langage *
 |---|---|---|
 | `tlsc-repo/tlsc/` | Bibliothèque scientifique (noyau Gibbs, ancres CLIP, métriques) | Tout module arrive avec son test dans `tlsc-repo/tests/` |
 | `tlsc-repo/experiments/` | Scripts d'expérience versionnés (`exp01_*` à `exp05_*`) | Seule source légitime de chiffres |
+| `tlsc-repo/tools/` | Outils d'inspection et de visualisation (`apercu_images.py`) | Ne produit aucun chiffre ; sortie dans `data/apercu/`, ignorée par git |
 | `tlsc-repo/outputs/<run_id>/` | Résultats mesurés (`metrics.json`, `scores.npz`, `analysis.json`, figures) | Jamais modifiés à la main ; `outputs/aggregate/` = synthèse régénérable |
 | `tlsc-repo/docs/` | Notes internes : `JOURNAL.md`, `rapport-exp0N.md`, `STATUT.md`, `cadre-theorique.md` | Une entrée JOURNAL par lot de runs, un rapport par expérience |
 | `papers/contribution/` | Papier LaTeX (contribution) | Compiler avec `latexmk -pdf main.tex` (MiKTeX) |
@@ -39,18 +40,31 @@ Hiérarchie des sources en cas de divergence (voir `tlsc-repo/docs/STATUT.md`) :
 
 ## Environnement et commandes
 
-Python : venv dédié `tlsc-repo/.venv` (3.11, torch CPU — pas de CUDA sur cette machine).
-Piège pwsh : préférer `Set-Location tlsc-repo; .venv\Scripts\python.exe -m ...`
+Python 3.11, **deux environnements** — la machine a une NVIDIA RTX 4060 Laptop (8 Go,
+bf16) et son pilote suffit : PyTorch embarque ses bibliothèques CUDA, aucun CUDA Toolkit
+à installer.
+
+| Environnement | torch | Usage |
+|---|---|---|
+| `tlsc-repo/.venv-cuda` | 2.4.1+cu124 | **Par défaut** — isolé, tout nouveau run |
+| `tlsc-repo/.venv` | 2.4.1 (CPU) | Reproduire les runs antérieurs au 2026-09-05 |
+
+Piège : `.venv` a été créé depuis le conda `medrag` avec `--system-site-packages`, donc
+son torch vient de cet environnement partagé — ne jamais y installer torch, cela
+toucherait un autre projet. `.venv-cuda` est isolé et n'a pas ce défaut.
+Les scripts choisissent la carte automatiquement (`--device` par défaut) et ramènent tout
+sur processeur juste après l'encodage : aucun code n'est à modifier.
+Piège pwsh : préférer `Set-Location tlsc-repo; .venv-cuda\Scripts\python.exe -m ...`
 (l'opérateur `&` avec arguments provoque parfois des ParserError).
 
 ```powershell
 Set-Location tlsc-repo
-.venv\Scripts\python.exe -m pytest tests -q          # DOIT être vert avant/après toute modif
-.venv\Scripts\python.exe -m ruff check tlsc experiments tests
-.venv\Scripts\python.exe -m experiments.exp01_zero_training --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5 --batch-size 32
-.venv\Scripts\python.exe -m experiments.exp01_analysis outputs    # DeLong + bootstrap → analysis.json
-.venv\Scripts\python.exe -m experiments.exp01_aggregate outputs   # summary.{json,csv} + figures → outputs/aggregate/
-.venv\Scripts\python.exe -m experiments.exp05_anchored_early_exit --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5
+.venv-cuda\Scripts\python.exe -m pytest tests -q          # DOIT être vert avant/après toute modif
+.venv-cuda\Scripts\python.exe -m ruff check tlsc experiments tests
+.venv-cuda\Scripts\python.exe -m experiments.exp01_zero_training --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5 --batch-size 32
+.venv-cuda\Scripts\python.exe -m experiments.exp01_analysis outputs    # DeLong + bootstrap → analysis.json
+.venv-cuda\Scripts\python.exe -m experiments.exp01_aggregate outputs   # summary.{json,csv} + figures → outputs/aggregate/
+.venv-cuda\Scripts\python.exe -m experiments.exp05_anchored_early_exit --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5
 ```
 
 Expériences disponibles : `exp01_zero_training` (détection F vs H), `exp02_layer_trajectories` (profondeur N comme variable), `exp03_anchor_regimes`
@@ -59,7 +73,12 @@ Expériences disponibles : `exp01_zero_training` (détection F vs H), `exp02_lay
 d'ancrage). Les expériences par couche encodent aussi le split TRAIN source :
 compter ce surcoût — `--train-limit` le borne.
 
-Coût : ~0,2 s/image CPU (BreastMNIST n=156 ≈ 3 min/corruption ; PneumoniaMNIST n=624 ≈ 13 min).
+Coût mesuré (ViT-B-16, 224x224, lots de 32, même cohorte) : **0,225 s/image** sur
+processeur contre **0,0066 s/image** sur la carte, soit un facteur **34** ; pic mémoire
+carte 0,88 Go sur 8, donc large marge pour des lots plus gros. À titre indicatif,
+BreastMNIST n=156 passe de ~3 min à ~5 s par corruption. Les deux environnements donnent
+les mêmes plongements (cosinus > 0,999998, prédictions identiques) : l'écart résiduel est
+celui du flottant simple précision entre matériels, pas un changement de comportement.
 Encodage fichiers : toujours `encoding="utf-8"` explicite (Windows/cp1252 a déjà cassé
 des runs) ; pas de caractères non-ASCII dans les `print()` de scripts (console cp1252).
 
@@ -75,6 +94,9 @@ emplacements concernés avant de committer :
    `tlsc-repo/outputs/<run_id>/figures/` (figures exp02 à exp05). Copies à synchroniser :
    `papers/contribution/figures/` et `docs/assets/figures/`. Ne jamais éditer une copie
    seule ; toute figure du site issue d'un run doit citer son `run_id` sur la page.
+   Les **illustrations** pédagogiques (images d'exemple) vivent à part dans
+   `docs/assets/apercu/`, régénérées par `tlsc-repo/tools/apercu_images.py` avec leur
+   manifeste `.json` : elles ne sortent d'aucun run et ne se citent jamais comme mesure.
 3. **Site public** (`docs/`) :
    - `docs/results.html` : tableau des runs canoniques (AUROC, IC, p, run_id) et figures
      à jour avec `outputs/aggregate/summary.csv` ;

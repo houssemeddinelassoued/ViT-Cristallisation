@@ -5,18 +5,41 @@ vision-langage gelé, pour l'imagerie médicale sous décalage d'acquisition.
 
 ## Installation
 
+Deux environnements coexistent. `.venv-cuda` est celui à utiliser ; `.venv` n'est conservé
+que pour reproduire les runs antérieurs au 2026-09-05.
+
+| Environnement | torch | Usage |
+|---|---|---|
+| `.venv-cuda` | 2.4.1+cu124 | **Par défaut** — isolé, tout nouveau run |
+| `.venv` | 2.4.1 (CPU) | Hérite du conda `medrag` ; ne jamais y toucher à torch |
+
+Il n'y a **pas de CUDA Toolkit à installer** : le pilote NVIDIA suffit, les bibliothèques
+d'exécution CUDA sont embarquées dans les paquets PyTorch. La version de torch est
+**épinglée** à celle de `.venv` pour que le passage à la carte ne change que le matériel.
+
 ```powershell
-py -3.11 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
-python -m pip install -r requirements.txt
-python -m pip install -e .
+Set-Location tlsc-repo
+C:\Users\<vous>\.conda\envs\medrag\python.exe -m venv .venv-cuda   # 3.11, sans heritage
+.venv-cuda\Scripts\python.exe -m pip install torch==2.4.1 torchvision==0.19.1 --index-url https://download.pytorch.org/whl/cu124
+.venv-cuda\Scripts\python.exe -m pip install -r requirements.txt
+.venv-cuda\Scripts\python.exe -m pip install -e .
 ```
 
 Vérification obligatoire — ne pas continuer sans ces quatre lignes :
 
 ```bash
-python -c "import torch;print(torch.__version__);print(torch.cuda.is_available());print(torch.cuda.get_device_name(0));print('bf16:',torch.cuda.is_bf16_supported())"
+.venv-cuda/Scripts/python.exe -c "import torch;print(torch.__version__);print(torch.cuda.is_available());print(torch.cuda.get_device_name(0));print('bf16:',torch.cuda.is_bf16_supported())"
+```
+
+**Si le téléchargement de torch se fige** (2,5 Go sur connexion lente ; pip reste bloqué
+sur une socket morte, sans erreur ni progression), le récupérer d'abord avec un
+téléchargement reprenable, puis installer le fichier local :
+
+```bash
+curl -L -C - --retry 30 --speed-limit 10240 --speed-time 60 \
+  -o torch-2.4.1+cu124-cp311-cp311-win_amd64.whl \
+  "https://download.pytorch.org/whl/cu124/torch-2.4.1%2Bcu124-cp311-cp311-win_amd64.whl"
+.venv-cuda/Scripts/python.exe -m pip install torch-2.4.1+cu124-cp311-cp311-win_amd64.whl
 ```
 
 ## Tests
@@ -134,6 +157,34 @@ sévérité 5 (PneumoniaMNIST, gaussian_blur, R2). En revanche la règle par éc
 croquis fondateur est **battue** par cette couche fixe calibrée. N* est un détecteur de
 décalage réel (AUROC 1,000 sous R2 sur BreastMNIST) mais ni universel ni de signe
 constant. Détails : `docs/rapport-exp05.md`.
+
+## Voir les images — aperçu visuel des cohortes
+
+```bash
+python -m tools.apercu_images --dataset breastmnist --all-corruptions --limit 6
+python -m tools.apercu_images --dataset pneumoniamnist --corruption gaussian_blur --limit 0 --force
+```
+
+Exporte en PNG ce que l'encodeur voit : une planche de contact par corruption (lignes =
+sévérités 0–5) et les images individuelles, dans `data/apercu/<jeu>/<split>/` — dossier
+**ignoré par git**, régénérable en une commande. Les images sources sont déjà dans
+`data/raw/*.npz` : aucun téléchargement.
+
+Les pixels passent par les mêmes fonctions que le pipeline (`tlsc.data.medmnistc`), donc
+une image d'aperçu à sévérité *s* est exactement l'image encodée par CLIP à cette
+sévérité. `--limit 0` exporte tout le split (`--force` au-delà de 5 000 fichiers) ;
+`--no-png` ne garde que les planches. Le mode `--grid` produit la grille corruption x
+sévérité qui illustre la section 6 du site — ces illustrations vivent dans
+`docs/assets/apercu/`, avec leur manifeste `.json` :
+
+```bash
+python -m tools.apercu_images --dataset breastmnist --all-corruptions --grid --transparent \
+    --out ../docs/assets/apercu --grid-name apercu_corruptions_breastmnist.png
+```
+
+**Aucune mesure** n'est produite : chaque sortie dépose son manifeste (`apercu.json` pour
+les planches, un `.json` homonyme pour les grilles) et ces fichiers ne se citent jamais
+comme résultat.
 
 Le cadre et les seuils pré-enregistrés sont définis dans `docs/cadre-theorique.md`.
 `docs/STATUT.md` indique quels documents du workspace sont autoritatifs.

@@ -132,6 +132,11 @@ Toute copie qui diverge de sa source, ou toute figure publiée sans source dans
 `outputs/`, est **MAJEUR**. Signale aussi les figures du site issues d'un run
 (exp02–exp05) dont le `run_id` n'est pas cité sur la page qui les affiche.
 
+`docs/assets/apercu/` échappe à cette règle : ce sont des **illustrations**
+pédagogiques produites par `tlsc-repo/tools/apercu_images.py`, sans run d'origine.
+N'y exige pas de `run_id` ; vérifie en revanche que chaque PNG a son manifeste `.json`
+homonyme et qu'aucune légende ne présente ces images comme une mesure.
+
 ### E. Propagation documentaire (checklist de cohérence de `CLAUDE.md`)
 
 Pour le lot audité, vérifie chaque point et dis lesquels manquent :

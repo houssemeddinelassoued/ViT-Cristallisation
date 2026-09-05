@@ -1,0 +1,30 @@
+{
+  "avertissement": "Illustration pedagogique — aucune mesure. Les valeurs publiables viennent de outputs/<run_id>/metrics.json.",
+  "figure": "apercu_corruptions_breastmnist.png",
+  "dataset": "breastmnist",
+  "split": "test",
+  "source": "medmnistc",
+  "corruptions": [
+    "pixelate",
+    "jpeg_compression",
+    "speckle_noise",
+    "motion_blur",
+    "brightness_up",
+    "brightness_down",
+    "contrast_down"
+  ],
+  "severites": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "index_image": 120,
+  "classe": "malignant",
+  "image_size": 224,
+  "seed": 0,
+  "genere_utc": "2026-09-05T12:59:08.470905+00:00",
+  "commande": "python -m tools.apercu_images --dataset breastmnist --split test --source medmnistc --grid --grid-index 120 --corruption pixelate jpeg_compression speckle_noise motion_blur brightness_up brightness_down contrast_down --severities 0 1 2 3 4 5"
+}
