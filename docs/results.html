@@ -79,13 +79,13 @@ sévérités 0–5, ensemble d'invites, seed 0. Analyse appariée par DeLong + b
 <tr><td>breast</td><td>jpeg_compression</td><td>0,920</td><td>0,711</td><td>+0,208 [+0,143, +0,274]</td><td>7,7e−10</td></tr>
 <tr><td>breast</td><td>motion_blur</td><td>0,885</td><td>0,760</td><td>+0,125 [+0,060, +0,190]</td><td>1,7e−4</td></tr>
 <tr><td>breast</td><td>speckle_noise</td><td>0,814</td><td>0,734</td><td>+0,080 [+0,006, +0,154]</td><td>0,032</td></tr>
-<tr><td>pneumonia</td><td>gaussian_blur</td><td>0,970</td><td>0,798</td><td>+0,172 [+0,148, +0,198]</td><td>3,9e−41</td></tr>
+<tr><td>pneumonia</td><td>gaussian_blur</td><td>0,970</td><td>0,798</td><td>+0,172 [+0,148, +0,198]</td><td>4,1e−41</td></tr>
 <tr><td>breast</td><td>brightness_up</td><td>0,594</td><td>0,677</td><td>−0,083 [−0,176, +0,012]</td><td>0,083</td></tr>
 <tr><td>breast</td><td>brightness_down</td><td>0,359</td><td>0,563</td><td>−0,204 [−0,297, −0,112]</td><td>1,3e−5</td></tr>
 <tr><td>breast</td><td>contrast_down</td><td>0,299</td><td>0,498</td><td>−0,199 [−0,287, −0,112]</td><td>7,4e−6</td></tr>
 <tr><td>pneumonia</td><td>gaussian_noise</td><td>0,127</td><td>0,462</td><td>−0,335 [−0,368, −0,300]</td><td>1,7e−86</td></tr>
-<tr><td>pneumonia</td><td>brightness_down</td><td>0,200</td><td>0,644</td><td>−0,444 [−0,481, −0,405]</td><td>1,6e−117</td></tr>
-<tr><td>pneumonia</td><td>contrast_down</td><td>0,209</td><td>0,698</td><td>−0,489 [−0,526, −0,452]</td><td>2,9e−148</td></tr>
+<tr><td>pneumonia</td><td>brightness_down</td><td>0,200</td><td>0,644</td><td>−0,445 [−0,482, −0,406]</td><td>8,0e−118</td></tr>
+<tr><td>pneumonia</td><td>contrast_down</td><td>0,209</td><td>0,698</td><td>−0,490 [−0,526, −0,452]</td><td>1,7e−148</td></tr>
 </table>
 
 <div class="callout danger">
@@ -166,34 +166,34 @@ R2 = centroïdes few-shot (k = 16 par classe), R3 = centroïdes sur le train com
 Expérience <strong>exploratoire déclarée</strong>. BreastMNIST, sévérités 0–5, seed 0.</p>
 <table>
 <tr><th>Régime</th><th>D<sub>inter</sub></th><th>Bal. acc. (sév. 0)</th><th>AUROC(F) sév. 5<br>speckle</th><th>AUROC(F) sév. 5<br>brightness_down</th></tr>
-<tr><td>R1 — invites textuelles</td><td>0,1032</td><td>0,517</td><td>0,814</td><td>0,359</td></tr>
+<tr><td>R1 — invites textuelles</td><td>0,1032</td><td>0,517</td><td>0,815</td><td>0,360</td></tr>
 <tr><td>R2 — few-shot (k=16)</td><td>0,0208</td><td>0,597</td><td>0,977</td><td>0,845</td></tr>
-<tr><td>R3 — centroïdes complets</td><td>0,0073</td><td>0,692</td><td>0,977</td><td>0,844</td></tr>
+<tr><td>R3 — centroïdes complets</td><td>0,0073</td><td>0,687</td><td>0,977</td><td>0,843</td></tr>
 </table>
-<p style="font-size:.85rem;color:var(--muted)">Runs : 20260901T173740Z_breastmnist_fe6d6b35 (speckle_noise),
-20260901T174749Z_breastmnist_bccf7433 (brightness_down).</p>
+<p style="font-size:.85rem;color:var(--muted)">Runs : 20260905T164120Z_breastmnist_fe6d6b35 (speckle_noise),
+20260905T163735Z_breastmnist_bccf7433 (brightness_down).</p>
 <p>Trois lectures :</p>
 <ul>
   <li><strong>L'inversion photométrique était une propriété des ancres textuelles, pas de F</strong> :
-  avec des centroïdes de données, brightness_down passe de 0,359 (sous le hasard) à 0,844–0,845 —
+  avec des centroïdes de données, brightness_down passe de 0,360 (sous le hasard) à 0,843–0,845 —
   dès k = 16 exemples par classe.</li>
-  <li><strong>La faiblesse zero-shot venait des ancres</strong> : balanced accuracy 0,517 → 0,692
+  <li><strong>La faiblesse zero-shot venait des ancres</strong> : balanced accuracy 0,517 → 0,687
   (R3) sur données propres. Mais D<sub>inter</sub> diminue de R1 à R3 (0,103 → 0,007) alors que la
   classification s'améliore : la distance brute entre ancres n'est pas, seule, le bon indicateur de
   qualité — c'est la position des ancres <em>dans le nuage des images</em> qui compte.</li>
-  <li><strong>H devient un mauvais détecteur sous R2/R3</strong> (AUROC 0,25–0,54) : avec des ancres
+  <li><strong>H devient un mauvais détecteur sous R2/R3</strong> (AUROC 0,25–0,56) : avec des ancres
   proches du nuage, la corruption déplace les images sans augmenter l'hésitation — la dominance
   de F comme détecteur s'accentue.</li>
 </ul>
 <figure>
   <img src="assets/figures/fig_exp03_regimes_speckle.png" alt="Régimes d'ancrage — speckle_noise">
   <figcaption>speckle_noise — détection AUROC(F), AUROC(H) et exactitude équilibrée par sévérité, trois régimes.
-  Run 20260901T173740Z_breastmnist_fe6d6b35.</figcaption>
+  Run 20260905T164120Z_breastmnist_fe6d6b35.</figcaption>
 </figure>
 <figure>
   <img src="assets/figures/fig_exp03_regimes_brightness_down.png" alt="Régimes d'ancrage — brightness_down">
   <figcaption>brightness_down — l'inversion de F sous R1 (courbe sous 0,5) disparaît sous R2/R3.
-  Run 20260901T174749Z_breastmnist_bccf7433.</figcaption>
+  Run 20260905T163735Z_breastmnist_bccf7433.</figcaption>
 </figure>
 
 <h2>Expérience 4 — arrêt anticipé calibré (« sortir quand H &lt; ε »)</h2>

@@ -44,7 +44,7 @@ d'invites sauf mention. Détail chiffré : `docs/rapport-exp01.md` §7 et
 | 7 corruptions breastmnist | de6dba0c, 2308a744, 41fa7739, c1697982, 4ae2e534, 98d42003, 3e02269f | prédiction pré-enregistrée corruption par corruption | F ≫ H sur structurel (pixelate 1,000 ; jpeg 0,920) ; **F sous le hasard sur photométrique** (brightness_down 0,359 ; contrast_down 0,299) |
 | Sensibilité invites | 1230876b, 417916a6, 6fdae919, 6353723a, 7ee23e9b, fb676849 | chaque gabarit isolé, speckle + brightness_down | dispersion AUROC(F) ≈ 0,03–0,05 < dispersion AUROC(H) ≈ 0,06–0,08 ; l'inversion de signe persiste sous chaque gabarit |
 | Graines 1–2, speckle | 0f58bbbd, f7608199 | bruit d'échantillonnage des corruptions | AUROC(F) sév. 5 : 0,814/0,819/0,827 — négligeable |
-| PneumoniaMNIST ×4 | a0dfe1a7, 2bc1d5f9, 2de86cbd, 2764835a | réplication seconde modalité (n = 624) | dichotomie répliquée : gaussian_blur F = 0,970 ≫ H ; photométrique inversé (F = 0,127–0,209, p ≤ 1e−86) |
+| PneumoniaMNIST ×4 | a0dfe1a7, puis 2bc1d5f9, 2de86cbd, 2764835a rejoués le 2026-09-05 | réplication seconde modalité (n = 624) | dichotomie répliquée : gaussian_blur F = 0,970 ≫ H ; photométrique inversé (F = 0,127–0,209, p ≤ 1e−86) |
 
 - **Verdict pré-enregistré : réfuté sur les 11 configurations canoniques**
   (C2 échoue partout ; `prediction_confirmee: false`). Consigné tel quel.
@@ -67,8 +67,8 @@ d'invites sauf mention. Détail chiffré : `docs/rapport-exp01.md` §7 et
   (`auroc_FH_bivariate` dans summary.json/csv, 3e barre sur `fig_two_sided.png`).
 - AUROC à sévérité 5 sur les 11 configurations canoniques, bivarié vs bilatéral :
   meilleur sur 5 (speckle 0,774 vs 0,742 ; pneumonia gaussian_noise 0,837 vs
-  0,803 ; pneumonia contrast_down 0,645 vs 0,584 ; pneumonia brightness_down
-  0,617 vs 0,593), équivalent sur 3 (pixelate, jpeg, motion_blur), moins bon
+  0,803 ; pneumonia contrast_down 0,646 vs 0,589 ; pneumonia brightness_down
+  0,618 vs 0,598), équivalent sur 3 (pixelate, jpeg, motion_blur), moins bon
   sur 3 (breast contrast_down 0,580 vs 0,630 ; breast brightness_down 0,578 vs
   0,606 ; gaussian_blur 0,943 vs 0,962).
 - **brightness_up reste le cas d'échec** (0,473, sous le hasard même en bivarié) :
@@ -115,20 +115,23 @@ pré-enregistré ; attente qualitative a priori « H_n décroît avec n sur la s
 Chantier d'alignement 2 : ancres = centroïdes de classe calculés depuis les
 données source (`tlsc/models/data_anchors.py`, 5 tests) + D_inter. Anti-fuite :
 centroïdes sur le split train SOURCE à sévérité 0 uniquement. **Exploratoire
-déclaré.** Runs (git 00f9f37 propre) : fe6d6b35 (speckle_noise), bccf7433
-(brightness_down).
+déclaré.** Runs rejoués le 2026-09-05 sur arbre propre et sur carte
+(git 3e51dc3) : `20260905T164120Z_…_fe6d6b35` (speckle_noise),
+`20260905T163735Z_…_bccf7433` (brightness_down). Les exécutions du 2026-09-01
+étaient annoncées ici « git 00f9f37 propre » ; c'était faux pour bccf7433, qui
+portait `git_dirty: true` — corrigé et rejoué (voir 2026-09-05, assainissement).
 
 | Régime | D_inter | Bal.acc (sév.0) | speckle F sév.5 | bright_down F sév.5 |
 |---|---|---|---|---|
-| R1 texte | 0,1032 | 0,517 | 0,814 | 0,359 |
+| R1 texte | 0,1032 | 0,517 | 0,815 | 0,360 |
 | R2 few-shot k=16 | 0,0208 | 0,597 | 0,977 | 0,845 |
-| R3 centroïdes | 0,0073 | 0,692 | 0,977 | 0,844 |
+| R3 centroïdes | 0,0073 | 0,687 | 0,977 | 0,843 |
 
 - **Observé** : l'inversion photométrique de F était une propriété des ancres
-  *textuelles* — elle disparaît dès k = 16 (0,359 → 0,845). La faiblesse
-  zero-shot venait des ancres (bal.acc 0,517 → 0,692 sous R3). D_inter seule
+  *textuelles* — elle disparaît dès k = 16 (0,360 → 0,845). La faiblesse
+  zero-shot venait des ancres (bal.acc 0,517 → 0,687 sous R3). D_inter seule
   est trompeuse : maximale pour les ancres les moins utiles (gap de modalité).
-  H se dégrade en détecteur sous R2/R3 (0,25–0,54) — la dominance de F
+  H se dégrade en détecteur sous R2/R3 (0,25–0,56) — la dominance de F
   s'accentue.
 - Décision : R2 (32 étiquettes source) = meilleur compromis observé ; croiser
   ensuite meilleure couche (exp02) × ancres R2 ; formaliser un critère de
@@ -206,3 +209,42 @@ brightness_down).
   matrice d'ablation ; refaire le croisement à plusieurs graines avec traitement
   statistique apparié avant toute revendication. Priorité inchangée : cohorte P1.
 - Détail : `docs/rapport-exp05.md`.
+
+## 2026-09-05 · assainissement — sept runs rejoués sur arbre propre, filtre de citabilité
+
+Audit complet du dépôt selon la grille de `.claude/agents/superviseur-tlsc.md`.
+Constat bloquant : sur 45 runs, 14 n'étaient pas citables, et plusieurs l'étaient
+pourtant — dont un sur le **site public**. Corrigé.
+
+- **Cause racine, dans l'outil.** `exp01_aggregate` ne contrôlait que la complétude
+  et le caractère réel d'un run, jamais la propreté de l'arbre : les runs `git_dirty`
+  entraient donc dans `summary.csv`. Ajout de `raison_rejet()` appliquant la règle
+  complète, affichage nommé de tout run écarté, 8 tests dédiés
+  (`tests/test_exp01_aggregate.py`). Correction d'un constat d'audit erroné de ma
+  part : ces runs n'atteignaient pas le rang **canonique**, qui exige six sévérités.
+- **Runs rejoués** (git 3e51dc3, arbre propre, carte RTX 4060) :
+  `20260905T163407Z_…_2bc1d5f9`, `20260905T163525Z_…_2de86cbd`,
+  `20260905T163629Z_…_2764835a` (exp01 PneumoniaMNIST, cités sans réserve dans le
+  rapport) ; `20260905T163735Z_…_bccf7433` et `20260905T164120Z_…_fe6d6b35`
+  (exp03, le journal les déclarait à tort « git 00f9f37 propre » alors que le second
+  portait `git_dirty: true`) ; `20260905T164506Z_…_0253fd15` et
+  `20260905T164541Z_…_9bd74780` (exp01, levant la réserve notée au rapport exp01 §6.5).
+  Le run exp03 speckle était propre mais a dû suivre : les deux runs exp03 partagent
+  une colonne d'exactitude à sévérité 0, laisser l'un sur processeur et l'autre sur
+  carte l'aurait rendue fausse pour l'un des deux.
+- **Écarts mesurés** entre processeur et carte : AUROC à 3,3e−4 près sur exp01. Sur
+  exp03, l'exactitude équilibrée R3 à sévérité 0 passe de 0,692 à 0,687 — une seule
+  prédiction basculée sur 156, près de la frontière de décision. Valeurs publiées
+  ajustées d'une unité sur la troisième décimale : exp03 R1 speckle 0,814→0,815,
+  R1 brightness 0,359→0,360, R3 brightness F 0,844→0,843 et H 0,539→0,540 ;
+  exp01 pneumonia ΔAUROC −0,444→−0,445 et −0,489→−0,490, bilatéral 0,593→0,598 et
+  0,584→0,589. Plage AUROC(H) sous R2/R3 corrigée de 0,25–0,54 à 0,25–0,56, qui
+  était déjà imprécise avant le rejeu.
+- **Propagation** : `docs/results.html`, `rapport-exp01.md`, `rapport-exp03.md`,
+  `README.md`, ce journal, et `papers/contribution/main.tex` recompilé (zéro
+  référence indéfinie ; le PDF ne contient plus aucune valeur périmée). Les trois
+  figures de `outputs/aggregate/` sont resynchronisées vers le site et le papier —
+  `fig_two_sided.png` du papier divergeait de sa source depuis le 2026-09-01.
+- Restent non citables et **non cités** : deux runs interrompus sans `metrics.json`,
+  un run fumigène, et quelques runs sales de mise au point antérieurs au 2026-09-01.
+- Décision : consolidation multi-graines de l'exp05, puis porte de décision P1.

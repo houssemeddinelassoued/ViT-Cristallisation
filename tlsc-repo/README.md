@@ -107,10 +107,10 @@ train source complet) : D_inter, classification et détection F/H par sévérit�
 (`tlsc/models/data_anchors.py`). Anti-fuite : centroïdes calculés sur le split train
 SOURCE à sévérité 0 uniquement. Exploratoire déclarée.
 
-**État (2026-09-01)** : l'inversion photométrique de F était une propriété des ancres
-textuelles — elle disparaît dès k = 16 (brightness_down : AUROC(F) 0,359 → 0,845) ;
-la balanced accuracy source passe de 0,517 (R1) à 0,692 (R3). Détails :
-`docs/rapport-exp03.md`.
+**État (runs rejoués le 2026-09-05)** : l'inversion photométrique de F était une
+propriété des ancres textuelles — elle disparaît dès k = 16 (brightness_down :
+AUROC(F) 0,360 → 0,845) ; la balanced accuracy source passe de 0,517 (R1) à 0,687 (R3).
+Détails : `docs/rapport-exp03.md`.
 
 ## Expérience 4 — arrêt anticipé calibré (« sortir quand H < ε »)
 

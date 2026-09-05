@@ -35,8 +35,8 @@ La prédiction est confirmée seulement si les trois tiennent.
 | 20260901T000843Z_…_4aecb603 | — | — | interrompu, pas de metrics.json | ❌ |
 | 20260901T001121Z_…_7d2ca324 | speckle_noise | 2 | complet, git 101ab28 propre | ✅ |
 | 20260901T001336Z_…_0a27403c | speckle_noise | 3 | complet, git 101ab28 propre | ✅ |
-| 20260901T001636Z_…_5458df41 | speckle_noise | 4 | complet, git 101ab28 (dirty) | ✅ (réserve) |
-| 20260901T002007Z_…_4a406385 | motion_blur | 0 | complet, git 101ab28 (dirty) | ✅ (réserve) |
+| 20260905T164506Z_…_0253fd15 | speckle_noise | 4 | complet, git 3e51dc3 propre, carte | ✅ |
+| 20260905T164541Z_…_9bd74780 | motion_blur | 0 | complet, git 3e51dc3 propre, carte | ✅ |
 | 20260901T002347Z_…_1f087957 | — | — | interrompu, pas de metrics.json | ❌ |
 | 20260901T002352Z_…_38532b74 | brightness | 0 | échec (nom de corruption invalide) | ❌ |
 
@@ -151,14 +151,19 @@ Deux observations importantes :
 3. Pré-enregistrer une exp01b : BiomedCLIP (ancres alignées au domaine médical),
    sévérités complètes 0–5, mêmes seuils.
 4. Documenter le régime faible-sévérité (F < 0,5) comme résultat à part entière.
-5. Exécuter les runs sur un dépôt git propre pour lever la réserve `git_dirty`
-   des runs 5458df41 et 4a406385.
+5. ~~Exécuter les runs sur un dépôt git propre pour lever la réserve `git_dirty`
+   des runs 5458df41 et 4a406385.~~ **Fait le 2026-09-05** : rejoués sur arbre
+   propre et sur carte (`0253fd15`, `9bd74780`). Seule la taille de lot diffère
+   (64 au lieu de 8), ce qui ne change pas le calcul et explique le nouveau
+   condensé de configuration ; les AUROC concordent à 0,001 près.
 
 ---
 
-*Runs sources : c2a0cdaf, 7d2ca324, 0a27403c, 5458df41 (speckle_noise, seeds 0/2/3/4),
-4a406385 (motion_blur, seed 0). Environnement : Python 3.11.14, torch 2.4.1+cpu,
-Windows, CPU. Commit 101ab28.*
+*Runs sources : c2a0cdaf, 7d2ca324, 0a27403c (speckle_noise, seeds 0/2/3),
+0253fd15 (speckle_noise, seed 4) et 9bd74780 (motion_blur, seed 0), ces deux derniers
+rejoués le 2026-09-05. Environnement des trois premiers : Python 3.11.14, torch
+2.4.1+cpu, Windows, processeur, commit 101ab28 ; des deux derniers : torch 2.4.1+cu124,
+RTX 4060, commit 3e51dc3.*
 
 ---
 
@@ -178,13 +183,13 @@ agrégation par `experiments/exp01_aggregate.py` (`outputs/aggregate/`).
 | breast | jpeg_compression | 0,920 | 0,711 | +0,208 [+0,143, +0,274] | 7,7e−10 | 0,899 | 98d42003 |
 | breast | motion_blur | 0,885 | 0,760 | +0,125 [+0,060, +0,190] | 1,7e−4 | 0,845 | 2308a744 |
 | breast | speckle_noise | 0,814 | 0,734 | +0,080 [+0,006, +0,154] | 0,032 | 0,742 | de6dba0c |
-| pneumonia | gaussian_blur | 0,970 | 0,798 | +0,172 [+0,148, +0,198] | 3,9e−41 | 0,962 | 2bc1d5f9 |
+| pneumonia | gaussian_blur | 0,970 | 0,798 | +0,172 [+0,148, +0,198] | 4,1e−41 | 0,962 | 2bc1d5f9 |
 | breast | brightness_up | 0,594 | 0,677 | −0,083 [−0,176, +0,012] | 0,083 | 0,447 | 41fa7739 |
 | breast | brightness_down | 0,359 | 0,563 | −0,204 [−0,297, −0,112] | 1,3e−5 | 0,606 | c1697982 |
 | breast | contrast_down | 0,299 | 0,498 | −0,199 [−0,287, −0,112] | 7,4e−6 | 0,630 | 4ae2e534 |
 | pneumonia | gaussian_noise | 0,127 | 0,462 | −0,335 [−0,368, −0,300] | 1,7e−86 | 0,803 | a0dfe1a7 |
-| pneumonia | brightness_down | 0,200 | 0,644 | −0,444 [−0,481, −0,405] | 1,6e−117 | 0,593 | 2de86cbd |
-| pneumonia | contrast_down | 0,209 | 0,698 | −0,489 [−0,526, −0,452] | 2,9e−148 | 0,584 | 2764835a |
+| pneumonia | brightness_down | 0,200 | 0,644 | −0,445 [−0,482, −0,406] | 8,0e−118 | 0,598 | 2de86cbd |
+| pneumonia | contrast_down | 0,209 | 0,698 | −0,490 [−0,526, −0,452] | 1,7e−148 | 0,589 | 2764835a |
 
 ### 7.2 Lecture
 
