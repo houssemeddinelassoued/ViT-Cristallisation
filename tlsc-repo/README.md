@@ -105,5 +105,35 @@ ancres R2/R3. Résultat exploitable : la profondeur de sortie N* croît avec la
 sévérité (1,00 → 2,79 sur brightness_down) — signal de dérive gratuit. Détails :
 `docs/rapport-exp04.md`.
 
+## Expérience 5 — ancres × arrêt calibré (test non trivial de « argmin_N H »)
+
+```bash
+python -m experiments.exp05_anchored_early_exit --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5 --k-shot 16
+```
+
+Croisement des expériences 3 et 4 : l'arrêt calibré est rejoué sous les trois régimes
+d'ancrage, avec des centroïdes R2/R3 **recalculés couche par couche** sur le split train
+source. L'exp04 avait trouvé la règle dégénérée (N* = 1) sous ancres textuelles quasi
+aveugles ; le test n'est non trivial que là où l'exactitude varie réellement avec la
+profondeur. Trois mesures : profondeur utile par régime, AUROC de la profondeur de
+sortie N* comme détecteur de décalage (`exit_depth_auroc`), et critère de qualité
+d'ancrage (`anchor_quality` : `Q_gap` = D_inter / distance ancres-nuage, `Q_fisher` =
+D_inter / dispersion intra-classe). Exploratoire déclarée.
+
+Anti-fuite en trois barrières : centroïdes sur le train source à sévérité 0 ; seuils ε
+et couche fixe sur la moitié calibration du test source ; évaluations sur l'autre
+moitié seulement. `--train-limit` borne le coût d'encodage du split train.
+
+**État (2026-09-05)** : la dégénérescence N* = 1 de l'exp04 est levée, et elle avait deux
+causes — des ancres textuelles au hasard (exactitude équilibrée 0,500 à onze couches sur
+douze) *et* un critère de calibration brut que le prédicteur majoritaire maximise. Sous
+ancres de données, l'optimum est intérieur : couches 2–3 sur BreastMNIST, 6–9 sur
+PneumoniaMNIST. Résultat principal, non visé : les dernières couches dégradent le
+diagnostic sous décalage — couche fixe 9 à 0,780 contre 0,539 en pleine profondeur à
+sévérité 5 (PneumoniaMNIST, gaussian_blur, R2). En revanche la règle par échantillon du
+croquis fondateur est **battue** par cette couche fixe calibrée. N* est un détecteur de
+décalage réel (AUROC 1,000 sous R2 sur BreastMNIST) mais ni universel ni de signe
+constant. Détails : `docs/rapport-exp05.md`.
+
 Le cadre et les seuils pré-enregistrés sont définis dans `docs/cadre-theorique.md`.
 `docs/STATUT.md` indique quels documents du workspace sont autoritatifs.

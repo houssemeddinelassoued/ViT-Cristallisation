@@ -13,7 +13,7 @@ vision-langage gelés (CLIP), appliquée à l'imagerie médicale.
 | [`docs/`](docs/) | Site public GitHub Pages : accueil, page de résultats, travaux de recherche (copie unique), figures. Ne pas confondre avec `tlsc-repo/docs/` (notes internes : journal de bord, cadre théorique, statut des sources). |
 | [`papers/`](papers/) | Documents LaTeX : [`papers/contribution/`](papers/contribution/) (papier de l'expérience 1) et [`papers/review/`](papers/review/) (revue de littérature complémentaire), indépendants l'un de l'autre. |
 | [`archive/`](archive/) | Documents de cadrage historiques (feuilles de route, plans, guides, notes aux encadrants). Conservés pour trace ; en cas de divergence, `02protocoleexperimentalv3.md` et `tlsc-repo/docs/` prévalent — voir [`tlsc-repo/docs/STATUT.md`](tlsc-repo/docs/STATUT.md). |
-| Racine | `README.md` (ce fichier) et [`02protocoleexperimentalv3.md`](02protocoleexperimentalv3.md), le protocole expérimental autoritatif (référencé par `tlsc-repo/docs/`). |
+| Racine | `README.md` (ce fichier), [`02protocoleexperimentalv3.md`](02protocoleexperimentalv3.md), le protocole expérimental autoritatif (référencé par `tlsc-repo/docs/`), et [`CLAUDE.md`](CLAUDE.md), consignes de travail pour les assistants — fichier jumeau de [`.github/copilot-instructions.md`](.github/copilot-instructions.md), à tenir synchronisé avec lui. |
 
 ## Règle de citation des résultats
 

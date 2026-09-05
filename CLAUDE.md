@@ -1,8 +1,15 @@
-# Instructions Copilot — ViT-Cristallisation
+# Instructions Claude Code — ViT-Cristallisation
 
 Projet de recherche (thèse) : détection de décalage d'acquisition par observables
 thermodynamiques (énergie libre F vs entropie H) sur encodeurs vision-langage **gelés**
 (CLIP), imagerie médicale. Langue de travail : **français** (code commenté, docs, commits).
+
+> **Fichier jumeau.** Ce document est la version Claude Code de
+> `.github/copilot-instructions.md` : même contenu, deux assistants. Toute règle
+> ajoutee ici doit etre reportee dans le fichier Copilot, et reciproquement.
+> Les regles de code du sous-depot restent dans `tlsc-repo/CLAUDE.md`
+> (notation figee, pieges connus) ; ce fichier-ci porte l'architecture du depot,
+> la checklist de coherence et les commandes.
 
 ## Architecture du dépôt — où va chaque chose
 
