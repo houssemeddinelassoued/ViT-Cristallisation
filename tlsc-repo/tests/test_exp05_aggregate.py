@@ -32,18 +32,25 @@ def _bloc(oracle: int, bal: list[float], fixe: int, auroc_f: float) -> dict:
 
 def _run(tmp_path, nom: str, *, seed: int = 0, dirty: bool = False,
          critere: str = "balanced_accuracy", oracle: int = 9, auroc_f: float = 1.0,
-         experiment: str = "exp05_anchored_early_exit", metrics: bool = True):
+         experiment: str = "exp05_anchored_early_exit", metrics: bool = True,
+         bilateral: bool = True):
     d = tmp_path / nom
     d.mkdir()
     if metrics:
         bal = [0.7, 0.75, 0.8, 0.84, 0.71]
+        regimes = {r: _bloc(oracle, bal, 9, auroc_f) for r in REGIMES}
+        if not bilateral:
+            for r in regimes.values():
+                for s in r["depth_detection"].values():
+                    for obs in ("F", "H"):
+                        s[obs].pop("auroc_two_sided", None)
         (d / "metrics.json").write_text(json.dumps({
             "run_id": nom,
             "config": {"experiment": experiment, "dataset": "pneumoniamnist",
                        "corruption": "gaussian_blur", "seed": seed},
             "environment": {"git_dirty": dirty},
             "critere_calibration": critere,
-            "regimes": {r: _bloc(oracle, bal, 9, auroc_f) for r in REGIMES},
+            "regimes": regimes,
         }), encoding="utf-8")
     return d
 
@@ -111,3 +118,17 @@ def test_ecart_type_nul_sur_une_seule_graine(tmp_path) -> None:
     e = agrege(retenus)[0]
     assert e["couche_oracle"]["ecart_type"] == 0.0
     assert e["couche_oracle"]["n_graines"] == 1
+
+
+def test_run_sans_detecteur_bilateral_ecarte(tmp_path) -> None:
+    """Les runs anterieurs a l'ajout du bilateral sur N* sont remplaces, pas ignores."""
+    d = _run(tmp_path, "ancien", bilateral=False)
+    assert raison_rejet(d) == "sans_bilateral"
+
+
+def test_collecte_nomme_le_motif_sans_bilateral(tmp_path) -> None:
+    _run(tmp_path, "neuf", seed=0)
+    _run(tmp_path, "ancien", seed=0, bilateral=False)
+    retenus, ecartes = collecte(tmp_path)
+    assert len(retenus) == 1
+    assert ecartes["sans_bilateral"] == ["ancien"]

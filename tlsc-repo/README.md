@@ -122,11 +122,12 @@ Règle d'arrêt par échantillon du croquis fondateur (`tlsc/eval/early_exit.py`
 seuils H/F et couche fixe calibrés sur une moitié stratifiée du split test source,
 évaluation sur l'autre moitié, sévérités 0–5. Exploratoire déclarée.
 
-**État (2026-09-01)** : sortie en couche ≈ 1 à exactitude préservée (≈ 92 % de calcul
-économisé) — mais trivialement, les ancres R1 étant quasi aveugles ; à refaire sous
-ancres R2/R3. Résultat exploitable : la profondeur de sortie N* croît avec la
-sévérité (1,00 → 2,79 sur brightness_down) — signal de dérive gratuit. Détails :
-`docs/rapport-exp04.md`.
+**État (2026-09-01, invalidé le 2026-09-05)** : cette expérience calibre sur
+l'exactitude *brute*. L'exp05 a montré que celle-ci vaut 0,731 à toutes les couches sous
+ancres R1, soit la proportion de la classe majoritaire : l'« exactitude préservée » et
+les ≈ 92 % de calcul économisé ne mesurent donc rien de diagnostique. Les conclusions
+d'efficience sont reprises sur critère **équilibré** dans l'exp05. Détails et
+avertissement : `docs/rapport-exp04.md`.
 
 ## Expérience 5 — ancres × arrêt calibré (test non trivial de « argmin_N H »)
 
@@ -147,16 +148,16 @@ Anti-fuite en trois barrières : centroïdes sur le train source à sévérité 
 et couche fixe sur la moitié calibration du test source ; évaluations sur l'autre
 moitié seulement. `--train-limit` borne le coût d'encodage du split train.
 
-**État (2026-09-05)** : la dégénérescence N* = 1 de l'exp04 est levée, et elle avait deux
-causes — des ancres textuelles au hasard (exactitude équilibrée 0,500 à onze couches sur
-douze) *et* un critère de calibration brut que le prédicteur majoritaire maximise. Sous
-ancres de données, l'optimum est intérieur : couches 2–3 sur BreastMNIST, 6–9 sur
-PneumoniaMNIST. Résultat principal, non visé : les dernières couches dégradent le
-diagnostic sous décalage — couche fixe 9 à 0,780 contre 0,539 en pleine profondeur à
-sévérité 5 (PneumoniaMNIST, gaussian_blur, R2). En revanche la règle par échantillon du
-croquis fondateur est **battue** par cette couche fixe calibrée. N* est un détecteur de
-décalage réel (AUROC 1,000 sous R2 sur BreastMNIST) mais ni universel ni de signe
-constant. Détails : `docs/rapport-exp05.md`.
+**État (consolidé sur 5 graines le 2026-09-05)** : la dégénérescence N* = 1 de l'exp04
+est levée, et elle avait deux causes — des ancres textuelles au hasard (exactitude
+équilibrée 0,500 à toute couche) *et* un critère de calibration brut que le prédicteur
+majoritaire maximise. Ce qui **survit à cinq graines** : une couche intermédiaire bat la
+couche de sortie sous ancres de données, dans les quatre configurations (+0,045 à +0,134) ;
+la règle par échantillon est battue par une profondeur fixe calibrée. Ce qui **ne survit
+pas** : la localisation de la couche optimale (±3 couches), et le gain sous décalage, dont
+le signe dépend du type de corruption — positif sur le flou (+0,151 ± 0,111), négatif sur
+les corruptions photométriques (−0,038 ± 0,042). Agrégation multi-graines :
+`python -m experiments.exp05_aggregate outputs`. Détails : `docs/rapport-exp05.md`.
 
 ## Voir les images — aperçu visuel des cohortes
 

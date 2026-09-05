@@ -197,6 +197,17 @@ Expérience <strong>exploratoire déclarée</strong>. BreastMNIST, sévérités 
 </figure>
 
 <h2>Expérience 4 — arrêt anticipé calibré (« sortir quand H &lt; ε »)</h2>
+<p style="border-left:3px solid #B04A22;padding-left:.9rem;font-size:.92rem">
+<strong>Avertissement ajouté le 2026-09-05 — l'économie annoncée ci-dessous n'est pas
+interprétable telle quelle.</strong> Cette expérience calibre sur l'exactitude
+<em>brute</em>. Or l'expérience 5 a établi que cette exactitude vaut 0,731 à chacune des
+douze couches sous ancres textuelles, soit exactement la proportion de la classe
+majoritaire de BreastMNIST : le critère est maximisé par le prédicteur dégénéré qui
+répond toujours la même classe, et l'« exactitude préservée » est la préservation de ce
+taux, non d'un pouvoir diagnostique. Mesurée en exactitude <strong>équilibrée</strong>,
+la performance de ces ancres est de 0,500, c'est-à-dire le hasard. Les chiffres
+d'efficience de cette section sont donc conservés comme trace du chantier, non comme
+résultat exploitable : voir l'expérience 5 ci-dessous.</p>
 <p>Règle d'arrêt par échantillon : sortie à la première couche où l'observable (H ou F) passe
 sous un seuil ε. Seuils et couche fixe de référence calibrés sur une moitié stratifiée du split
 test source (77 images) ; évaluation sur l'autre moitié (79). Ancres textuelles R1.
@@ -230,7 +241,9 @@ Runs : 20260901T182032Z_breastmnist_a8b68f84 (speckle), 20260901T182436Z_breastm
 avec des centroïdes R2/R3 <strong>recalculés couche par couche</strong> sur le split train source.
 L'expérience 4 avait trouvé la règle dégénérée (sortie en couche 1) ; le test n'est non trivial que
 là où l'exactitude varie réellement avec la profondeur. Expérience <strong>exploratoire déclarée</strong>.
-BreastMNIST et PneumoniaMNIST, sévérités 0–5, seed 0.</p>
+BreastMNIST et PneumoniaMNIST, sévérités 0–5, <strong>20 runs = 5 graines × 4 configurations</strong>,
+tous propres (commit a9b5f12). Toutes les valeurs ci-dessous sont des moyennes ± écart-type sur
+les cinq graines.</p>
 <p style="border-left:3px solid var(--muted);padding-left:.9rem;font-size:.92rem">
 <strong>Changement de critère, à lire avant toute comparaison avec l'expérience 4.</strong>
 L'expérience 4 calibrait sur l'exactitude <em>brute</em>. Le premier run de l'expérience 5 a montré
@@ -241,100 +254,109 @@ dégénéré qui répond toujours la même classe. L'expérience 5 calibre sur l
 
 <h3 style="font-size:1rem;margin-top:1.4rem">Où se trouve la profondeur utile</h3>
 <table>
-<tr><th>Cohorte</th><th>Régime</th><th>Couche oracle</th><th>Équilibrée à l'oracle</th><th>Équilibrée couche 12</th></tr>
-<tr><td>BreastMNIST</td><td>R1 — invites textuelles</td><td>12</td><td>0,521</td><td>0,521</td></tr>
-<tr><td>BreastMNIST</td><td>R2 — few-shot (k=16)</td><td>2</td><td>0,719</td><td>0,604</td></tr>
-<tr><td>BreastMNIST</td><td>R3 — centroïdes complets</td><td>3</td><td>0,684</td><td>0,640</td></tr>
-<tr><td>PneumoniaMNIST</td><td>R1 — invites textuelles</td><td>1</td><td>0,500</td><td>0,492</td></tr>
-<tr><td>PneumoniaMNIST</td><td>R2 — few-shot (k=16)</td><td>9</td><td>0,841</td><td>0,705</td></tr>
-<tr><td>PneumoniaMNIST</td><td>R3 — centroïdes complets</td><td>6</td><td>0,825</td><td>0,740</td></tr>
+<tr><th>Cohorte</th><th>Régime</th><th>Couche oracle</th><th>Équilibrée à l'oracle</th><th>Équilibrée couche 12</th><th>Écart</th></tr>
+<tr><td>BreastMNIST</td><td>R1 — invites textuelles</td><td>7,6 ± 6,0</td><td>0,509 ± 0,009</td><td>—</td><td>—</td></tr>
+<tr><td>BreastMNIST</td><td>R2 — few-shot (k=16)</td><td>5,2 ± 3,1</td><td>0,748 ± 0,061</td><td>0,614 ± 0,065</td><td>+0,134</td></tr>
+<tr><td>BreastMNIST</td><td>R3 — centroïdes complets</td><td>4,0 ± 3,4</td><td>0,703 ± 0,041</td><td>0,658 ± 0,035</td><td>+0,045</td></tr>
+<tr><td>PneumoniaMNIST</td><td>R1 — invites textuelles</td><td>1,0 ± 0,0</td><td>0,500 ± 0,000</td><td>—</td><td>—</td></tr>
+<tr><td>PneumoniaMNIST</td><td>R2 — few-shot (k=16)</td><td>4,8 ± 2,7</td><td>0,821 ± 0,016</td><td>0,728 ± 0,031</td><td>+0,093</td></tr>
+<tr><td>PneumoniaMNIST</td><td>R3 — centroïdes complets</td><td>8,4 ± 1,3</td><td>0,835 ± 0,023</td><td>0,730 ± 0,014</td><td>+0,105</td></tr>
 </table>
 <p style="font-size:.85rem;color:var(--muted)">Exactitude équilibrée, domaine source, split évaluation.
-Runs : 20260904T232709Z_breastmnist_7d1b0ed1, 20260904T233155Z_breastmnist_6f91783e,
-20260904T233649Z_pneumoniamnist_9b5f183e, 20260905T001255Z_pneumoniamnist_6044eb14.</p>
-
-<h3 style="font-size:1rem;margin-top:1.4rem">Comportement sous décalage — PneumoniaMNIST, gaussian_blur</h3>
-<table>
-<tr><th>Sévérité</th><th>R2 — couche fixe 9</th><th>R2 — pleine profondeur</th><th>R3 — couche fixe 9</th><th>R3 — pleine profondeur</th></tr>
-<tr><td>0</td><td>0,841</td><td>0,705</td><td>0,824</td><td>0,740</td></tr>
-<tr><td>3</td><td>0,813</td><td>0,617</td><td>0,788</td><td>0,608</td></tr>
-<tr><td>5</td><td>0,780</td><td>0,539</td><td>0,674</td><td>0,535</td></tr>
-</table>
-<p style="font-size:.85rem;color:var(--muted)">Run 20260904T233649Z_pneumoniamnist_9b5f183e.
-La couche fixe est choisie sur la moitié calibration de la source, jamais sur la cible.</p>
+Agrégation : <code>outputs/aggregate/exp05_summary.csv</code>. La couche oracle est choisie sur le
+split d'évaluation lui-même : c'est une borne supérieure optimiste, pas une performance atteignable.</p>
 
 <ul>
-  <li><strong>La dégénérescence de l'expérience 4 est levée, et elle avait deux causes.</strong>
-  Sous ancres textuelles l'exactitude équilibrée vaut 0,500 à onze couches sur douze : ces ancres
-  classent au hasard, elles ne sont pas seulement faibles. S'y ajoutait un critère de calibration
-  brut que le prédicteur majoritaire maximise. Sous ancres de données, un optimum intérieur
-  apparaît — jamais en couche 1, jamais en couche 12.</li>
-  <li><strong>Les dernières couches détruisent le signal sous décalage.</strong> À sévérité 5, la
-  couche fixe calibrée conserve 0,780 quand la pleine profondeur tombe à 0,539, pour 75 % du calcul.
-  L'écart croît avec la sévérité (+0,136 à sévérité 0, +0,241 à sévérité 5). C'est le résultat le
-  plus exploitable de l'expérience, et il n'était pas visé.</li>
-  <li><strong>Mais la règle par échantillon du croquis fondateur perd contre une couche fixe.</strong>
-  Les règles calibrées sortent en couche ≈ 1,1 et plafonnent à 0,622 et 0,652 à sévérité 5, loin des
-  0,780 de la couche fixe. Ce qui survit du croquis est « toutes les couches ne se valent pas », pas
-  « chaque image choisit la sienne ». Consigné tel quel.</li>
+  <li><strong>Les ancres textuelles sont au hasard, pas seulement faibles.</strong> L'exactitude
+  équilibrée vaut 0,500 à 0,509 quelle que soit la couche, sur les deux cohortes et les cinq graines.
+  La « préservation d'exactitude » de l'expérience 4 était la préservation du taux de la classe
+  majoritaire. La dégénérescence avait donc deux causes cumulées : des ancres aveugles, et un critère
+  de calibration que le prédicteur majoritaire maximise.</li>
+  <li><strong>Une couche intermédiaire bat la couche de sortie, et c'est robuste.</strong> L'écart est
+  positif dans les quatre configurations sous ancres de données, de +0,045 à +0,134, et il dépasse
+  l'écart-type inter-graines dans les quatre cas.</li>
+  <li><strong>Mais quelle couche est optimale n'est pas stable.</strong> L'écart-type de la couche
+  oracle atteint 3,4 couches sur une plage de 12. Une version antérieure de cette page, fondée sur une
+  seule graine, annonçait une couche 9 : c'était un tirage particulier, pas une propriété du substrat.</li>
 </ul>
+
+<h3 style="font-size:1rem;margin-top:1.4rem">Comportement sous décalage — le signe dépend de la corruption</h3>
+<table>
+<tr><th>Cohorte · corruption</th><th>Type</th><th>R2 few-shot</th><th>R3 centroïdes</th></tr>
+<tr><td>Pneumonia · gaussian_blur</td><td>structurel</td><td>+0,134 ± 0,153</td><td>+0,151 ± 0,111</td></tr>
+<tr><td>Breast · speckle_noise</td><td>structurel</td><td>+0,010 ± 0,104</td><td>+0,029 ± 0,074</td></tr>
+<tr><td>Breast · brightness_down</td><td>photométrique</td><td>−0,017 ± 0,042</td><td>−0,035 ± 0,057</td></tr>
+<tr><td>Pneumonia · brightness_down</td><td>photométrique</td><td>−0,073 ± 0,069</td><td>−0,038 ± 0,042</td></tr>
+</table>
+<p style="font-size:.85rem;color:var(--muted)">Écart d'exactitude équilibrée entre la couche fixe
+calibrée et la pleine profondeur, à sévérité 5. Positif = la sortie anticipée est meilleure. La couche
+fixe est choisie sur la moitié calibration de la source, jamais sur la cible.</p>
+<p>Sur le flou gaussien, la couche fixe calibrée l'emporte nettement et les cinq graines sont positives
+sous R3. Sur les corruptions photométriques elle <em>perd</em> : sous R3 sur PneumoniaMNIST, les cinq
+graines sont négatives. C'est la même dichotomie structurel/photométrique que l'expérience 1 avait
+trouvée pour l'énergie libre comme détecteur, réapparue ici sur une grandeur toute autre. Une version
+antérieure de cette page annonçait un gain de +0,241 sur une seule graine ; il vaut +0,134 ± 0,153.</p>
+<p>La règle d'arrêt <em>par échantillon</em> du croquis fondateur reste, elle, battue par la couche
+fixe calibrée. Ce qui survit du croquis est que toutes les couches ne se valent pas, non que chaque
+image doive choisir la sienne.</p>
 
 <h3 style="font-size:1rem;margin-top:1.4rem">La profondeur de sortie N* comme détecteur de décalage</h3>
 <table>
-<tr><th>Cohorte · corruption</th><th>Régime</th><th>AUROC (règle H)</th><th>AUROC (règle F)</th></tr>
-<tr><td>Breast · speckle_noise</td><td>R2</td><td>0,442</td><td>1,000</td></tr>
-<tr><td>Breast · speckle_noise</td><td>R3</td><td>0,059</td><td>0,808</td></tr>
-<tr><td>Breast · brightness_down</td><td>R2</td><td>0,436</td><td>1,000</td></tr>
-<tr><td>Breast · brightness_down</td><td>R3</td><td>0,167</td><td>0,808</td></tr>
-<tr><td>Pneumonia · gaussian_blur</td><td>R2</td><td>0,478</td><td>0,503</td></tr>
-<tr><td>Pneumonia · brightness_down</td><td>R2</td><td>0,511</td><td>0,835</td></tr>
-<tr><td>Pneumonia · brightness_down</td><td>R3</td><td>0,499</td><td>0,825</td></tr>
+<tr><th>Cohorte · corruption</th><th>Régime</th><th>AUROC (règle F)</th><th>AUROC (règle H)</th><th>H bilatérale</th></tr>
+<tr><td>Breast · speckle_noise</td><td>R2</td><td>0,900 ± 0,224</td><td>0,397 ± 0,130</td><td>0,526 ± 0,168</td></tr>
+<tr><td>Breast · brightness_down</td><td>R2</td><td>0,900 ± 0,224</td><td>0,376 ± 0,191</td><td>0,560 ± 0,232</td></tr>
+<tr><td>Breast · brightness_down</td><td>R3</td><td>0,617 ± 0,160</td><td>0,240 ± 0,096</td><td>0,446 ± 0,192</td></tr>
+<tr><td>Pneumonia · brightness_down</td><td>R3</td><td>0,886 ± 0,080</td><td>0,500 ± 0,007</td><td>0,500 ± 0,007</td></tr>
+<tr><td>Pneumonia · gaussian_blur</td><td>R3</td><td>0,514 ± 0,020</td><td>0,482 ± 0,006</td><td>0,482 ± 0,006</td></tr>
 </table>
 <p style="font-size:.85rem;color:var(--muted)">AUROC des profondeurs de sortie source contre cible,
-sévérité 5, split évaluation. Le compteur de couches est produit gratuitement par la règle d'arrêt.</p>
-<p>Le compteur de couches est un détecteur réel, mais ni universel ni de signe constant : parfait sur
-BreastMNIST sous R2, fort sur PneumoniaMNIST photométrique, au hasard sur gaussian_blur. Sous R3 sur
-BreastMNIST la règle H descend à 0,059 : le détecteur est fortement <strong>inversé</strong>, les
-images corrompues cristallisant plus tôt. C'est la signature signée déjà rencontrée pour F à
-l'expérience 1 ; la transformation bilatérale devrait s'y appliquer, mais elle n'a pas été testée ici.</p>
+sévérité 5. Le compteur de couches est produit gratuitement par la règle d'arrêt. La colonne bilatérale
+applique à N* la transformation |N* − médiane<sub>source</sub>(N*)|.</p>
+<p>Le compteur de couches est un détecteur réel mais instable : sous la règle F il atteint 0,86 à 0,90
+sur trois configurations, avec un écart-type de 0,224 sur BreastMNIST, où la même configuration donne
+0,500 ou 1,000 selon la graine. Il échoue sur le flou gaussien, là même où le gain d'exactitude est
+maximal : détection et efficience ne vont pas de pair. La transformation bilatérale récupère
+partiellement les détecteurs inversés sur BreastMNIST, de 0,24–0,40 vers 0,43–0,56, soit du franchement
+inversé au voisinage du hasard ; elle ne change rien sur PneumoniaMNIST, où les profondeurs sont quasi
+constantes et n'offrent aucune dispersion sur laquelle opérer.</p>
 
 <h3 style="font-size:1rem;margin-top:1.4rem">Un critère de qualité d'ancrage</h3>
 <table>
-<tr><th>Cohorte</th><th>Régime</th><th>D<sub>inter</sub></th><th>Distance ancres-nuage</th><th>Q<sub>gap</sub></th><th>Équilibrée mesurée</th></tr>
-<tr><td>BreastMNIST</td><td>R1 — textuelles</td><td>0,1032</td><td>1,2921</td><td>0,0799</td><td>0,521</td></tr>
-<tr><td>BreastMNIST</td><td>R2 — few-shot</td><td>0,0208</td><td>0,0932</td><td>0,2235</td><td>0,604</td></tr>
-<tr><td>BreastMNIST</td><td>R3 — centroïdes</td><td>0,0073</td><td>0,0908</td><td>0,0799</td><td>0,640</td></tr>
-<tr><td>PneumoniaMNIST</td><td>R1 — textuelles</td><td>0,1137</td><td>1,2750</td><td>0,0892</td><td>0,492</td></tr>
-<tr><td>PneumoniaMNIST</td><td>R2 — few-shot</td><td>0,0250</td><td>0,0438</td><td>0,5701</td><td>0,705</td></tr>
-<tr><td>PneumoniaMNIST</td><td>R3 — centroïdes</td><td>0,0144</td><td>0,0420</td><td>0,3416</td><td>0,740</td></tr>
+<tr><th>Cohorte</th><th>Régime</th><th>Q<sub>gap</sub></th><th>Équilibrée mesurée (couche 12)</th></tr>
+<tr><td>BreastMNIST</td><td>R1 — textuelles</td><td>0,0799 ± 0,0000</td><td>0,509</td></tr>
+<tr><td>BreastMNIST</td><td>R2 — few-shot</td><td>0,1637 ± 0,0440</td><td>0,614</td></tr>
+<tr><td>BreastMNIST</td><td>R3 — centroïdes</td><td>0,0799 ± 0,0000</td><td>0,658</td></tr>
+<tr><td>PneumoniaMNIST</td><td>R1 — textuelles</td><td>0,0892 ± 0,0000</td><td>0,500</td></tr>
+<tr><td>PneumoniaMNIST</td><td>R2 — few-shot</td><td>0,3960 ± 0,1023</td><td>0,728</td></tr>
+<tr><td>PneumoniaMNIST</td><td>R3 — centroïdes</td><td>0,3546 ± 0,0094</td><td>0,730</td></tr>
 </table>
-<p style="font-size:.85rem;color:var(--muted)">Q<sub>gap</sub> = D<sub>inter</sub> / distance ancres-nuage,
-mesuré sur le nuage train source à la couche 12. Exactitude équilibrée mesurée à la même couche.</p>
+<p style="font-size:.85rem;color:var(--muted)">Q<sub>gap</sub> = D<sub>inter</sub> / distance
+ancres-nuage, mesuré sur le nuage train source à la couche 12. R1 et R3 ne dépendent pas de la graine ;
+R2 en dépend par son tirage few-shot.</p>
 <p>Le critère réussit à moitié. Il corrige l'inversion due au gap de modalité — la distance ancres-nuage
-vaut ≈ 1,28 pour les invites textuelles contre ≈ 0,04 à 0,09 pour les ancres de données — et place
-partout les ancres de données devant les ancres textuelles, là où D<sub>inter</sub> seule affirmait le
-contraire. Mais il classe R2 devant R3 alors que l'exactitude mesurée place R3 devant : les centroïdes
-complets moyennent beaucoup d'exemples et se rapprochent de la moyenne globale, ce qui écrase
-D<sub>inter</sub>. Le critère sert donc à <em>rejeter</em> des ancres détachées du nuage, pas à
-départager deux jeux d'ancres tous deux ancrés dans les données.</p>
+vaut ≈ 1,28 pour les invites textuelles contre ≈ 0,04 à 0,09 pour les ancres de données — là où
+D<sub>inter</sub> seule affirmait le contraire. Mais il échoue sur le classement fin : sur BreastMNIST il
+égalise R1 et R3 dont les exactitudes diffèrent de 0,15, et sur PneumoniaMNIST l'écart entre R2 et R3
+n'est pas séparable compte tenu de la dispersion. Il sert donc à <em>rejeter</em> des ancres détachées
+du nuage, pas à départager deux jeux d'ancres tous deux ancrés dans les données.</p>
 
 <figure>
   <img src="assets/figures/fig_exp05_ancres_arret_pneumonia_blur.png" alt="Ancres × arrêt calibré — PneumoniaMNIST, gaussian_blur">
-  <figcaption>PneumoniaMNIST · gaussian_blur — de gauche à droite : exactitude équilibrée sous règle calibrée
-  (trait plein) contre pleine profondeur (pointillé), profondeur moyenne de sortie, AUROC de N* sous chaque
-  règle, et exactitude équilibrée par couche sur la source. Le pic vers la couche 9 et la chute en couche 12
-  sont le cœur du résultat. Run 20260904T233649Z_pneumoniamnist_9b5f183e.</figcaption>
+  <figcaption>PneumoniaMNIST · gaussian_blur, graine 0 — de gauche à droite : exactitude équilibrée sous
+  règle calibrée (trait plein) contre pleine profondeur (pointillé), profondeur moyenne de sortie, AUROC
+  de N* sous chaque règle, et exactitude équilibrée par couche sur la source. Une seule graine : voir les
+  tableaux ci-dessus pour la dispersion. Run 20260905T172853Z_pneumoniamnist_9b5f183e.</figcaption>
 </figure>
 <figure>
   <img src="assets/figures/fig_exp05_ancres_arret_speckle.png" alt="Ancres × arrêt calibré — BreastMNIST, speckle_noise">
-  <figcaption>BreastMNIST · speckle_noise — même lecture. Les ancres textuelles restent plates à 0,500,
-  au hasard. Run 20260904T232709Z_breastmnist_7d1b0ed1.</figcaption>
+  <figcaption>BreastMNIST · speckle_noise, graine 0 — même lecture. Les ancres textuelles restent plates
+  à 0,500, au hasard. Run 20260905T172741Z_breastmnist_7d1b0ed1.</figcaption>
 </figure>
 <figure>
   <img src="assets/figures/fig_exp05_qualite_ancrage_pneumonia.png" alt="Qualité d'ancrage par couche — PneumoniaMNIST">
-  <figcaption>PneumoniaMNIST — à gauche D<sub>inter</sub> seule, qui place les ancres textuelles en tête à
-  toutes les couches ; à droite le rapport de Fisher, qui renverse ce classement trompeur. Échelle
-  logarithmique. Run 20260904T233649Z_pneumoniamnist_9b5f183e.</figcaption>
+  <figcaption>PneumoniaMNIST, graine 0 — à gauche D<sub>inter</sub> seule, qui place les ancres textuelles
+  en tête à toutes les couches ; à droite le rapport de Fisher, qui renverse ce classement trompeur.
+  Échelle logarithmique. Run 20260905T172853Z_pneumoniamnist_9b5f183e.</figcaption>
 </figure>
 
 <h2>Limites et prochaines étapes</h2>

@@ -51,6 +51,12 @@ def raison_rejet(run_dir: Path) -> str | None:
         return "git_dirty"
     if j.get("critere_calibration") != "balanced_accuracy":
         return "critere_brut"
+    detection = j.get("regimes", {}).get("R1_texte", {}).get("depth_detection", {})
+    premier = next(iter(detection.values()), {})
+    if "auroc_two_sided" not in premier.get("F", {}):
+        # runs anterieurs a l'ajout du detecteur bilateral sur N* : il leur
+        # manque une grandeur agregee, ils sont remplaces par un rejeu
+        return "sans_bilateral"
     return None
 
 
@@ -126,9 +132,11 @@ def _agrege_groupe(dataset: str, corruption: str, regime: str, *,
         "Q_gap_couche12": _stats(
             [b["anchor_quality_par_couche"][-1]["Q_gap"] for b in blocs]),
     }
-    entree["gain_couche_fixe_sevmax"] = {
-        "moyenne": entree["bal_couche_fixe_sevmax"]["moyenne"]
-        - entree["bal_pleine_prof_sevmax"]["moyenne"]}
+    # le gain se mesure graine par graine, puis s'agrege : sa dispersion dit si
+    # l'avantage de la couche fixe tient sur toutes les graines ou sur une seule
+    entree["gain_couche_fixe_sevmax"] = _stats(
+        [s["fixed_layer"]["balanced_accuracy"] - s["full_depth"]["balanced_accuracy"]
+         for s in sevm])
     return entree
 
 

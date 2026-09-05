@@ -39,8 +39,11 @@ split calibration/évaluation stratifié, exploratoire déclarée). Le croisemen
 ancres × arrêt est implémenté (`experiments/exp05_anchored_early_exit.py`,
 exploratoire déclarée) : arrêt calibré rejoué sous les trois régimes d'ancrage
 avec centroïdes recalculés couche par couche, profondeur de sortie N* quantifiée
-en détecteur (`exit_depth_auroc`), et critère de qualité d'ancrage
-(`tlsc/models/data_anchors.py` : `anchor_cloud_distance`, `anchor_quality`).
+en détecteur (`exit_depth_auroc`, variante bilatérale comprise), et critère de qualité
+d'ancrage (`tlsc/models/data_anchors.py` : `anchor_cloud_distance`, `anchor_quality`).
+L'agrégation multi-graines de l'exp05 (`experiments/exp05_aggregate.py`) écrit
+`outputs/aggregate/exp05_summary.{json,csv}` et n'admet que les runs complets, propres
+et calibrés sur l'exactitude équilibrée.
 Les cohortes P0 couvertes sont BreastMNIST-C (7 corruptions officielles) et
 PneumoniaMNIST-C (4 corruptions). TPT, C-TPT, l'adaptation visuelle, les cohortes
 P1/P2 et la calibration conforme restent à implémenter et à valider avant toute

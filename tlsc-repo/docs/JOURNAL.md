@@ -161,6 +161,11 @@ l'autre moitié (79), sévérités 0–5. **Exploratoire déclaré.** Runs
 
 ## 2026-09-05 · exp05 — croisement ancres × arrêt calibré, N* détecteur, qualité d'ancrage
 
+> **Entrée à une seule graine, corrigée le jour même par la consolidation à cinq graines
+> (entrée suivante).** Les chiffres ci-dessous restent tels qu'ils ont été mesurés, mais
+> plusieurs ne sont pas reproductibles : la couche 9, le gain de +0,241 et l'AUROC de
+> 1,000 étaient des tirages particuliers. Se référer à l'entrée de consolidation.
+
 Chantier décidé en fin d'exp03 et d'exp04 : rejouer l'arrêt calibré sous les trois
 régimes d'ancrage, où l'exactitude varie réellement avec la profondeur
 (`experiments/exp05_anchored_early_exit.py`, centroïdes recalculés couche par couche ;
@@ -248,3 +253,45 @@ pourtant — dont un sur le **site public**. Corrigé.
 - Restent non citables et **non cités** : deux runs interrompus sans `metrics.json`,
   un run fumigène, et quelques runs sales de mise au point antérieurs au 2026-09-01.
 - Décision : consolidation multi-graines de l'exp05, puis porte de décision P1.
+
+## 2026-09-05 · exp05 consolidée — cinq graines, et ce qui ne survit pas
+
+20 runs = 5 graines × 4 configurations, tous propres (git a9b5f12, carte RTX 4060),
+agrégés par `experiments/exp05_aggregate.py` (9 tests) vers
+`outputs/aggregate/exp05_summary.{json,csv}`. Ajout au passage de `auroc_two_sided`
+dans `exit_depth_auroc` (2 tests) : la profondeur de sortie hérite du caractère
+signé de son observable, la transformation bilatérale lui est donc applicable.
+
+- **Ce qui survit.** Les ancres textuelles sont au hasard (équilibrée 0,500–0,509 à
+  toute couche, deux cohortes, cinq graines). Une couche intermédiaire bat la couche
+  de sortie sous ancres de données dans les **quatre** configurations, de +0,045 à
+  +0,134, écart supérieur à la dispersion inter-graines. La règle d'arrêt par
+  échantillon reste battue par une profondeur fixe calibrée.
+- **Ce qui ne survit pas, et que l'entrée précédente affirmait.** La couche optimale
+  n'est pas localisée : écart-type de 2,7 à 3,4 couches sur une plage de 12 (seule
+  exception, R3 sur PneumoniaMNIST à 8,4 ± 1,3). La « couche 9 » était un tirage.
+- **Le gain sous décalage change de signe selon la corruption.** Flou gaussien :
+  +0,134 ± 0,153 (R2) et +0,151 ± 0,111 (R3), cinq graines positives sous R3.
+  Photométrique : −0,073 ± 0,069 et −0,038 ± 0,042, cinq graines négatives sous R3.
+  Le +0,241 annoncé sur une graine vaut +0,134 ± 0,153. C'est la dichotomie
+  structurel/photométrique de l'exp01, réapparue sur une grandeur toute autre.
+- **N* détecteur : réel mais instable.** Règle F : 0,86–0,90 sur trois configurations,
+  mais 0,900 ± 0,224 sur BreastMNIST, où la même configuration donne 0,500 ou 1,000
+  selon la graine. Échec sur le flou (0,514–0,520), là même où le gain d'exactitude
+  est maximal : détection et efficience ne vont pas de pair.
+- **Bilatéral sur N*** : récupère partiellement les détecteurs inversés sur
+  BreastMNIST (0,24–0,40 → 0,43–0,56, soit du franchement inversé au hasard), sans
+  rien changer sur PneumoniaMNIST où les profondeurs sont quasi constantes. Gain
+  réel, mais aucun détecteur fondé sur H et la profondeur n'est exploitable.
+- **Q3** : Q_gap égalise R1 et R3 sur BreastMNIST (0,0799) alors que leurs exactitudes
+  diffèrent de 0,15 ; sur PneumoniaMNIST R2 et R3 ne sont pas séparables
+  (0,396 ± 0,102 contre 0,355 ± 0,009). Critère utile pour **rejeter**, pas pour
+  départager.
+- **Correction de cohérence** : l'exp04, calibrée sur l'exactitude brute, annonçait
+  encore une économie de calcul « à exactitude préservée ». Avertissement ajouté au
+  site et à `rapport-exp04.md` : cette préservation était celle du taux de la classe
+  majoritaire.
+- Décision : traitement statistique apparié avant toute revendication ; ne pas
+  revendiquer de gain d'efficience sans distinguer corruptions structurelles et
+  photométriques ; priorité à la porte de décision P1.
+- Détail : `docs/rapport-exp05.md`.

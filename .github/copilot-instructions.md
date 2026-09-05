@@ -65,6 +65,7 @@ Set-Location tlsc-repo
 .venv-cuda\Scripts\python.exe -m experiments.exp01_analysis outputs    # DeLong + bootstrap → analysis.json
 .venv-cuda\Scripts\python.exe -m experiments.exp01_aggregate outputs   # summary.{json,csv} + figures → outputs/aggregate/
 .venv-cuda\Scripts\python.exe -m experiments.exp05_anchored_early_exit --dataset breastmnist --source medmnistc --corruption speckle_noise --severities 0 1 2 3 4 5
+.venv-cuda\Scripts\python.exe -m experiments.exp05_aggregate outputs   # multi-graines -> outputs/aggregate/exp05_summary.{json,csv}
 ```
 
 Expériences disponibles : `exp01_zero_training` (détection F vs H), `exp02_layer_trajectories` (profondeur N comme variable), `exp03_anchor_regimes`
